@@ -27,7 +27,7 @@ The algorithm:
 1. For each row, read the integer vocab-index for every active filter column
 2. Join those indices with `|` to form a composite key (e.g. `"2|5|14"`)
 3. Count how many rows produce the same key → that count is the cluster's size
-4. Also store up to 50 sample row indices per cluster for the drill-down preview
+4. Store all row indices per cluster (used for drill-down analysis)
 
 **Examples:**
 - 1 filter = `Semester` → 3 clusters (one per unique semester value)
@@ -56,25 +56,56 @@ Each cluster is drawn as a circle on an SVG canvas:
 
 - **Size**: radius is proportional to `sqrt(count / maxCount)` — area therefore scales with count, which is perceptually more accurate than linear radius scaling
 - **Position**: row-packed layout (left to right, wrapping to next row when the SVG width is exceeded)
-- **Label**: the last filter column's value is shown inside the bubble if the bubble is large enough
+- **Label**: the current level's value is shown inside the bubble if the bubble is large enough
 - **Colour**: cycles through a 17-colour palette, one colour per cluster in sorted order
-- **Tooltip**: hover shows all filter values for that cluster + exact count + share of total
+- **Tooltip**: hover shows the filter value for that level + row count + share of total
+
+### Hierarchical drill-in (multiple filters)
+
+When more than one filter is active, the bubble view becomes a **zoomable hierarchy**:
+
+- The top level shows one bubble per unique value of the *first* filter — its size reflects the total row count across all sub-combinations
+- A dashed inner ring and a "N sub" badge indicate the bubble contains sub-clusters
+- The tooltip shows "click to zoom in →"
+- **Clicking a bubble** replaces the canvas with the sub-clusters at the next filter level (grouped by the second filter value, then third, etc.)
+- A **breadcrumb bar** appears above the canvas showing the current drill path (e.g. `All › Speaking Skills 1 › Bachelor`); clicking any crumb navigates back up to that level
+- At the deepest filter level (leaf), bubbles are no longer clickable for drill-in — use the **ⓘ button** instead
+- The **ⓘ button** (top-right of every bubble) opens the within-cluster analysis panel at any level
 
 ---
 
 ## List view
 
-Clusters are shown as rows, sorted by count (or alphabetically):
+When only one filter is active, clusters are shown as a flat sorted list. With two or more filters active, the list becomes a **collapsible hierarchy**:
 
-- A proportional bar shows each cluster's size relative to the largest cluster
-- The percentage shown is share of the **total row count** (not just the largest cluster)
-- Click any row to expand it and see up to 50 sample values from a non-filter column (defaults to column index 2 = the title/name column if available)
+- Top level shows one row per unique value of the first filter, with the total row count across all its sub-combinations
+- Clicking a top-level row expands it to show the second-filter breakdown as indented child rows
+- Child rows expand further to show the third-filter level, and so on — recursively until the last filter
+- Each row at every level has an **ⓘ button** that opens the within-cluster analysis panel for that node
+
+In all modes:
+- A proportional bar shows each entry's size relative to the largest entry at that level
+- The percentage shown is share of the **total row count**
+- Sorting (by count or alphabetically) applies at every level independently
+
+---
+
+## Within-cluster analysis (ⓘ panel)
+
+Clicking the **ⓘ button** on any bubble or list row opens a slide-in panel that answers: *"Given these rows share the same combination — what internal differences explain why they appear multiple times?"*
+
+The panel shows every column not used as a filter, broken down by value frequency:
+
+- **Varying columns** (2+ unique values) appear first, sorted by number of distinct values descending, each with a proportional mini-bar chart and percentage
+- **Uniform columns** (same value for all rows in the cluster) are shown collapsed below — they're definitionally uninteresting for explaining variation
+- Filter columns themselves are listed as uniform by definition
+- A **diversity indicator** (● dots, 1–5) summarises how many distinct values each column has at a glance
 
 ---
 
 ## Filter chain & reordering
 
 - Active filters are shown as numbered chips in the left panel
-- Chips can be **dragged** to reorder — changing order does not change which clusters exist, but changes how the composite key is built (which affects the alpha sort order and the label shown in bubbles/list)
-- Removing a filter immediately re-clusters using only the remaining filters
+- Chips can be **dragged** to reorder — changing order does not change which clusters exist, but changes the hierarchy structure in both bubble drill-in and list view (first filter = top level)
+- Removing a filter immediately re-clusters using only the remaining filters and resets the bubble drill stack to the top level
 - The column picker shows how many unique values each column has, helping you predict cluster count before adding it

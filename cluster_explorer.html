@@ -183,6 +183,15 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 /* BUBBLE SVG */
 #bubble-view { width: 100%; }
 #bubble-svg { display: block; overflow: visible; }
+#bubble-crumbs {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  padding: 6px 10px; background: var(--hover); border-bottom: 1px solid var(--border2);
+  font-size: 11px;
+}
+.crumb { color: var(--accent); cursor: pointer; padding: 2px 6px; border-radius: 3px; }
+.crumb:hover { background: var(--border2); }
+.crumb-sep { color: var(--dim); }
+.crumb-cur { color: var(--bright); font-weight: 700; }
 
 /* LIST VIEW */
 #list-view { display: none; }
@@ -490,6 +499,7 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
         Each unique combination of selected column values becomes one cluster — sized by row count.</p>
       </div>
       <div id="bubble-view" style="display:none">
+        <div id="bubble-crumbs" style="display:none"></div>
         <svg id="bubble-svg"></svg>
       </div>
       <div id="list-view"></div>
@@ -511,6 +521,9 @@ let COL_Q = '';       // column search
 let SUBSET_COL = -1;  // column index for subset pre-filter (-1 = off)
 let SUBSET_VAL = '';  // match string for subset
 let SUBSET_ROWS = null; // cached array of row indices passing the subset
+// Bubble drill-down stack: [{label, depth, clusters}]
+// depth = how many filters have been "zoomed into"
+let BUBBLE_STACK = [];
 
 // ── CSV PARSING ──
 function detectDelimiter(sample) {
@@ -827,14 +840,74 @@ function renderClusters() {
   hideLanding();
   const clusters = applySort(applyFilters(computeClusters()));
   document.getElementById('cluster-count').textContent = clusters.length.toLocaleString() + ' clusters';
-  if (VIEW === 'bubble') renderBubbles(clusters);
-  else renderList(clusters);
+  if (VIEW === 'bubble') {
+    BUBBLE_STACK = [];
+    renderBubblesAtDepth(clusters, 0);
+  } else {
+    renderList(clusters);
+  }
+}
+
+// Build groups at a given depth from a flat cluster list
+function groupClustersAtDepth(clusters, depth) {
+  const groups = new Map();
+  for (const c of clusters) {
+    const k = c.parts[depth] ?? '(none)';
+    if (!groups.has(k)) groups.set(k, { key: k, clusters: [], count: 0, allRows: [] });
+    const g = groups.get(k);
+    g.clusters.push(c);
+    g.count += c.count;
+    g.allRows = g.allRows.concat(c.allRows);
+  }
+  return [...groups.values()];
+}
+
+// Navigate into a bubble group
+function enterBubbleLevel(group, depth, allClusters) {
+  BUBBLE_STACK.push({ label: group.key, depth, clusters: allClusters });
+  renderBubblesAtDepth(group.clusters, depth + 1);
+}
+
+// Go back to a breadcrumb level
+function bubbleNavTo(stackIdx) {
+  const frame = BUBBLE_STACK[stackIdx];
+  BUBBLE_STACK = BUBBLE_STACK.slice(0, stackIdx);
+  renderBubblesAtDepth(frame.clusters, frame.depth);
+}
+
+// Render breadcrumb trail
+function renderBubbleCrumbs(depth) {
+  const bar = document.getElementById('bubble-crumbs');
+  if (BUBBLE_STACK.length === 0) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML = '';
+
+  const root = document.createElement('span');
+  root.className = 'crumb';
+  root.textContent = 'All';
+  root.addEventListener('click', () => bubbleNavTo(0));
+  bar.appendChild(root);
+
+  BUBBLE_STACK.forEach((frame, idx) => {
+    const sep = document.createElement('span');
+    sep.className = 'crumb-sep';
+    sep.textContent = '›';
+    bar.appendChild(sep);
+
+    const label = document.createElement('span');
+    const isLast = idx === BUBBLE_STACK.length - 1;
+    label.className = isLast ? 'crumb-cur' : 'crumb';
+    label.textContent = frame.label;
+    if (!isLast) label.addEventListener('click', () => bubbleNavTo(idx + 1));
+    bar.appendChild(label);
+  });
 }
 
 // ── BUBBLE VIEW ──
-function renderBubbles(clusters) {
+function renderBubblesAtDepth(clusters, depth) {
   document.getElementById('bubble-view').style.display = '';
   document.getElementById('list-view').style.display = 'none';
+  renderBubbleCrumbs(depth);
 
   const svg = document.getElementById('bubble-svg');
   svg.innerHTML = '';
@@ -845,12 +918,26 @@ function renderBubbles(clusters) {
     return;
   }
 
-  const maxC = Math.max(...clusters.map(c => c.count));
-  const total = clusters.reduce((s,c) => s+c.count, 0);
+  // At depths before the last filter, group by parts[depth] so each bubble = one level-value
+  const isLeaf = FILTERS.length <= 1 || depth >= FILTERS.length - 1;
+
+  // Build display items: either raw clusters (leaf) or grouped (non-leaf)
+  let items; // [{key, count, allRows, clusters, parts}]
+  if (isLeaf) {
+    items = clusters.map(c => ({ key: c.parts[depth] ?? c.parts[c.parts.length-1], count: c.count, allRows: c.allRows, clusters: [c], parts: c.parts }));
+  } else {
+    const grouped = groupClustersAtDepth(clusters, depth);
+    if (SORT === 'cnt-d') grouped.sort((a,b) => b.count - a.count);
+    else if (SORT === 'cnt-a') grouped.sort((a,b) => a.count - b.count);
+    else grouped.sort((a,b) => a.key.localeCompare(b.key));
+    items = grouped.map(g => ({ key: g.key, count: g.count, allRows: g.allRows, clusters: g.clusters, parts: [g.key] }));
+  }
+
+  const maxC = Math.max(...items.map(c => c.count));
+  const total = items.reduce((s,c) => s+c.count, 0);
   const MIN_R = 12, MAX_R = 88;
 
-  // Compute radii
-  clusters.forEach(c => {
+  items.forEach(c => {
     c.r = MIN_R + (MAX_R - MIN_R) * Math.sqrt(c.count / maxC);
   });
 
@@ -858,7 +945,7 @@ function renderBubbles(clusters) {
   const W = document.getElementById('bubble-view').clientWidth || 900;
   const PAD = 8;
   let x = PAD, y = PAD, rowH = 0;
-  clusters.forEach(c => {
+  items.forEach(c => {
     const d = c.r * 2 + PAD;
     if (x + d > W - PAD && x > PAD) { x = PAD; y += rowH + PAD; rowH = 0; }
     c.cx = x + c.r; c.cy = y + c.r;
@@ -870,10 +957,10 @@ function renderBubbles(clusters) {
 
   const tip = document.getElementById('tip');
 
-  clusters.forEach((c, i) => {
+  items.forEach((c, i) => {
     const col = COLORS[i % COLORS.length];
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    g.style.cursor = 'default';
+    g.style.cursor = isLeaf ? 'default' : 'pointer';
 
     // shadow
     const sh = document.createElementNS('http://www.w3.org/2000/svg','circle');
@@ -890,6 +977,29 @@ function renderBubbles(clusters) {
     ci.setAttribute('stroke-width','1.5');
     g.appendChild(ci);
 
+    // drill-in hint ring (non-leaf only)
+    if (!isLeaf) {
+      const hint = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      hint.setAttribute('cx', c.cx); hint.setAttribute('cy', c.cy);
+      hint.setAttribute('r', c.r - 3);
+      hint.setAttribute('fill', 'none');
+      hint.setAttribute('stroke', col + '44');
+      hint.setAttribute('stroke-width','1');
+      hint.setAttribute('stroke-dasharray','3 3');
+      g.appendChild(hint);
+    }
+
+    // sub-cluster count badge (non-leaf)
+    if (!isLeaf && c.clusters.length > 1) {
+      const badge = document.createElementNS('http://www.w3.org/2000/svg','text');
+      badge.setAttribute('x', c.cx); badge.setAttribute('y', c.cy - c.r + 12);
+      badge.setAttribute('text-anchor','middle'); badge.setAttribute('dominant-baseline','middle');
+      badge.setAttribute('fill', col); badge.setAttribute('fill-opacity','0.6');
+      badge.setAttribute('font-size', '8');
+      badge.textContent = c.clusters.length + ' sub';
+      g.appendChild(badge);
+    }
+
     // count
     const fy = c.r > 28 ? c.cy - 6 : c.cy + 3;
     const ct = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -901,27 +1011,27 @@ function renderBubbles(clusters) {
     ct.textContent = c.count >= 1000 ? (c.count/1000).toFixed(1)+'k' : c.count;
     g.appendChild(ct);
 
-    // label (last filter value)
+    // label
     if (c.r > 20) {
-      const lbl = c.parts[c.parts.length-1];
       const maxCh = Math.max(4, Math.floor(c.r * 0.26));
       const lt = document.createElementNS('http://www.w3.org/2000/svg','text');
       lt.setAttribute('x', c.cx); lt.setAttribute('y', c.r > 28 ? c.cy + 10 : c.cy + 3);
       lt.setAttribute('text-anchor','middle'); lt.setAttribute('dominant-baseline','middle');
       lt.setAttribute('fill', col); lt.setAttribute('fill-opacity','0.7');
       lt.setAttribute('font-size', Math.max(7, Math.min(10, c.r * 0.26)));
-      lt.textContent = lbl.length > maxCh ? lbl.slice(0, maxCh) + '…' : lbl;
+      lt.textContent = c.key.length > maxCh ? c.key.slice(0, maxCh) + '…' : c.key;
       g.appendChild(lt);
     }
 
     // tooltip
     g.addEventListener('mouseenter', () => {
       const pct = (c.count/total*100).toFixed(1);
-      let html = c.parts.map((p, pi) => {
-        return '<div class="tip-row"><span class="tip-k">' + escHtml(CSV.headers[FILTERS[pi]]) + ':</span><span class="tip-v">' + escHtml(p) + '</span></div>';
-      }).join('');
+      const filterHeader = CSV.headers[FILTERS[depth]] || '';
+      let html = '<div class="tip-row"><span class="tip-k">' + escHtml(filterHeader) + ':</span><span class="tip-v">' + escHtml(c.key) + '</span></div>';
+      if (!isLeaf) html += '<div class="tip-row"><span class="tip-k">Sub-clusters:</span><span class="tip-v">' + c.clusters.length + '</span></div>';
       html += '<div class="tip-row" style="margin-top:4px"><span class="tip-k">Rows:</span><span class="tip-count">' + c.count.toLocaleString() + '</span></div>';
       html += '<div class="tip-row"><span class="tip-k">Share:</span><span class="tip-v">' + pct + '% of total</span></div>';
+      if (!isLeaf) html += '<div class="tip-row" style="margin-top:4px;color:var(--accent)"><em>click to zoom in →</em></div>';
       tip.innerHTML = html; tip.style.display = 'block';
     });
     g.addEventListener('mousemove', e => {
@@ -930,7 +1040,16 @@ function renderBubbles(clusters) {
     });
     g.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
 
-    // ⓘ button as SVG foreignObject
+    // Click: zoom in (non-leaf) or nothing (leaf — use ⓘ for drill-down)
+    if (!isLeaf) {
+      g.addEventListener('click', e => {
+        if (e.target.closest && e.target.closest('foreignObject')) return;
+        tip.style.display = 'none';
+        enterBubbleLevel(c, depth, clusters);
+      });
+    }
+
+    // ⓘ button (always shown)
     const fo = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
     fo.setAttribute('x', c.cx + c.r - 14);
     fo.setAttribute('y', c.cy - c.r);
@@ -938,11 +1057,14 @@ function renderBubbles(clusters) {
     const ibtn = document.createElement('div');
     ibtn.style.cssText = 'width:15px;height:15px;border-radius:50%;background:#0008;border:1px solid ' + col + ';color:' + col + ';font-size:9px;line-height:15px;text-align:center;cursor:pointer;user-select:none;font-weight:700';
     ibtn.textContent = 'i';
-    ibtn.addEventListener('click', e => { e.stopPropagation(); tip.style.display = 'none'; openDrillDown(c, col); });
+    ibtn.addEventListener('click', e => {
+      e.stopPropagation();
+      tip.style.display = 'none';
+      // Build a synthetic cluster for drill-down: all rows in this item
+      openDrillDown({ parts: c.parts, count: c.count, allRows: c.allRows }, col);
+    });
     fo.appendChild(ibtn);
     g.appendChild(fo);
-
-    g.style.cursor = 'default';
 
     svg.appendChild(g);
   });
@@ -1437,7 +1559,7 @@ document.querySelectorAll('.vbtn').forEach(btn => {
   });
 });
 window.addEventListener('resize', () => {
-  if (VIEW === 'bubble' && CSV && FILTERS.length) renderBubbles(applySort(applyFilters(computeClusters())));
+  if (VIEW === 'bubble' && CSV && FILTERS.length) renderClusters();
 });
 </script>
 </body>
