@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cluster Explorer</title>
+<style>
+:root {
+  --bg: #111318;
+  --panel: #16191f;
+  --sidebar: #1a1d24;
+  --border: #2a2d35;
+  --border2: #353840;
+  --text: #c9cdd8;
+  --dim: #606674;
+  --bright: #e8eaf0;
+  --accent: #4f8ef7;
+  --green: #3ecf8e;
+  --yellow: #f7c948;
+  --red: #e05c5c;
+  --hover: #1f2330;
+  --drag: #1e2a3a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background: var(--bg); color: var(--text); }
+
+/* ── TOPBAR ── */
+#topbar {
+  height: 46px; background: #0d0f14;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 14px; flex-shrink: 0; z-index: 10;
+}
+#topbar h1 { font-size: 13px; font-weight: 700; color: var(--bright); white-space: nowrap; }
+#topbar h1 em { color: var(--accent); font-style: normal; }
+.sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+
+/* CSV upload area */
+#csv-drop-zone {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--panel); border: 1px dashed var(--border2);
+  border-radius: 5px; padding: 4px 10px; cursor: pointer;
+  transition: border-color .15s, background .15s;
+  min-width: 260px;
+}
+#csv-drop-zone:hover, #csv-drop-zone.dragover {
+  border-color: var(--accent); background: #1a2535;
+}
+#csv-drop-zone .dz-icon { font-size: 15px; }
+#csv-drop-zone .dz-text { font-size: 11px; color: var(--dim); }
+#csv-drop-zone .dz-text strong { color: var(--accent); font-weight: 600; }
+#csv-drop-zone .dz-file { font-size: 11px; color: var(--green); font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#csv-input { display: none; }
+
+/* delimiter selector */
+#delim-wrap { display: flex; align-items: center; gap: 5px; }
+#delim-wrap label { font-size: 11px; color: var(--dim); }
+#delim-select {
+  background: var(--panel); border: 1px solid var(--border2); color: var(--text);
+  padding: 3px 6px; border-radius: 3px; font-size: 11px; outline: none; cursor: pointer;
+}
+
+#stats-bar { margin-left: auto; font-size: 11px; color: var(--dim); white-space: nowrap; }
+#stats-bar strong { color: var(--text); }
+
+/* ── LAYOUT ── */
+#layout { display: flex; height: calc(100vh - 46px); overflow: hidden; }
+
+/* ── LEFT PANEL ── */
+#left {
+  width: 290px; min-width: 200px; background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+}
+.panel-title {
+  padding: 8px 12px; font-size: 10px; font-weight: 700;
+  color: var(--dim); text-transform: uppercase; letter-spacing: .09em;
+  border-bottom: 1px solid var(--border); background: #0f1117; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-title button {
+  font-size: 10px; background: none; border: 1px solid var(--border2);
+  color: var(--dim); border-radius: 3px; padding: 1px 6px; cursor: pointer;
+}
+.panel-title button:hover { color: var(--text); border-color: var(--dim); }
+
+/* Active filter chips */
+#active-wrap {
+  padding: 6px 8px; display: flex; flex-direction: column; gap: 3px;
+  border-bottom: 1px solid var(--border); min-height: 36px; flex-shrink: 0;
+}
+.empty-hint { font-size: 11px; color: var(--dim); font-style: italic; padding: 3px 4px; }
+
+.chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--panel); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 4px 7px;
+  cursor: grab; user-select: none; transition: background .1s;
+}
+.chip:hover { background: var(--hover); }
+.chip.drag-over { border-color: var(--accent); background: var(--drag); }
+.chip.dragging { opacity: .3; }
+.chip-num {
+  width: 17px; height: 17px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.chip-lbl { flex: 1; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-uniq { font-size: 10px; color: var(--dim); flex-shrink: 0; }
+.chip-rm {
+  background: none; border: none; color: var(--dim);
+  cursor: pointer; font-size: 14px; line-height: 1; padding: 0 1px;
+  flex-shrink: 0; transition: color .1s;
+}
+.chip-rm:hover { color: var(--red); }
+
+/* Column list */
+#col-wrap { flex: 1; overflow-y: auto; padding: 6px 8px; }
+#col-wrap::-webkit-scrollbar { width: 4px; }
+#col-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+#col-search {
+  width: 100%; background: var(--bg); border: 1px solid var(--border2);
+  color: var(--text); padding: 4px 8px; border-radius: 3px; font-size: 11px;
+  outline: none; margin-bottom: 6px;
+}
+#col-search:focus { border-color: var(--accent); }
+
+.col-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 7px; border-radius: 3px; cursor: pointer;
+  border: 1px solid transparent; margin-bottom: 2px; transition: background .1s;
+}
+.col-item:hover { background: var(--hover); }
+.col-item:hover .col-add { display: flex; }
+.col-item.used { background: #182030; border-color: var(--accent); cursor: default; }
+.col-item.used .col-name { color: var(--accent); }
+.col-item.used .col-add { display: none !important; }
+.col-name { font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-uniq { font-size: 10px; color: var(--dim); flex-shrink: 0; }
+.col-add {
+  display: none; align-items: center; justify-content: center;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 3px; font-size: 10px; padding: 1px 6px; cursor: pointer; flex-shrink: 0;
+}
+
+/* ── RIGHT PANEL ── */
+#right { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#cluster-bar {
+  padding: 7px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  background: var(--panel);
+}
+.vbtn {
+  background: var(--bg); border: 1px solid var(--border2);
+  color: var(--dim); padding: 3px 9px; border-radius: 3px;
+  font-size: 11px; cursor: pointer; transition: all .1s;
+}
+.vbtn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.vbtn:hover:not(.on) { border-color: var(--dim); color: var(--text); }
+#sort-sel {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 3px 6px; border-radius: 3px; font-size: 11px; outline: none; cursor: pointer;
+}
+#cluster-search {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 3px 8px; border-radius: 3px; font-size: 11px; outline: none; width: 160px;
+}
+#cluster-search:focus { border-color: var(--accent); }
+#cluster-count { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+#cluster-area { flex: 1; overflow: auto; padding: 14px; }
+#cluster-area::-webkit-scrollbar { width: 6px; height: 6px; }
+#cluster-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* Empty/landing state */
+#landing {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 14px; color: var(--dim);
+}
+#landing .land-icon { font-size: 48px; opacity: .4; }
+#landing p { font-size: 13px; text-align: center; line-height: 1.7; max-width: 340px; }
+#landing p strong { color: var(--text); }
+
+/* BUBBLE SVG */
+#bubble-view { width: 100%; }
+#bubble-svg { display: block; overflow: visible; }
+
+/* LIST VIEW */
+#list-view { display: none; }
+.cl-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 9px; border-bottom: 1px solid var(--border);
+  cursor: pointer; border-radius: 3px; transition: background .1s;
+}
+.cl-row:hover, .cl-row.open { background: var(--hover); }
+.cl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.cl-key { flex: 1; font-size: 12px; line-height: 1.5; }
+.kp { display: inline; }
+.ks { color: var(--dim); margin: 0 3px; }
+.cl-bar-wrap { width: 100px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+.cl-bar { height: 5px; border-radius: 3px; min-width: 2px; }
+.cl-pct { font-size: 10px; color: var(--dim); width: 32px; text-align: right; }
+.cl-n { font-size: 11px; font-weight: 700; color: var(--bright); flex-shrink: 0; }
+.cl-sub {
+  display: none; padding: 3px 0 3px 34px;
+  border-bottom: 1px solid var(--border);
+}
+.cl-sub.open { display: block; }
+.cl-sub-item { font-size: 11px; color: var(--dim); padding: 1px 0; line-height: 1.4; }
+.cl-sub-item::before { content: '· '; color: var(--border2); }
+
+/* TOOLTIP */
+#tip {
+  position: fixed; pointer-events: none; display: none;
+  background: #1a1d24; border: 1px solid var(--border2);
+  border-radius: 5px; padding: 8px 12px; font-size: 12px;
+  color: var(--text); max-width: 360px; line-height: 1.7;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5); z-index: 999;
+}
+.tip-row { display: flex; gap: 8px; }
+.tip-k { color: var(--dim); white-space: nowrap; }
+.tip-v { color: var(--green); word-break: break-word; }
+.tip-count { color: var(--yellow); font-weight: 700; }
+
+/* LOADING overlay */
+#overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999; gap: 14px;
+}
+#overlay.show { display: flex; }
+#overlay p { color: var(--text); font-size: 14px; }
+.spin {
+  width: 34px; height: 34px; border: 3px solid var(--border2);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2px; }
+
+/* ── SUBSET SECTION ── */
+#subset-section {
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#subset-title {
+  padding: 7px 12px; font-size: 10px; font-weight: 700;
+  color: var(--dim); text-transform: uppercase; letter-spacing: .09em;
+  background: #0f1117; display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none;
+}
+#subset-title:hover { color: var(--text); }
+#subset-title .ss-arrow { font-size: 9px; transition: transform .15s; }
+#subset-title.open .ss-arrow { transform: rotate(90deg); }
+#subset-body { display: none; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+#subset-col-select {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 4px 7px; border-radius: 3px; font-size: 11px; outline: none; cursor: pointer; width: 100%;
+}
+#subset-col-select:focus { border-color: var(--accent); }
+#subset-val-row { display: flex; gap: 5px; align-items: center; }
+#subset-val {
+  flex: 1; background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 4px 7px; border-radius: 3px; font-size: 11px; outline: none;
+}
+#subset-val:focus { border-color: var(--accent); }
+#subset-val::placeholder { color: var(--dim); }
+#subset-clear-btn {
+  background: none; border: 1px solid var(--border2); color: var(--dim);
+  border-radius: 3px; padding: 3px 7px; font-size: 11px; cursor: pointer; white-space: nowrap;
+}
+#subset-clear-btn:hover { color: var(--red); border-color: var(--red); }
+#subset-badge {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  background: var(--green); color: #0a1a12; font-weight: 700;
+  display: none; align-self: flex-start;
+}
+#subset-badge.active { display: block; }
+</style>
+</head>
+<body>
+
+<div id="overlay"><div class="spin"></div><p id="overlay-msg">Parsing CSV…</p></div>
+<div id="tip"></div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <h1>&#128202; <em>Cluster Explorer</em></h1>
+  <div class="sep"></div>
+
+  <!-- CSV drop / pick -->
+  <div id="csv-drop-zone" title="Click to choose a CSV, or drag one here">
+    <span class="dz-icon">📂</span>
+    <span class="dz-text" id="dz-label"><strong>Choose CSV</strong> or drag &amp; drop</span>
+  </div>
+  <input type="file" id="csv-input" accept=".csv,.tsv,.txt">
+
+  <div id="delim-wrap">
+    <label>Delimiter:</label>
+    <select id="delim-select">
+      <option value="auto">Auto-detect</option>
+      <option value=";">Semicolon ;</option>
+      <option value=",">Comma ,</option>
+      <option value="&#9;">Tab</option>
+      <option value="|">Pipe |</option>
+    </select>
+  </div>
+
+  <div class="sep"></div>
+  <div id="stats-bar">No file loaded</div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div id="layout">
+
+  <!-- LEFT: filters -->
+  <div id="left">
+
+    <!-- SUBSET pre-filter -->
+    <div id="subset-section">
+      <div id="subset-title" class="open">
+        <span>&#9654; Subset <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--dim);font-size:10px">(pre-filter rows)</span></span>
+        <span class="ss-arrow">&#9654;</span>
+      </div>
+      <div id="subset-body">
+        <select id="subset-col-select">
+          <option value="">— choose a column —</option>
+        </select>
+        <div id="subset-val-row">
+          <input type="text" id="subset-val" placeholder="match value…" disabled>
+          <button id="subset-clear-btn" title="Clear subset">✕ Clear</button>
+        </div>
+        <div id="subset-badge">0 rows</div>
+      </div>
+    </div>
+
+    <div class="panel-title">
+      <span>Active Filters</span>
+      <button id="btn-clear">Clear all</button>
+    </div>
+    <div id="active-wrap">
+      <div class="empty-hint" id="filter-empty">Add columns below to create clusters</div>
+    </div>
+    <div id="col-wrap">
+      <input type="text" id="col-search" placeholder="Search columns…">
+      <div id="col-list"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: clusters -->
+  <div id="right">
+    <div id="cluster-bar">
+      <div style="display:flex;gap:3px" id="view-btns">
+        <button class="vbtn on" data-v="bubble">&#9679; Bubbles</button>
+        <button class="vbtn" data-v="list">&#9776; List</button>
+      </div>
+      <div class="sep"></div>
+      <label style="font-size:11px;color:var(--dim)">Sort:</label>
+      <select id="sort-sel">
+        <option value="cnt-d">Count ↓</option>
+        <option value="cnt-a">Count ↑</option>
+        <option value="alpha">A → Z</option>
+      </select>
+      <input type="text" id="cluster-search" placeholder="Filter clusters…">
+      <span id="cluster-count"></span>
+    </div>
+    <div id="cluster-area">
+      <div id="landing">
+        <div class="land-icon">📂</div>
+        <p><strong>Drop a CSV file</strong> (or click the button above) to get started.<br>
+        Then add columns from the left panel to group your data into clusters.<br>
+        Each unique combination of selected column values becomes one cluster — sized by row count.</p>
+      </div>
+      <div id="bubble-view" style="display:none">
+        <svg id="bubble-svg"></svg>
+      </div>
+      <div id="list-view"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PALETTE ──
+const COLORS = ['#4f8ef7','#3ecf8e','#f7c948','#e05c5c','#b06ef7','#f7874f','#4fc9f7','#e8f74f','#f74fb8','#4ff79e','#4f7ff7','#c9f74f','#f7c24f','#4ff7d8','#d4a8ff','#f7504f','#7ef74f'];
+
+// ── STATE ──
+let CSV = null;       // { headers: [], vocabs: [], rows: [] (encoded) }
+let FILTERS = [];     // column indices in order
+let VIEW = 'bubble';
+let SORT = 'cnt-d';
+let Q = '';           // cluster search
+let COL_Q = '';       // column search
+let SUBSET_COL = -1;  // column index for subset pre-filter (-1 = off)
+let SUBSET_VAL = '';  // match string for subset
+let SUBSET_ROWS = null; // cached array of row indices passing the subset
+
+// ── CSV PARSING ──
+function detectDelimiter(sample) {
+  // Use only the first line for detection
+  const firstLine = sample.slice(0, 2000).split('\n')[0];
+  const delims = [';', ',', '\t', '|'];
+  let best = ',', bestN = 0;
+  for (const d of delims) {
+    const n = (firstLine.match(new RegExp(d === '\t' ? '\t' : ('\\' + d), 'g')) || []).length;
+    if (n > bestN) { bestN = n; best = d; }
+  }
+  return best;
+}
+
+function parseCSV(text, delimOverride) {
+  // Normalise line endings to \n only
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const delim = delimOverride === 'auto' ? detectDelimiter(text) : delimOverride;
+
+  // Full RFC-4180 state-machine parser over the entire text.
+  // Correctly handles quoted fields containing embedded newlines, quotes, and delimiters.
+  const allRows = [];
+  let row = [];
+  let cell = '';
+  let inQuote = false;
+  let i = 0;
+  const len = text.length;
+
+  while (i < len) {
+    const ch = text[i];
+
+    if (inQuote) {
+      if (ch === '"') {
+        if (text[i+1] === '"') { cell += '"'; i += 2; } // escaped quote ""
+        else { inQuote = false; i++; }                   // closing quote
+      } else {
+        cell += ch; i++;                                  // any char inside quotes (incl. \n)
+      }
+    } else {
+      if (ch === '"') {
+        inQuote = true; i++;
+      } else if (ch === delim) {
+        row.push(cell.trim()); cell = ''; i++;
+      } else if (ch === '\n') {
+        row.push(cell.trim()); cell = '';
+        // only emit the row if it has content (skip blank lines)
+        if (row.some(c => c !== '')) allRows.push(row);
+        row = []; i++;
+      } else {
+        cell += ch; i++;
+      }
+    }
+  }
+  // flush last cell/row
+  row.push(cell.trim());
+  if (row.some(c => c !== '')) allRows.push(row);
+
+  if (allRows.length < 2) return null;
+
+  const headers = allRows[0];
+  const numCols = headers.length;
+
+  // Build vocabs per column
+  const vocabMaps = headers.map(() => new Map());
+  const rawRows = [];
+
+  for (let li = 1; li < allRows.length; li++) {
+    const cells = allRows[li];
+    // pad / trim to numCols
+    while (cells.length < numCols) cells.push('');
+    rawRows.push(cells.slice(0, numCols));
+    for (let ci = 0; ci < numCols; ci++) {
+      const v = cells[ci] || '';
+      if (!vocabMaps[ci].has(v)) vocabMaps[ci].set(v, vocabMaps[ci].size);
+    }
+  }
+
+  const vocabs = vocabMaps.map(m => {
+    const arr = new Array(m.size);
+    for (const [v, i] of m) arr[i] = v;
+    return arr;
+  });
+
+  const rows = rawRows.map(cells =>
+    cells.map((v, ci) => vocabMaps[ci].get(v) ?? 0)
+  );
+
+  return { headers, vocabs, rows, delimiter: delim };
+}
+
+function loadCSV(text, filename) {
+  showOverlay('Parsing CSV…');
+  setTimeout(() => {
+    const delim = document.getElementById('delim-select').value;
+    try {
+      CSV = parseCSV(text, delim);
+      if (!CSV) { hideOverlay(); alert('Could not parse CSV — check delimiter.'); return; }
+      FILTERS = [];
+      Q = ''; COL_Q = '';
+      SUBSET_COL = -1; SUBSET_VAL = ''; SUBSET_ROWS = null;
+      document.getElementById('cluster-search').value = '';
+      document.getElementById('col-search').value = '';
+      document.getElementById('subset-col-select').value = '';
+      document.getElementById('subset-val').value = '';
+      document.getElementById('subset-val').disabled = true;
+      document.getElementById('subset-badge').classList.remove('active');
+      buildSubsetSelect();
+      buildColList();
+      renderFilters();
+      updateStats();
+      showLanding();
+      document.getElementById('dz-label').innerHTML = '<span class="dz-file">' + escHtml(filename) + '</span>';
+    } catch(e) {
+      alert('Parse error: ' + e.message);
+    }
+    hideOverlay();
+  }, 30);
+}
+
+// ── SUBSET ──
+function buildSubsetSelect() {
+  const sel = document.getElementById('subset-col-select');
+  sel.innerHTML = '<option value="">— choose a column —</option>';
+  if (!CSV) return;
+  CSV.headers.forEach((h, ci) => {
+    const opt = document.createElement('option');
+    opt.value = ci;
+    opt.textContent = h + ' (' + CSV.vocabs[ci].length + ' unique)';
+    sel.appendChild(opt);
+  });
+  // restore previous selection if column still exists
+  if (SUBSET_COL >= 0 && SUBSET_COL < CSV.headers.length) {
+    sel.value = SUBSET_COL;
+    document.getElementById('subset-val').disabled = false;
+  }
+}
+
+function applySubset() {
+  const valInput = document.getElementById('subset-val').value.trim();
+  SUBSET_VAL = valInput;
+
+  if (SUBSET_COL < 0 || SUBSET_VAL === '') {
+    SUBSET_ROWS = null;
+    document.getElementById('subset-badge').classList.remove('active');
+    updateStats();
+    renderClusters();
+    return;
+  }
+
+  // Build subset: rows where vocabs[SUBSET_COL][row[SUBSET_COL]] contains SUBSET_VAL
+  const q = SUBSET_VAL.toLowerCase();
+  const vocab = CSV.vocabs[SUBSET_COL];
+  // Pre-compute which vocab indices match
+  const matchingIdx = new Set();
+  vocab.forEach((v, i) => { if (v.toLowerCase().includes(q)) matchingIdx.add(i); });
+
+  SUBSET_ROWS = [];
+  for (let ri = 0; ri < CSV.rows.length; ri++) {
+    if (matchingIdx.has(CSV.rows[ri][SUBSET_COL])) SUBSET_ROWS.push(ri);
+  }
+
+  const badge = document.getElementById('subset-badge');
+  badge.textContent = SUBSET_ROWS.length.toLocaleString() + ' rows';
+  badge.classList.add('active');
+
+  updateStats();
+  renderClusters();
+}
+
+function clearSubset() {
+  SUBSET_COL = -1;
+  SUBSET_VAL = '';
+  SUBSET_ROWS = null;
+  document.getElementById('subset-col-select').value = '';
+  const vi = document.getElementById('subset-val');
+  vi.value = ''; vi.disabled = true;
+  document.getElementById('subset-badge').classList.remove('active');
+  updateStats();
+  renderClusters();
+}
+
+function getActiveRows() {
+  if (!CSV) return [];
+  if (SUBSET_ROWS !== null) return SUBSET_ROWS;
+  // return all row indices
+  if (!CSV._allIdx) CSV._allIdx = Array.from({length: CSV.rows.length}, (_, i) => i);
+  return CSV._allIdx;
+}
+
+// ── COLUMN LIST ──
+function buildColList() {
+  renderColList();
+}
+
+function renderColList() {
+  const list = document.getElementById('col-list');
+  list.innerHTML = '';
+  if (!CSV) return;
+  const q = COL_Q.toLowerCase();
+  CSV.headers.forEach((h, ci) => {
+    if (q && !h.toLowerCase().includes(q)) return;
+    const used = FILTERS.includes(ci);
+    const item = document.createElement('div');
+    item.className = 'col-item' + (used ? ' used' : '');
+    item.dataset.ci = ci;
+    item.innerHTML =
+      '<span class="col-name" title="' + escHtml(h) + '">' + escHtml(h) + '</span>' +
+      '<span class="col-uniq">' + CSV.vocabs[ci].length.toLocaleString() + '</span>' +
+      '<button class="col-add">+ Add</button>';
+    item.querySelector('.col-add').addEventListener('click', e => { e.stopPropagation(); addFilter(ci); });
+    item.addEventListener('click', () => { if (!FILTERS.includes(ci)) addFilter(ci); });
+    list.appendChild(item);
+  });
+}
+
+// ── FILTERS ──
+function addFilter(ci) {
+  if (FILTERS.includes(ci)) return;
+  FILTERS.push(ci);
+  renderFilters();
+  renderColList();
+  renderClusters();
+}
+
+function removeFilter(ci) {
+  FILTERS = FILTERS.filter(f => f !== ci);
+  renderFilters();
+  renderColList();
+  renderClusters();
+}
+
+function renderFilters() {
+  const wrap = document.getElementById('active-wrap');
+  const empty = document.getElementById('filter-empty');
+  wrap.innerHTML = '';
+  if (FILTERS.length === 0) {
+    const h = document.createElement('div');
+    h.className = 'empty-hint';
+    h.id = 'filter-empty';
+    h.textContent = CSV ? 'Add columns below to create clusters' : 'Load a CSV first';
+    wrap.appendChild(h);
+    return;
+  }
+  FILTERS.forEach((ci, pos) => {
+    const color = COLORS[pos % COLORS.length];
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.draggable = true;
+    chip.dataset.pos = pos;
+    chip.innerHTML =
+      '<span class="chip-num" style="background:' + color + '22;color:' + color + '">' + (pos+1) + '</span>' +
+      '<span class="chip-lbl" style="color:' + color + '" title="' + escHtml(CSV.headers[ci]) + '">' + escHtml(CSV.headers[ci]) + '</span>' +
+      '<span class="chip-uniq">' + CSV.vocabs[ci].length + '</span>' +
+      '<button class="chip-rm" title="Remove">×</button>';
+
+    chip.querySelector('.chip-rm').addEventListener('click', e => { e.stopPropagation(); removeFilter(ci); });
+
+    chip.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', pos); chip.classList.add('dragging'); });
+    chip.addEventListener('dragend', () => { chip.classList.remove('dragging'); document.querySelectorAll('.chip').forEach(c => c.classList.remove('drag-over')); });
+    chip.addEventListener('dragover', e => { e.preventDefault(); document.querySelectorAll('.chip').forEach(c => c.classList.remove('drag-over')); chip.classList.add('drag-over'); });
+    chip.addEventListener('drop', e => {
+      e.preventDefault(); chip.classList.remove('drag-over');
+      const from = parseInt(e.dataTransfer.getData('text/plain'));
+      const to = parseInt(chip.dataset.pos);
+      if (from === to) return;
+      const f = [...FILTERS]; const t = f[from]; f[from] = f[to]; f[to] = t;
+      FILTERS = f; renderFilters(); renderColList(); renderClusters();
+    });
+    wrap.appendChild(chip);
+  });
+}
+
+// ── COMPUTE CLUSTERS ──
+function computeClusters() {
+  if (!CSV || FILTERS.length === 0) return [];
+  const counts = new Map();
+  const meta = new Map();
+  const activeRows = getActiveRows();
+  for (let ai = 0; ai < activeRows.length; ai++) {
+    const ri = activeRows[ai];
+    const row = CSV.rows[ri];
+    const key = FILTERS.map(ci => row[ci]).join('|');
+    counts.set(key, (counts.get(key) || 0) + 1);
+    if (!meta.has(key)) {
+      meta.set(key, { parts: FILTERS.map(ci => CSV.vocabs[ci][row[ci]]), samples: [] });
+    }
+    const m = meta.get(key);
+    if (m.samples.length < 50) m.samples.push(ri);
+  }
+  const out = [];
+  for (const [key, count] of counts) {
+    const { parts, samples } = meta.get(key);
+    out.push({ key, parts, count, samples });
+  }
+  return out;
+}
+
+function applyFilters(clusters) {
+  if (!Q) return clusters;
+  const q = Q.toLowerCase();
+  return clusters.filter(c => c.parts.some(p => p.toLowerCase().includes(q)));
+}
+
+function applySort(clusters) {
+  if (SORT === 'cnt-d') return clusters.sort((a,b) => b.count - a.count);
+  if (SORT === 'cnt-a') return clusters.sort((a,b) => a.count - b.count);
+  return clusters.sort((a,b) => a.parts.join().localeCompare(b.parts.join()));
+}
+
+// ── RENDER CLUSTERS ──
+function renderClusters() {
+  if (!CSV || FILTERS.length === 0) { showLanding(); return; }
+  hideLanding();
+  const clusters = applySort(applyFilters(computeClusters()));
+  document.getElementById('cluster-count').textContent = clusters.length.toLocaleString() + ' clusters';
+  if (VIEW === 'bubble') renderBubbles(clusters);
+  else renderList(clusters);
+}
+
+// ── BUBBLE VIEW ──
+function renderBubbles(clusters) {
+  document.getElementById('bubble-view').style.display = '';
+  document.getElementById('list-view').style.display = 'none';
+
+  const svg = document.getElementById('bubble-svg');
+  svg.innerHTML = '';
+
+  if (clusters.length === 0) {
+    svg.innerHTML = '<text x="50%" y="80" text-anchor="middle" fill="#606674" font-size="13">No clusters match</text>';
+    svg.setAttribute('height', 160);
+    return;
+  }
+
+  const maxC = Math.max(...clusters.map(c => c.count));
+  const total = clusters.reduce((s,c) => s+c.count, 0);
+  const MIN_R = 12, MAX_R = 88;
+
+  // Compute radii
+  clusters.forEach(c => {
+    c.r = MIN_R + (MAX_R - MIN_R) * Math.sqrt(c.count / maxC);
+  });
+
+  // Row-pack layout
+  const W = document.getElementById('bubble-view').clientWidth || 900;
+  const PAD = 8;
+  let x = PAD, y = PAD, rowH = 0;
+  clusters.forEach(c => {
+    const d = c.r * 2 + PAD;
+    if (x + d > W - PAD && x > PAD) { x = PAD; y += rowH + PAD; rowH = 0; }
+    c.cx = x + c.r; c.cy = y + c.r;
+    x += d; rowH = Math.max(rowH, d);
+  });
+  const H = y + rowH + PAD * 3;
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+  const tip = document.getElementById('tip');
+
+  clusters.forEach((c, i) => {
+    const col = COLORS[i % COLORS.length];
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor = 'default';
+
+    // shadow
+    const sh = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    sh.setAttribute('cx', c.cx+2); sh.setAttribute('cy', c.cy+2);
+    sh.setAttribute('r', c.r); sh.setAttribute('fill','rgba(0,0,0,.25)');
+    g.appendChild(sh);
+
+    // fill
+    const ci = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    ci.setAttribute('cx', c.cx); ci.setAttribute('cy', c.cy);
+    ci.setAttribute('r', c.r);
+    ci.setAttribute('fill', col + '22');
+    ci.setAttribute('stroke', col);
+    ci.setAttribute('stroke-width','1.5');
+    g.appendChild(ci);
+
+    // count
+    const fy = c.r > 28 ? c.cy - 6 : c.cy + 3;
+    const ct = document.createElementNS('http://www.w3.org/2000/svg','text');
+    ct.setAttribute('x', c.cx); ct.setAttribute('y', fy);
+    ct.setAttribute('text-anchor','middle'); ct.setAttribute('dominant-baseline','middle');
+    ct.setAttribute('fill', col);
+    ct.setAttribute('font-size', Math.max(8, Math.min(15, c.r * 0.44)));
+    ct.setAttribute('font-weight','700');
+    ct.textContent = c.count >= 1000 ? (c.count/1000).toFixed(1)+'k' : c.count;
+    g.appendChild(ct);
+
+    // label (last filter value)
+    if (c.r > 20) {
+      const lbl = c.parts[c.parts.length-1];
+      const maxCh = Math.max(4, Math.floor(c.r * 0.26));
+      const lt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      lt.setAttribute('x', c.cx); lt.setAttribute('y', c.r > 28 ? c.cy + 10 : c.cy + 3);
+      lt.setAttribute('text-anchor','middle'); lt.setAttribute('dominant-baseline','middle');
+      lt.setAttribute('fill', col); lt.setAttribute('fill-opacity','0.7');
+      lt.setAttribute('font-size', Math.max(7, Math.min(10, c.r * 0.26)));
+      lt.textContent = lbl.length > maxCh ? lbl.slice(0, maxCh) + '…' : lbl;
+      g.appendChild(lt);
+    }
+
+    // tooltip
+    g.addEventListener('mouseenter', () => {
+      const pct = (c.count/total*100).toFixed(1);
+      let html = c.parts.map((p, pi) => {
+        return '<div class="tip-row"><span class="tip-k">' + escHtml(CSV.headers[FILTERS[pi]]) + ':</span><span class="tip-v">' + escHtml(p) + '</span></div>';
+      }).join('');
+      html += '<div class="tip-row" style="margin-top:4px"><span class="tip-k">Rows:</span><span class="tip-count">' + c.count.toLocaleString() + '</span></div>';
+      html += '<div class="tip-row"><span class="tip-k">Share:</span><span class="tip-v">' + pct + '% of total</span></div>';
+      tip.innerHTML = html; tip.style.display = 'block';
+    });
+    g.addEventListener('mousemove', e => {
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top = Math.max(4, e.clientY - 10) + 'px';
+    });
+    g.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+
+    svg.appendChild(g);
+  });
+}
+
+// ── LIST VIEW ──
+function renderList(clusters) {
+  document.getElementById('bubble-view').style.display = 'none';
+  const lv = document.getElementById('list-view');
+  lv.style.display = 'block';
+  lv.innerHTML = '';
+
+  if (clusters.length === 0) {
+    lv.innerHTML = '<div style="padding:40px;text-align:center;color:var(--dim)">No clusters match the filter</div>';
+    return;
+  }
+
+  const maxC = Math.max(...clusters.map(c => c.count));
+  const total = clusters.reduce((s,c) => s+c.count, 0);
+  const q = Q.toLowerCase();
+
+  // Decide which column to show as "detail" when expanding
+  // prefer col index 2 (title) if it exists and is not a filter, else first non-filter col
+  let detailCol = -1;
+  if (CSV.headers.length > 2 && !FILTERS.includes(2)) detailCol = 2;
+  else {
+    for (let ci = 0; ci < CSV.headers.length; ci++) {
+      if (!FILTERS.includes(ci)) { detailCol = ci; break; }
+    }
+  }
+
+  clusters.forEach((c, i) => {
+    const col = COLORS[i % COLORS.length];
+    const pct = (c.count / maxC * 100).toFixed(1);
+    const pctT = (c.count / total * 100).toFixed(2);
+
+    const keyHtml = c.parts.map((p, pi) =>
+      (pi > 0 ? '<span class="ks">›</span>' : '') +
+      '<span class="kp" title="' + escHtml(CSV.headers[FILTERS[pi]]) + '" style="color:' + COLORS[pi % COLORS.length] + '">' +
+      (q ? hlText(p, q) : escHtml(p)) + '</span>'
+    ).join('');
+
+    const row = document.createElement('div');
+    row.className = 'cl-row';
+    row.innerHTML =
+      '<span class="cl-dot" style="background:' + col + '"></span>' +
+      '<span class="cl-key">' + keyHtml + '</span>' +
+      '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + pct + '%;background:' + col + '70"></span><span class="cl-pct">' + pctT + '%</span></span>' +
+      '<span class="cl-n">' + c.count.toLocaleString() + '</span>';
+
+    const sub = document.createElement('div');
+    sub.className = 'cl-sub';
+
+    row.addEventListener('click', () => {
+      const isOpen = sub.classList.toggle('open');
+      row.classList.toggle('open', isOpen);
+      if (isOpen && sub.innerHTML === '') {
+        if (detailCol >= 0) {
+          c.samples.forEach(ri => {
+            const val = CSV.vocabs[detailCol][CSV.rows[ri][detailCol]];
+            const el = document.createElement('div');
+            el.className = 'cl-sub-item';
+            el.textContent = val;
+            sub.appendChild(el);
+          });
+          if (c.count > c.samples.length) {
+            const el = document.createElement('div');
+            el.className = 'cl-sub-item';
+            el.style.color = 'var(--dim)';
+            el.textContent = '…and ' + (c.count - c.samples.length).toLocaleString() + ' more rows';
+            sub.appendChild(el);
+          }
+        } else {
+          sub.innerHTML = '<div class="cl-sub-item" style="color:var(--dim)">' + c.count.toLocaleString() + ' rows</div>';
+        }
+      }
+    });
+
+    const wrap = document.createElement('div');
+    wrap.appendChild(row);
+    wrap.appendChild(sub);
+    lv.appendChild(wrap);
+  });
+}
+
+// ── STATS ──
+function updateStats() {
+  const el = document.getElementById('stats-bar');
+  if (!CSV) { el.textContent = 'No file loaded'; return; }
+  const activeN = SUBSET_ROWS !== null ? SUBSET_ROWS.length : CSV.rows.length;
+  const subsetStr = SUBSET_ROWS !== null
+    ? ' &nbsp;·&nbsp; subset: <strong style="color:var(--green)">' + activeN.toLocaleString() + '</strong> rows'
+    : '';
+  el.innerHTML =
+    '<strong>' + CSV.rows.length.toLocaleString() + '</strong> total rows' + subsetStr +
+    ' &nbsp;·&nbsp; <strong>' + CSV.headers.length + '</strong> columns' +
+    ' &nbsp;·&nbsp; delimiter: <strong>' + escHtml(CSV.delimiter === '\t' ? 'Tab' : CSV.delimiter) + '</strong>';
+}
+
+// ── UI HELPERS ──
+function showLanding() {
+  document.getElementById('landing').style.display = '';
+  document.getElementById('bubble-view').style.display = 'none';
+  document.getElementById('list-view').style.display = 'none';
+  document.getElementById('cluster-count').textContent = '';
+}
+function hideLanding() {
+  document.getElementById('landing').style.display = 'none';
+}
+function showOverlay(msg) {
+  document.getElementById('overlay-msg').textContent = msg;
+  document.getElementById('overlay').classList.add('show');
+}
+function hideOverlay() {
+  document.getElementById('overlay').classList.remove('show');
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function hlText(text, q) {
+  if (!q) return escHtml(text);
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if (idx === -1) return escHtml(text);
+  return escHtml(text.slice(0,idx)) + '<mark>' + escHtml(text.slice(idx,idx+q.length)) + '</mark>' + hlText(text.slice(idx+q.length), q);
+}
+
+// ── FILE INPUT ──
+const dropZone = document.getElementById('csv-drop-zone');
+const fileInput = document.getElementById('csv-input');
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => loadCSV(ev.target.result, f.name);
+  r.readAsText(f, 'UTF-8');
+  fileInput.value = '';
+});
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => loadCSV(ev.target.result, f.name);
+  r.readAsText(f, 'UTF-8');
+});
+
+// Also allow dropping on the whole window
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => loadCSV(ev.target.result, f.name);
+  r.readAsText(f, 'UTF-8');
+});
+
+// ── SUBSET CONTROLS ──
+document.getElementById('subset-title').addEventListener('click', () => {
+  const body = document.getElementById('subset-body');
+  const title = document.getElementById('subset-title');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'flex';
+  title.classList.toggle('open', !isOpen);
+});
+
+document.getElementById('subset-col-select').addEventListener('change', e => {
+  const val = e.target.value;
+  SUBSET_COL = val === '' ? -1 : parseInt(val);
+  const vi = document.getElementById('subset-val');
+  vi.disabled = SUBSET_COL < 0;
+  if (SUBSET_COL < 0) {
+    vi.value = '';
+    clearSubset();
+  } else {
+    vi.focus();
+  }
+});
+
+let subsetTimer;
+document.getElementById('subset-val').addEventListener('input', e => {
+  clearTimeout(subsetTimer);
+  subsetTimer = setTimeout(() => applySubset(), 300);
+});
+
+document.getElementById('subset-clear-btn').addEventListener('click', () => clearSubset());
+
+// ── CONTROLS ──
+document.getElementById('btn-clear').addEventListener('click', () => {
+  FILTERS = []; renderFilters(); renderColList(); renderClusters();
+});
+document.getElementById('sort-sel').addEventListener('change', e => {
+  SORT = e.target.value; renderClusters();
+});
+document.getElementById('cluster-search').addEventListener('input', e => {
+  Q = e.target.value; renderClusters();
+});
+document.getElementById('col-search').addEventListener('input', e => {
+  COL_Q = e.target.value; renderColList();
+});
+document.getElementById('delim-select').addEventListener('change', () => {
+  // re-parse current file if any — but we don't keep the raw text, so just hint
+  document.getElementById('dz-label').innerHTML = '<strong>Re-drop CSV</strong> to apply new delimiter';
+});
+document.querySelectorAll('.vbtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    VIEW = btn.dataset.v;
+    renderClusters();
+  });
+});
+window.addEventListener('resize', () => {
+  if (VIEW === 'bubble' && CSV && FILTERS.length) renderBubbles(applySort(applyFilters(computeClusters())));
+});
+</script>
+</body>
+</html>

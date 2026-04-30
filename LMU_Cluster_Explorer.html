@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>LMU Cluster Explorer</title>
+<style>
+:root {
+  --bg: #111318;
+  --panel-bg: #16191f;
+  --sidebar-bg: #1a1d24;
+  --border: #2a2d35;
+  --border2: #353840;
+  --text: #c9cdd8;
+  --text-dim: #606674;
+  --text-bright: #e8eaf0;
+  --accent: #4f8ef7;
+  --accent2: #3ecf8e;
+  --accent3: #f7c948;
+  --accent4: #e05c5c;
+  --hover: #1f2330;
+  --drag-over: #1e2a3a;
+  --tag-colors: #4f8ef7,#3ecf8e,#f7c948,#e05c5c,#b06ef7,#f7874f,#4fc9f7,#e8f74f,#f74fb8,#4ff79e,#f74f4f,#4f7ff7,#c9f74f,#f7504f,#7ef74f,#f7c24f,#4ff7d8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background: var(--bg); color: var(--text); }
+
+/* ── TOP BAR ── */
+#topbar {
+  height: 44px;
+  background: #0d0f14;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; flex-shrink: 0;
+}
+#topbar h1 { font-size: 14px; font-weight: 700; color: var(--text-bright); white-space: nowrap; }
+#topbar h1 em { color: var(--accent); font-style: normal; }
+.tb-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+#stats-bar { font-size: 11px; color: var(--text-dim); margin-left: auto; white-space: nowrap; }
+#stats-bar strong { color: var(--text); }
+
+/* ── LAYOUT ── */
+#layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 44px); }
+
+/* ── LEFT: FILTER PANEL ── */
+#filter-panel {
+  width: 300px; min-width: 220px; max-width: 420px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden; flex-shrink: 0;
+  resize: horizontal;
+}
+#filter-header {
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+#filter-header span { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: .08em; }
+#filter-header button { font-size: 11px; background: none; border: 1px solid var(--border2); color: var(--text-dim); border-radius: 3px; padding: 2px 7px; cursor: pointer; }
+#filter-header button:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* Active filter chain */
+#active-filters {
+  padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 4px;
+  border-bottom: 1px solid var(--border);
+  min-height: 40px;
+  flex-shrink: 0;
+}
+#active-filters .empty-hint {
+  font-size: 11px; color: var(--text-dim);
+  padding: 4px 4px;
+  font-style: italic;
+}
+
+/* Filter chip */
+.filter-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 5px 8px;
+  cursor: grab; user-select: none;
+  transition: background .1s;
+  position: relative;
+}
+.filter-chip:hover { background: var(--hover); }
+.filter-chip.drag-over { border-color: var(--accent); background: var(--drag-over); }
+.filter-chip.dragging { opacity: .35; }
+.chip-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.chip-label { flex: 1; font-size: 12px; }
+.chip-unique { font-size: 10px; color: var(--text-dim); }
+.chip-remove {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 13px; line-height: 16px; text-align: center;
+  flex-shrink: 0; transition: color .1s;
+}
+.chip-remove:hover { color: var(--accent4); }
+
+/* Column picker */
+#col-picker-wrap {
+  flex: 1; overflow-y: auto; padding: 8px 10px;
+}
+#col-picker-wrap::-webkit-scrollbar { width: 5px; }
+#col-picker-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.col-section-title { font-size: 10px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: .08em; padding: 6px 4px 4px; }
+.col-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: 4px; cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .1s;
+  margin-bottom: 2px;
+}
+.col-item:hover { background: var(--hover); }
+.col-item.active { background: #1a2535; border-color: var(--accent); cursor: default; }
+.col-item.active .col-name { color: var(--accent); }
+.col-uniq { font-size: 10px; color: var(--text-dim); margin-left: auto; }
+.col-name { font-size: 12px; }
+.col-icon { font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; }
+.col-sample { font-size: 10px; color: var(--text-dim); }
+
+/* ADD BUTTON */
+.col-add-btn {
+  font-size: 10px; background: var(--accent); color: #fff;
+  border: none; border-radius: 3px; padding: 1px 6px;
+  cursor: pointer; margin-left: auto; flex-shrink: 0;
+  display: none;
+}
+.col-item:hover .col-add-btn { display: block; }
+.col-item.active .col-add-btn { display: none; }
+
+/* ── RIGHT: CLUSTER VIEW ── */
+#cluster-panel {
+  flex: 1; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+#cluster-toolbar {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0; background: var(--panel-bg);
+}
+#cluster-toolbar label { font-size: 11px; color: var(--text-dim); }
+#view-toggle { display: flex; gap: 3px; }
+.vbtn {
+  background: var(--bg); border: 1px solid var(--border2);
+  color: var(--text-dim); padding: 3px 9px; border-radius: 3px;
+  font-size: 11px; cursor: pointer; transition: all .1s;
+}
+.vbtn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.vbtn:hover:not(.active) { border-color: var(--text-dim); color: var(--text); }
+
+#search-cluster {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 3px 8px; border-radius: 3px; font-size: 11px; outline: none; width: 180px;
+}
+#search-cluster:focus { border-color: var(--accent); }
+
+#sort-select {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 3px 7px; border-radius: 3px; font-size: 11px; outline: none; cursor: pointer;
+}
+
+#cluster-count-label { margin-left: auto; font-size: 11px; color: var(--text-dim); }
+
+/* CLUSTER CANVAS / LIST */
+#cluster-area { flex: 1; overflow: auto; padding: 16px; }
+#cluster-area::-webkit-scrollbar { width: 7px; height: 7px; }
+#cluster-area::-webkit-scrollbar-track { background: var(--bg); }
+#cluster-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* BUBBLE VIEW */
+#bubble-svg-wrap { width: 100%; min-height: 500px; }
+
+/* LIST VIEW */
+#list-view { display: none; }
+.cluster-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 7px 10px; border-bottom: 1px solid var(--border);
+  border-radius: 3px; transition: background .1s;
+  cursor: pointer;
+}
+.cluster-row:hover { background: var(--hover); }
+.cluster-row.expanded { background: var(--hover); }
+.cr-swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.cr-key { flex: 1; font-size: 12px; color: var(--text); }
+.cr-key .key-part { display: inline-block; }
+.cr-key .key-sep { color: var(--text-dim); margin: 0 3px; }
+.cr-count { font-size: 11px; font-weight: 700; color: var(--text-bright); flex-shrink: 0; }
+.cr-bar-wrap { width: 120px; flex-shrink: 0; display: flex; align-items: center; gap: 5px; }
+.cr-bar { height: 6px; border-radius: 3px; min-width: 2px; }
+.cr-pct { font-size: 10px; color: var(--text-dim); width: 34px; text-align: right; }
+
+/* Expanded exam list */
+.exam-sublist {
+  display: none; padding: 4px 0 4px 36px;
+  border-bottom: 1px solid var(--border);
+}
+.exam-sublist.open { display: block; }
+.exam-sub-item { font-size: 11px; color: var(--text-dim); padding: 2px 0; line-height: 1.4; }
+.exam-sub-item::before { content: '·  '; color: var(--border2); }
+
+/* LOADING */
+#loading {
+  position: fixed; inset: 0; background: rgba(0,0,0,.75);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 999; gap: 12px;
+}
+#loading p { color: var(--text); font-size: 14px; }
+.spinner {
+  width: 36px; height: 36px; border: 3px solid var(--border2);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Tooltip */
+#tooltip {
+  position: fixed; pointer-events: none;
+  background: #1a1d24; border: 1px solid var(--border2);
+  border-radius: 5px; padding: 8px 12px;
+  font-size: 12px; color: var(--text);
+  max-width: 340px; line-height: 1.6;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  z-index: 500; display: none;
+}
+#tooltip .tt-title { font-weight: 600; color: var(--text-bright); margin-bottom: 4px; }
+#tooltip .tt-row { display: flex; gap: 8px; }
+#tooltip .tt-key { color: var(--text-dim); }
+#tooltip .tt-val { color: var(--accent2); }
+
+mark { background: #f7c94833; color: #f7c948; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div><p id="loading-msg">Loading data&hellip;</p></div>
+<div id="tooltip"></div>
+
+<div id="topbar">
+  <h1>&#128202; LMU <em>Cluster Explorer</em></h1>
+  <div class="tb-sep"></div>
+  <span style="font-size:11px;color:var(--text-dim)">Add columns on the left &rarr; see clusters on the right</span>
+  <div id="stats-bar">–</div>
+</div>
+
+<div id="layout">
+
+  <!-- LEFT: FILTER / COLUMN PANEL -->
+  <div id="filter-panel">
+    <div id="filter-header">
+      <span>Active Filters</span>
+      <button id="btn-clear-all">Clear all</button>
+    </div>
+    <div id="active-filters">
+      <div class="empty-hint">No filters yet — add columns below</div>
+    </div>
+    <div id="col-picker-wrap">
+      <div class="col-section-title">Available Columns</div>
+      <div id="col-list"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: CLUSTER VIEW -->
+  <div id="cluster-panel">
+    <div id="cluster-toolbar">
+      <div id="view-toggle">
+        <button class="vbtn active" data-view="bubble">&#9679; Bubbles</button>
+        <button class="vbtn" data-view="list">&#9776; List</button>
+      </div>
+      <div class="tb-sep" style="background:var(--border);width:1px;height:18px;"></div>
+      <label>Sort:</label>
+      <select id="sort-select">
+        <option value="count-desc">Count ↓</option>
+        <option value="count-asc">Count ↑</option>
+        <option value="alpha">A → Z</option>
+      </select>
+      <input type="text" id="search-cluster" placeholder="Filter clusters…">
+      <span id="cluster-count-label">0 clusters</span>
+    </div>
+    <div id="cluster-area">
+      <div id="bubble-view">
+        <svg id="bubble-svg" style="width:100%;overflow:visible;display:block;"></svg>
+      </div>
+      <div id="list-view"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONSTANTS ──
+const TAG_COLORS = ['#4f8ef7','#3ecf8e','#f7c948','#e05c5c','#b06ef7','#f7874f','#4fc9f7','#e8f74f','#f74fb8','#4ff79e','#f74f4f','#4f7ff7','#c9f74f','#7ef74f','#f7c24f','#4ff7d8','#d4a8ff'];
+const COL_ICONS = ['📅','🔑','📝','🎓','🎓','🏫','🏫','🔀','🎯','🎯','📌','📌','📋','🔢','🔢','🔢','📄'];
+const COL_LABELS = ['Semester','AnkerID','Veranstaltungstitel','Abschluss (Nr)','Abschluss (Text)','Studiengang (Nr)','Studiengang (Text)','Vertiefung','Schwerpunkt','Schwerpunkt Text','KzFa','KzFa Text','PO-Version','PORGNR','Pordnr','Prüfungsnr','Prüfungstext'];
+
+let DATA = null; // {header, vocabs, rows}
+let activeFilters = []; // list of col indices in order
+let currentView = 'bubble';
+let searchQuery = '';
+let sortMode = 'count-desc';
+
+// ── LOAD DATA ──
+async function loadData() {
+  const msg = document.getElementById('loading-msg');
+  msg.textContent = 'Loading data (6 MB)…';
+  try {
+    const r = await fetch('encoded_data.json');
+    msg.textContent = 'Parsing…';
+    DATA = await r.json();
+    document.getElementById('loading').style.display = 'none';
+    init();
+  } catch(e) {
+    msg.textContent = 'Error loading data: ' + e.message;
+  }
+}
+
+// ── INIT ──
+function init() {
+  buildColList();
+  updateStats();
+  renderClusters();
+}
+
+// ── BUILD COLUMN PICKER ──
+function buildColList() {
+  const list = document.getElementById('col-list');
+  list.innerHTML = '';
+  DATA.vocabs.forEach((vocab, ci) => {
+    const item = document.createElement('div');
+    item.className = 'col-item' + (activeFilters.includes(ci) ? ' active' : '');
+    item.dataset.col = ci;
+    item.innerHTML =
+      '<span class="col-icon">' + COL_ICONS[ci] + '</span>' +
+      '<span class="col-name">' + COL_LABELS[ci] + '</span>' +
+      '<span class="col-uniq">' + vocab.length.toLocaleString() + ' unique</span>' +
+      '<button class="col-add-btn">+ Add</button>';
+
+    const btn = item.querySelector('.col-add-btn');
+    btn.addEventListener('click', e => { e.stopPropagation(); addFilter(ci); });
+    item.addEventListener('click', () => { if (!activeFilters.includes(ci)) addFilter(ci); });
+    list.appendChild(item);
+  });
+}
+
+function refreshColList() {
+  document.querySelectorAll('.col-item').forEach(el => {
+    const ci = parseInt(el.dataset.col);
+    el.classList.toggle('active', activeFilters.includes(ci));
+  });
+}
+
+// ── FILTER MANAGEMENT ──
+function addFilter(ci) {
+  if (activeFilters.includes(ci)) return;
+  activeFilters.push(ci);
+  refreshColList();
+  renderActiveFilters();
+  renderClusters();
+}
+
+function removeFilter(ci) {
+  activeFilters = activeFilters.filter(f => f !== ci);
+  refreshColList();
+  renderActiveFilters();
+  renderClusters();
+}
+
+function renderActiveFilters() {
+  const container = document.getElementById('active-filters');
+  container.innerHTML = '';
+  if (activeFilters.length === 0) {
+    container.innerHTML = '<div class="empty-hint">No filters yet — add columns below</div>';
+    return;
+  }
+  activeFilters.forEach((ci, pos) => {
+    const chip = document.createElement('div');
+    chip.className = 'filter-chip';
+    chip.draggable = true;
+    chip.dataset.pos = pos;
+
+    const color = TAG_COLORS[pos % TAG_COLORS.length];
+    chip.innerHTML =
+      '<span class="chip-num" style="background:' + color + '22;color:' + color + '">' + (pos+1) + '</span>' +
+      '<span class="chip-label" style="color:' + color + '">' + COL_ICONS[ci] + ' ' + COL_LABELS[ci] + '</span>' +
+      '<span class="chip-unique">' + DATA.vocabs[ci].length + ' vals</span>' +
+      '<button class="chip-remove" title="Remove">×</button>';
+
+    chip.querySelector('.chip-remove').addEventListener('click', e => { e.stopPropagation(); removeFilter(ci); });
+
+    // Drag to reorder
+    chip.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', pos);
+      chip.classList.add('dragging');
+    });
+    chip.addEventListener('dragend', () => {
+      chip.classList.remove('dragging');
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('drag-over'));
+    });
+    chip.addEventListener('dragover', e => {
+      e.preventDefault();
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('drag-over'));
+      chip.classList.add('drag-over');
+    });
+    chip.addEventListener('drop', e => {
+      e.preventDefault();
+      chip.classList.remove('drag-over');
+      const from = parseInt(e.dataTransfer.getData('text/plain'));
+      const to = parseInt(chip.dataset.pos);
+      if (from === to) return;
+      const newF = [...activeFilters];
+      const tmp = newF[from]; newF[from] = newF[to]; newF[to] = tmp;
+      activeFilters = newF;
+      renderActiveFilters();
+      renderClusters();
+    });
+
+    container.appendChild(chip);
+  });
+}
+
+// ── COMPUTE CLUSTERS ──
+function computeClusters() {
+  if (activeFilters.length === 0) return [];
+
+  // Use integer-index tuple as key to avoid value-space collisions
+  const counts = new Map(); // intkey -> count
+  const keyToMeta = new Map(); // intkey -> {parts, sampleRows}
+
+  for (let ri = 0; ri < DATA.rows.length; ri++) {
+    const row = DATA.rows[ri];
+    // key = pipe-separated vocab indices per active filter col
+    const intkey = activeFilters.map(ci => row[ci]).join('|');
+    counts.set(intkey, (counts.get(intkey) || 0) + 1);
+    if (!keyToMeta.has(intkey)) {
+      const parts = activeFilters.map(ci => DATA.vocabs[ci][row[ci]]);
+      keyToMeta.set(intkey, { parts, sampleRows: [] });
+    }
+    const meta = keyToMeta.get(intkey);
+    if (meta.sampleRows.length < 30) meta.sampleRows.push(ri);
+  }
+
+  let clusters = [];
+  for (const [intkey, count] of counts) {
+    const { parts, sampleRows } = keyToMeta.get(intkey);
+    clusters.push({ key: intkey, parts, count, sampleRows });
+  }
+  return clusters;
+}
+
+function filterClusters(clusters) {
+  if (!searchQuery) return clusters;
+  const q = searchQuery.toLowerCase();
+  return clusters.filter(c => c.parts.some(p => p.toLowerCase().includes(q)));
+}
+
+function sortClusters(clusters) {
+  if (sortMode === 'count-desc') return clusters.sort((a,b) => b.count - a.count);
+  if (sortMode === 'count-asc') return clusters.sort((a,b) => a.count - b.count);
+  if (sortMode === 'alpha') return clusters.sort((a,b) => a.key.localeCompare(b.key));
+  return clusters;
+}
+
+// ── RENDER CLUSTERS ──
+function renderClusters() {
+  const clusters = sortClusters(filterClusters(computeClusters()));
+  document.getElementById('cluster-count-label').textContent =
+    clusters.length.toLocaleString() + ' clusters';
+
+  if (currentView === 'bubble') renderBubbles(clusters);
+  else renderList(clusters);
+
+  updateStats();
+}
+
+// ── BUBBLE VIEW ──
+function renderBubbles(clusters) {
+  document.getElementById('bubble-view').style.display = '';
+  document.getElementById('list-view').style.display = 'none';
+
+  const svg = document.getElementById('bubble-svg');
+  svg.innerHTML = '';
+
+  if (clusters.length === 0) {
+    svg.innerHTML = '<text x="50%" y="100" text-anchor="middle" fill="#606674" font-size="14">No filters selected — pick columns on the left</text>';
+    svg.setAttribute('height', 200);
+    return;
+  }
+
+  const maxCount = Math.max(...clusters.map(c => c.count));
+  const totalCount = clusters.reduce((s,c) => s+c.count, 0);
+
+  // Size bubbles: area proportional to count
+  const MIN_R = 14, MAX_R = 80;
+  clusters.forEach(c => {
+    c.r = MIN_R + (MAX_R - MIN_R) * Math.sqrt(c.count / maxCount);
+  });
+
+  // Layout: pack into rows
+  const W = document.getElementById('bubble-view').clientWidth || 800;
+  const PAD = 10;
+  let x = PAD, y = PAD, rowH = 0;
+  clusters.forEach((c, i) => {
+    const d = c.r * 2 + PAD;
+    if (x + d > W - PAD && x > PAD) {
+      x = PAD;
+      y += rowH + PAD;
+      rowH = 0;
+    }
+    c.cx = x + c.r;
+    c.cy = y + c.r;
+    x += d;
+    rowH = Math.max(rowH, d);
+  });
+  const totalH = y + rowH + PAD * 4;
+  svg.setAttribute('height', totalH);
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + totalH);
+
+  const tooltip = document.getElementById('tooltip');
+
+  clusters.forEach((c, i) => {
+    const color = TAG_COLORS[i % TAG_COLORS.length];
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor = 'pointer';
+
+    // Shadow circle
+    const shadow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    shadow.setAttribute('cx', c.cx + 2);
+    shadow.setAttribute('cy', c.cy + 2);
+    shadow.setAttribute('r', c.r);
+    shadow.setAttribute('fill', 'rgba(0,0,0,0.3)');
+    g.appendChild(shadow);
+
+    // Main circle
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', c.cx);
+    circle.setAttribute('cy', c.cy);
+    circle.setAttribute('r', c.r);
+    circle.setAttribute('fill', color + '28');
+    circle.setAttribute('stroke', color);
+    circle.setAttribute('stroke-width', '1.5');
+    g.appendChild(circle);
+
+    // Count text
+    const countTxt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    countTxt.setAttribute('x', c.cx);
+    countTxt.setAttribute('y', c.cy + (c.r > 28 ? -4 : 4));
+    countTxt.setAttribute('text-anchor','middle');
+    countTxt.setAttribute('dominant-baseline','middle');
+    countTxt.setAttribute('fill', color);
+    countTxt.setAttribute('font-size', Math.max(9, Math.min(14, c.r * 0.45)));
+    countTxt.setAttribute('font-weight', '700');
+    countTxt.textContent = c.count >= 1000 ? (c.count/1000).toFixed(1)+'k' : c.count;
+    g.appendChild(countTxt);
+
+    // Label text (below count, only if large enough)
+    if (c.r > 22) {
+      const shortLabel = c.parts[c.parts.length-1];
+      const maxChars = Math.floor(c.r * 0.28);
+      const labelStr = shortLabel.length > maxChars ? shortLabel.slice(0,maxChars)+'…' : shortLabel;
+      const labelTxt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      labelTxt.setAttribute('x', c.cx);
+      labelTxt.setAttribute('y', c.cy + (c.r > 28 ? 12 : 4));
+      labelTxt.setAttribute('text-anchor','middle');
+      labelTxt.setAttribute('dominant-baseline','middle');
+      labelTxt.setAttribute('fill', color);
+      labelTxt.setAttribute('fill-opacity','0.75');
+      labelTxt.setAttribute('font-size', Math.max(8, Math.min(11, c.r * 0.28)));
+      labelTxt.textContent = labelStr;
+      g.appendChild(labelTxt);
+    }
+
+    // Tooltip
+    g.addEventListener('mouseenter', e => {
+      const pct = (c.count/totalCount*100).toFixed(1);
+      let html = '<div class="tt-title">' + c.parts.map((p,pi) => {
+        const col = activeFilters[pi];
+        return '<div class="tt-row"><span class="tt-key">' + COL_LABELS[col] + ':</span><span class="tt-val">' + escHtml(p) + '</span></div>';
+      }).join('') + '</div>';
+      html += '<div class="tt-row"><span class="tt-key">Count:</span><span style="color:#f7c948;font-weight:700">' + c.count.toLocaleString() + ' exams</span></div>';
+      html += '<div class="tt-row"><span class="tt-key">Share:</span><span class="tt-val">' + pct + '%</span></div>';
+      tooltip.innerHTML = html;
+      tooltip.style.display = 'block';
+    });
+    g.addEventListener('mousemove', e => {
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top = (e.clientY - 10) + 'px';
+    });
+    g.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+    svg.appendChild(g);
+  });
+}
+
+// ── LIST VIEW ──
+function renderList(clusters) {
+  document.getElementById('bubble-view').style.display = 'none';
+  const listView = document.getElementById('list-view');
+  listView.style.display = 'block';
+  listView.innerHTML = '';
+
+  if (clusters.length === 0) {
+    listView.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-dim)">No filters selected</div>';
+    return;
+  }
+
+  const maxCount = Math.max(...clusters.map(c => c.count));
+  const totalCount = clusters.reduce((s,c) => s+c.count, 0);
+  const q = searchQuery.toLowerCase();
+
+  clusters.forEach((c, i) => {
+    const color = TAG_COLORS[i % TAG_COLORS.length];
+    const pct = (c.count / maxCount * 100).toFixed(1);
+    const pctTotal = (c.count / totalCount * 100).toFixed(1);
+
+    const row = document.createElement('div');
+    row.className = 'cluster-row';
+
+    // Key label with parts
+    const keyHtml = c.parts.map((p, pi) => {
+      const col = activeFilters[pi];
+      const hl = q ? hlText(p, q) : escHtml(p);
+      return (pi > 0 ? '<span class="key-sep">›</span>' : '') +
+             '<span class="key-part" title="' + COL_LABELS[col] + '" style="color:' + TAG_COLORS[pi % TAG_COLORS.length] + '">' + hl + '</span>';
+    }).join('');
+
+    row.innerHTML =
+      '<span class="cr-swatch" style="background:' + color + '"></span>' +
+      '<span class="cr-key">' + keyHtml + '</span>' +
+      '<span class="cr-bar-wrap">' +
+        '<span class="cr-bar" style="width:' + pct + '%;background:' + color + '80"></span>' +
+        '<span class="cr-pct">' + pctTotal + '%</span>' +
+      '</span>' +
+      '<span class="cr-count">' + c.count.toLocaleString() + '</span>';
+
+    // Expand to show sample exams
+    const sublist = document.createElement('div');
+    sublist.className = 'exam-sublist';
+    row.addEventListener('click', () => {
+      const open = sublist.classList.toggle('open');
+      row.classList.toggle('expanded', open);
+      if (open && sublist.innerHTML === '') {
+        const examColIdx = 2; // Veranstaltungstitel
+        c.sampleRows.forEach(ri => {
+          const examName = DATA.vocabs[examColIdx][DATA.rows[ri][examColIdx]];
+          const el = document.createElement('div');
+          el.className = 'exam-sub-item';
+          el.textContent = examName;
+          sublist.appendChild(el);
+        });
+        if (c.count > c.sampleRows.length) {
+          const el = document.createElement('div');
+          el.className = 'exam-sub-item';
+          el.style.color = 'var(--text-dim)';
+          el.textContent = '… and ' + (c.count - c.sampleRows.length) + ' more';
+          sublist.appendChild(el);
+        }
+      }
+    });
+
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(row);
+    wrapper.appendChild(sublist);
+    listView.appendChild(wrapper);
+  });
+}
+
+// ── STATS ──
+function updateStats() {
+  const clusters = computeClusters();
+  document.getElementById('stats-bar').innerHTML =
+    '<strong>' + DATA.rows.length.toLocaleString() + '</strong> total exams &nbsp;·&nbsp; ' +
+    '<strong>' + activeFilters.length + '</strong> filters &nbsp;·&nbsp; ' +
+    '<strong>' + clusters.length.toLocaleString() + '</strong> clusters';
+}
+
+// ── UTILS ──
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function hlText(text, q) {
+  if (!q) return escHtml(text);
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if (idx === -1) return escHtml(text);
+  return escHtml(text.slice(0,idx)) + '<mark>' + escHtml(text.slice(idx,idx+q.length)) + '</mark>' + hlText(text.slice(idx+q.length), q);
+}
+
+// ── EVENT WIRING ──
+document.getElementById('btn-clear-all').addEventListener('click', () => {
+  activeFilters = [];
+  refreshColList();
+  renderActiveFilters();
+  renderClusters();
+});
+
+document.getElementById('sort-select').addEventListener('change', e => {
+  sortMode = e.target.value;
+  renderClusters();
+});
+
+document.getElementById('search-cluster').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  renderClusters();
+});
+
+document.querySelectorAll('.vbtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentView = btn.dataset.view;
+    renderClusters();
+  });
+});
+
+window.addEventListener('resize', () => {
+  if (currentView === 'bubble') renderClusters();
+});
+
+loadData();
+</script>
+</body>
+</html>
