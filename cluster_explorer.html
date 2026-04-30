@@ -200,8 +200,16 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 .cl-bar { height: 5px; border-radius: 3px; min-width: 2px; }
 .cl-pct { font-size: 10px; color: var(--dim); width: 32px; text-align: right; }
 .cl-n { font-size: 11px; font-weight: 700; color: var(--bright); flex-shrink: 0; }
+.info-btn {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--dim); font-size: 10px; font-weight: 700; line-height: 18px;
+  text-align: center; cursor: pointer; padding: 0; margin-top: 1px;
+  transition: background .15s, color .15s;
+}
+.info-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 .cl-sub {
-  display: none; padding: 3px 0 3px 34px;
+  display: none; padding: 3px 0;
   border-bottom: 1px solid var(--border);
 }
 .cl-sub.open { display: block; }
@@ -921,14 +929,26 @@ function renderBubbles(clusters) {
       tip.style.top = Math.max(4, e.clientY - 10) + 'px';
     });
     g.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
-    g.addEventListener('click', () => { tip.style.display = 'none'; openDrillDown(c, col); });
-    g.style.cursor = 'pointer';
+
+    // ⓘ button as SVG foreignObject
+    const fo = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
+    fo.setAttribute('x', c.cx + c.r - 14);
+    fo.setAttribute('y', c.cy - c.r);
+    fo.setAttribute('width', 16); fo.setAttribute('height', 16);
+    const ibtn = document.createElement('div');
+    ibtn.style.cssText = 'width:15px;height:15px;border-radius:50%;background:#0008;border:1px solid ' + col + ';color:' + col + ';font-size:9px;line-height:15px;text-align:center;cursor:pointer;user-select:none;font-weight:700';
+    ibtn.textContent = 'i';
+    ibtn.addEventListener('click', e => { e.stopPropagation(); tip.style.display = 'none'; openDrillDown(c, col); });
+    fo.appendChild(ibtn);
+    g.appendChild(fo);
+
+    g.style.cursor = 'default';
 
     svg.appendChild(g);
   });
 }
 
-// ── LIST VIEW ──
+// ── LIST VIEW (hierarchical) ──
 function renderList(clusters) {
   document.getElementById('bubble-view').style.display = 'none';
   const lv = document.getElementById('list-view');
@@ -940,75 +960,189 @@ function renderList(clusters) {
     return;
   }
 
-  const maxC = Math.max(...clusters.map(c => c.count));
   const total = clusters.reduce((s,c) => s+c.count, 0);
   const q = Q.toLowerCase();
 
-  // Decide which column to show as "detail" when expanding
-  // prefer col index 2 (title) if it exists and is not a filter, else first non-filter col
-  let detailCol = -1;
-  if (CSV.headers.length > 2 && !FILTERS.includes(2)) detailCol = 2;
-  else {
-    for (let ci = 0; ci < CSV.headers.length; ci++) {
-      if (!FILTERS.includes(ci)) { detailCol = ci; break; }
+  if (FILTERS.length <= 1) {
+    // ── FLAT mode (single filter or none) ──
+    renderListFlat(lv, clusters, total, q);
+  } else {
+    // ── HIERARCHICAL mode (multiple filters) ──
+    // Group clusters by their level-0 value
+    const groups = new Map(); // l0val -> [cluster, ...]
+    for (const c of clusters) {
+      const k = c.parts[0];
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(c);
     }
-  }
+    // Sort groups by total count desc (or alpha)
+    const sortedGroups = [...groups.entries()].map(([k, cs]) => ({
+      key: k,
+      clusters: cs,
+      count: cs.reduce((s,c) => s+c.count, 0),
+      allRows: cs.flatMap(c => c.allRows)
+    }));
+    if (SORT === 'cnt-d') sortedGroups.sort((a,b) => b.count - a.count);
+    else if (SORT === 'cnt-a') sortedGroups.sort((a,b) => a.count - b.count);
+    else sortedGroups.sort((a,b) => a.key.localeCompare(b.key));
 
+    const maxTop = Math.max(...sortedGroups.map(g => g.count));
+
+    sortedGroups.forEach((grp, gi) => {
+      const col = COLORS[gi % COLORS.length];
+      const pct = (grp.count / maxTop * 100).toFixed(1);
+      const pctT = (grp.count / total * 100).toFixed(2);
+
+      // Top-level row
+      const wrap = document.createElement('div');
+
+      const row = document.createElement('div');
+      row.className = 'cl-row';
+      row.style.cssText = 'cursor:pointer;';
+      row.innerHTML =
+        '<span style="font-size:10px;color:var(--dim);width:14px;flex-shrink:0;text-align:center" class="hl-arrow">▶</span>' +
+        '<span class="cl-dot" style="background:' + col + ';margin-left:4px"></span>' +
+        '<span class="cl-key" style="color:' + col + '">' + (q ? hlText(grp.key, q) : escHtml(grp.key)) + '</span>' +
+        '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + pct + '%;background:' + col + '70"></span><span class="cl-pct">' + pctT + '%</span></span>' +
+        '<span class="cl-n">' + grp.count.toLocaleString() + '</span>' +
+        '<button class="info-btn" title="Deep analysis">i</button>';
+
+      // Children container
+      const children = document.createElement('div');
+      children.className = 'cl-sub';
+
+      // Toggle expand
+      const arrowEl = row.querySelector('.hl-arrow');
+      row.addEventListener('click', e => {
+        if (e.target.classList.contains('info-btn')) return;
+        const open = children.classList.toggle('open');
+        row.classList.toggle('open', open);
+        arrowEl.textContent = open ? '▼' : '▶';
+        if (open && children.innerHTML === '') {
+          // Render level-1 children
+          renderLevel(children, grp.clusters, total, q, 1);
+        }
+      });
+
+      row.querySelector('.info-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        // Build a synthetic cluster object for the group
+        openDrillDown({ parts: [grp.key], count: grp.count, allRows: grp.allRows }, col);
+      });
+
+      wrap.appendChild(row);
+      wrap.appendChild(children);
+      lv.appendChild(wrap);
+    });
+  }
+}
+
+function renderListFlat(container, clusters, total, q) {
+  const maxC = Math.max(...clusters.map(c => c.count));
   clusters.forEach((c, i) => {
     const col = COLORS[i % COLORS.length];
     const pct = (c.count / maxC * 100).toFixed(1);
     const pctT = (c.count / total * 100).toFixed(2);
-
     const keyHtml = c.parts.map((p, pi) =>
       (pi > 0 ? '<span class="ks">›</span>' : '') +
-      '<span class="kp" title="' + escHtml(CSV.headers[FILTERS[pi]]) + '" style="color:' + COLORS[pi % COLORS.length] + '">' +
-      (q ? hlText(p, q) : escHtml(p)) + '</span>'
+      '<span class="kp" style="color:' + COLORS[pi % COLORS.length] + '">' + (q ? hlText(p, q) : escHtml(p)) + '</span>'
     ).join('');
 
     const row = document.createElement('div');
     row.className = 'cl-row';
-    row.style.cursor = 'pointer';
     row.innerHTML =
       '<span class="cl-dot" style="background:' + col + '"></span>' +
       '<span class="cl-key">' + keyHtml + '</span>' +
       '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + pct + '%;background:' + col + '70"></span><span class="cl-pct">' + pctT + '%</span></span>' +
       '<span class="cl-n">' + c.count.toLocaleString() + '</span>' +
-      '<span style="font-size:10px;color:var(--dim);margin-left:6px;flex-shrink:0" title="Open breakdown">&#9656;</span>';
+      '<button class="info-btn" title="Deep analysis">i</button>';
 
-    row.addEventListener('click', () => { openDrillDown(c, col); });
-
-    const sub = document.createElement('div');
-    sub.className = 'cl-sub';
-
-    row.addEventListener('dblclick', () => {
-      const isOpen = sub.classList.toggle('open');
-      row.classList.toggle('open', isOpen);
-      if (isOpen && sub.innerHTML === '') {
-        if (detailCol >= 0) {
-          c.samples.forEach(ri => {
-            const val = CSV.vocabs[detailCol][CSV.rows[ri][detailCol]];
-            const el = document.createElement('div');
-            el.className = 'cl-sub-item';
-            el.textContent = val;
-            sub.appendChild(el);
-          });
-          if (c.count > c.samples.length) {
-            const el = document.createElement('div');
-            el.className = 'cl-sub-item';
-            el.style.color = 'var(--dim)';
-            el.textContent = '…and ' + (c.count - c.samples.length).toLocaleString() + ' more rows';
-            sub.appendChild(el);
-          }
-        } else {
-          sub.innerHTML = '<div class="cl-sub-item" style="color:var(--dim)">' + c.count.toLocaleString() + ' rows</div>';
-        }
-      }
+    row.querySelector('.info-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      openDrillDown(c, col);
     });
 
+    container.appendChild(row);
+  });
+}
+
+// Recursively render sub-levels (depth = which filter index we're showing)
+function renderLevel(container, clusters, total, q, depth) {
+  if (depth >= FILTERS.length) {
+    // Leaf level — show raw row count only
+    const leaf = document.createElement('div');
+    leaf.style.cssText = 'padding:4px 14px 4px ' + (14 + depth*16) + 'px;font-size:11px;color:var(--dim)';
+    leaf.textContent = clusters.reduce((s,c) => s+c.count, 0).toLocaleString() + ' rows';
+    container.appendChild(leaf);
+    return;
+  }
+
+  // Group by value at this depth
+  const groups = new Map();
+  for (const c of clusters) {
+    const k = c.parts[depth] ?? '(none)';
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(c);
+  }
+
+  const sortedGroups = [...groups.entries()].map(([k, cs]) => ({
+    key: k,
+    clusters: cs,
+    count: cs.reduce((s,c) => s+c.count, 0),
+    allRows: cs.flatMap(c => c.allRows)
+  }));
+  if (SORT === 'cnt-d') sortedGroups.sort((a,b) => b.count - a.count);
+  else if (SORT === 'cnt-a') sortedGroups.sort((a,b) => a.count - b.count);
+  else sortedGroups.sort((a,b) => a.key.localeCompare(b.key));
+
+  const maxC = Math.max(...sortedGroups.map(g => g.count));
+  const indent = 14 + depth * 16;
+  const isLeaf = depth === FILTERS.length - 1;
+
+  sortedGroups.forEach((grp, gi) => {
+    const col = COLORS[(depth * 7 + gi) % COLORS.length];
+    const pct = (grp.count / maxC * 100).toFixed(1);
+    const pctT = (grp.count / total * 100).toFixed(2);
+
     const wrap = document.createElement('div');
+
+    const row = document.createElement('div');
+    row.className = 'cl-row';
+    row.style.cssText = 'padding-left:' + indent + 'px;cursor:pointer;background:#0a0c12;border-bottom-color:#1e2130';
+
+    const toggleSpan = isLeaf ? '' : '<span class="hl-arrow" style="font-size:9px;color:var(--dim);width:12px;flex-shrink:0;text-align:center">▶</span>';
+    row.innerHTML =
+      toggleSpan +
+      '<span class="cl-dot" style="background:' + col + ';margin-left:' + (isLeaf ? '0' : '4') + 'px"></span>' +
+      '<span class="cl-key" style="color:' + COLORS[depth % COLORS.length] + ';font-size:11px">' + (q ? hlText(grp.key, q) : escHtml(grp.key)) + '</span>' +
+      '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + pct + '%;background:' + col + '60"></span><span class="cl-pct" style="font-size:10px">' + pctT + '%</span></span>' +
+      '<span class="cl-n" style="font-size:11px">' + grp.count.toLocaleString() + '</span>' +
+      '<button class="info-btn" title="Deep analysis">i</button>';
+
+    const children = document.createElement('div');
+    children.className = 'cl-sub';
+
+    if (!isLeaf) {
+      const arrowEl = row.querySelector('.hl-arrow');
+      row.addEventListener('click', e => {
+        if (e.target.classList.contains('info-btn')) return;
+        const open = children.classList.toggle('open');
+        row.classList.toggle('open', open);
+        if (arrowEl) arrowEl.textContent = open ? '▼' : '▶';
+        if (open && children.innerHTML === '') {
+          renderLevel(children, grp.clusters, total, q, depth + 1);
+        }
+      });
+    }
+
+    row.querySelector('.info-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      openDrillDown({ parts: grp.clusters[0].parts.slice(0, depth+1), count: grp.count, allRows: grp.allRows }, col);
+    });
+
     wrap.appendChild(row);
-    wrap.appendChild(sub);
-    lv.appendChild(wrap);
+    wrap.appendChild(children);
+    container.appendChild(wrap);
   });
 }
 
