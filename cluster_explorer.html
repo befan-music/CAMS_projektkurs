@@ -193,6 +193,52 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 .crumb-sep { color: var(--dim); }
 .crumb-cur { color: var(--bright); font-weight: 700; }
 
+/* LEAF BREAKDOWN VIEW */
+#breakdown-view { display: none; width: 100%; }
+#breakdown-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; background: var(--hover); border-bottom: 1px solid var(--border2);
+}
+#breakdown-back {
+  background: none; border: 1px solid var(--border2); color: var(--accent);
+  border-radius: 4px; padding: 3px 10px; font-size: 11px; cursor: pointer;
+}
+#breakdown-back:hover { background: var(--border2); }
+#breakdown-title { font-size: 12px; font-weight: 700; color: var(--bright); flex: 1; }
+#breakdown-subtitle { font-size: 11px; color: var(--dim); }
+#breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px; padding: 14px; overflow-y: auto;
+}
+.bk-card {
+  border-radius: 6px; border: 1px solid var(--border2);
+  padding: 10px 11px; background: #0d1018;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.bk-card-hd {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+}
+.bk-col-name { font-size: 11px; font-weight: 700; color: var(--bright); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bk-nuniq { font-size: 10px; color: var(--dim); white-space: nowrap; }
+/* unity meter: a single full-width segmented bar */
+.bk-seg-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; width: 100%; }
+.bk-seg { height: 100%; transition: width .3s; }
+/* unity label row */
+.bk-unity {
+  font-size: 10px; font-weight: 700; letter-spacing: .03em;
+  padding: 2px 5px; border-radius: 3px; text-align: center; align-self: flex-start;
+}
+.bk-unity.high  { background: #1a3a1f; color: #4caf50; }
+.bk-unity.mid   { background: #3a2e0a; color: #f7c948; }
+.bk-unity.low   { background: #3a1010; color: #e05c5c; }
+/* top values list */
+.bk-vals { display: flex; flex-direction: column; gap: 3px; }
+.bk-val-row { display: flex; align-items: center; gap: 5px; }
+.bk-val-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.bk-val-label { font-size: 10px; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bk-val-pct { font-size: 10px; color: var(--dim); white-space: nowrap; }
+
 /* LIST VIEW */
 #list-view { display: none; }
 .cl-row {
@@ -503,6 +549,14 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
         <svg id="bubble-svg"></svg>
       </div>
       <div id="list-view"></div>
+      <div id="breakdown-view">
+        <div id="breakdown-header">
+          <button id="breakdown-back">← Back</button>
+          <span id="breakdown-title"></span>
+          <span id="breakdown-subtitle"></span>
+        </div>
+        <div id="breakdown-grid"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -836,6 +890,7 @@ function applySort(clusters) {
 
 // ── RENDER CLUSTERS ──
 function renderClusters() {
+  document.getElementById('breakdown-view').style.display = 'none';
   if (!CSV || FILTERS.length === 0) { showLanding(); return; }
   hideLanding();
   const clusters = applySort(applyFilters(computeClusters()));
@@ -960,7 +1015,6 @@ function renderBubblesAtDepth(clusters, depth) {
   items.forEach((c, i) => {
     const col = COLORS[i % COLORS.length];
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    g.style.cursor = isLeaf ? 'default' : 'pointer';
 
     // shadow
     const sh = document.createElementNS('http://www.w3.org/2000/svg','circle');
@@ -1032,6 +1086,7 @@ function renderBubblesAtDepth(clusters, depth) {
       html += '<div class="tip-row" style="margin-top:4px"><span class="tip-k">Rows:</span><span class="tip-count">' + c.count.toLocaleString() + '</span></div>';
       html += '<div class="tip-row"><span class="tip-k">Share:</span><span class="tip-v">' + pct + '% of total</span></div>';
       if (!isLeaf) html += '<div class="tip-row" style="margin-top:4px;color:var(--accent)"><em>click to zoom in →</em></div>';
+      else html += '<div class="tip-row" style="margin-top:4px;color:var(--accent)"><em>click to see why they differ</em></div>';
       tip.innerHTML = html; tip.style.display = 'block';
     });
     g.addEventListener('mousemove', e => {
@@ -1040,14 +1095,17 @@ function renderBubblesAtDepth(clusters, depth) {
     });
     g.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
 
-    // Click: zoom in (non-leaf) or nothing (leaf — use ⓘ for drill-down)
-    if (!isLeaf) {
-      g.addEventListener('click', e => {
-        if (e.target.closest && e.target.closest('foreignObject')) return;
-        tip.style.display = 'none';
+    // Click: zoom in (non-leaf) or open breakdown (leaf)
+    g.addEventListener('click', e => {
+      if (e.target.closest && e.target.closest('foreignObject')) return;
+      tip.style.display = 'none';
+      if (!isLeaf) {
         enterBubbleLevel(c, depth, clusters);
-      });
-    }
+      } else {
+        openLeafBreakdown(c, col);
+      }
+    });
+    g.style.cursor = 'pointer';
 
     // ⓘ button (always shown)
     const fo = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
@@ -1462,6 +1520,130 @@ function closeDrillDown() {
   document.getElementById('dd-overlay').classList.remove('open');
   document.getElementById('dd-panel').classList.remove('open');
 }
+
+// ── LEAF BREAKDOWN VIEW ──
+// A palette of distinct segment colours for the stacked bar
+const SEG_COLORS = [
+  '#4fc3f7','#81c784','#ffb74d','#e57373','#ce93d8',
+  '#4db6ac','#fff176','#f48fb1','#80cbc4','#ff8a65',
+  '#a5d6a7','#90caf9','#ffcc02','#ef9a9a','#b39ddb'
+];
+
+function openLeafBreakdown(item, accentColor) {
+  // item: { key, count, allRows, clusters, parts }
+  document.getElementById('bubble-view').style.display = 'none';
+  document.getElementById('list-view').style.display = 'none';
+
+  const bv = document.getElementById('breakdown-view');
+  bv.style.display = 'block';
+
+  // Header
+  const crumbPath = BUBBLE_STACK.map(f => f.label).concat([item.key]).join(' › ');
+  document.getElementById('breakdown-title').textContent = crumbPath;
+  document.getElementById('breakdown-subtitle').textContent =
+    item.count.toLocaleString() + ' rows · analysing internal variation';
+
+  const grid = document.getElementById('breakdown-grid');
+  grid.innerHTML = '';
+
+  const analysis = analyzeCluster(item.allRows);
+  // Only show non-filter columns — filter cols are definitionally uniform
+  const cols = analysis.filter(a => !a.isFilter);
+
+  // Sort: most uniform (high dominance) first → most diverse last
+  // dominance = top value's share of total
+  cols.sort((a, b) => {
+    const domA = a.values[0].count / item.count;
+    const domB = b.values[0].count / item.count;
+    return domB - domA;
+  });
+
+  cols.forEach(col_info => {
+    const dom = col_info.values[0].count / item.count; // 0..1, 1=fully uniform
+
+    // Unity label
+    let unityClass, unityLabel;
+    if (dom >= 0.9)       { unityClass = 'high'; unityLabel = 'Uniform'; }
+    else if (dom >= 0.5)  { unityClass = 'mid';  unityLabel = 'Mixed'; }
+    else                   { unityClass = 'low';  unityLabel = 'Diverse'; }
+
+    const card = document.createElement('div');
+    card.className = 'bk-card';
+
+    // Header row
+    const hd = document.createElement('div');
+    hd.className = 'bk-card-hd';
+    hd.innerHTML =
+      '<span class="bk-col-name" title="' + escHtml(col_info.header) + '">' + escHtml(col_info.header) + '</span>' +
+      '<span class="bk-nuniq">' + col_info.numUniq + (col_info.numUniq === 1 ? ' val' : ' vals') + '</span>';
+    card.appendChild(hd);
+
+    // Unity badge
+    const badge = document.createElement('div');
+    badge.className = 'bk-unity ' + unityClass;
+    badge.textContent = unityLabel + ' · ' + Math.round(dom * 100) + '% top';
+    card.appendChild(badge);
+
+    // Segmented bar (top values, rest collapsed into "other")
+    const MAX_SEGS = 5;
+    const shown = col_info.values.slice(0, MAX_SEGS);
+    const otherCount = col_info.values.slice(MAX_SEGS).reduce((s, v) => s + v.count, 0);
+
+    const bar = document.createElement('div');
+    bar.className = 'bk-seg-bar';
+    shown.forEach((v, si) => {
+      const seg = document.createElement('div');
+      seg.className = 'bk-seg';
+      seg.style.width = (v.count / item.count * 100).toFixed(2) + '%';
+      seg.style.background = SEG_COLORS[si % SEG_COLORS.length];
+      seg.title = v.val + ' · ' + v.count.toLocaleString() + ' rows';
+      bar.appendChild(seg);
+    });
+    if (otherCount > 0) {
+      const seg = document.createElement('div');
+      seg.className = 'bk-seg';
+      seg.style.width = (otherCount / item.count * 100).toFixed(2) + '%';
+      seg.style.background = '#444';
+      seg.title = 'Other · ' + otherCount.toLocaleString() + ' rows';
+      bar.appendChild(seg);
+    }
+    card.appendChild(bar);
+
+    // Top value rows
+    const vals = document.createElement('div');
+    vals.className = 'bk-vals';
+    shown.forEach((v, si) => {
+      const pct = (v.count / item.count * 100).toFixed(1);
+      const vrow = document.createElement('div');
+      vrow.className = 'bk-val-row';
+      vrow.innerHTML =
+        '<span class="bk-val-dot" style="background:' + SEG_COLORS[si % SEG_COLORS.length] + '"></span>' +
+        '<span class="bk-val-label" title="' + escHtml(v.val || '(empty)') + '">' + escHtml(v.val || '(empty)') + '</span>' +
+        '<span class="bk-val-pct">' + pct + '%</span>';
+      vals.appendChild(vrow);
+    });
+    if (otherCount > 0) {
+      const vrow = document.createElement('div');
+      vrow.className = 'bk-val-row';
+      const otherPct = (otherCount / item.count * 100).toFixed(1);
+      vrow.innerHTML =
+        '<span class="bk-val-dot" style="background:#444"></span>' +
+        '<span class="bk-val-label" style="color:var(--dim)">+' + (col_info.numUniq - MAX_SEGS) + ' more</span>' +
+        '<span class="bk-val-pct">' + otherPct + '%</span>';
+      vals.appendChild(vrow);
+    }
+    card.appendChild(vals);
+
+    grid.appendChild(card);
+  });
+}
+
+function closeLeafBreakdown() {
+  document.getElementById('breakdown-view').style.display = 'none';
+  document.getElementById('bubble-view').style.display = '';
+}
+
+document.getElementById('breakdown-back').addEventListener('click', closeLeafBreakdown);
 
 // ── FILE INPUT ──
 const dropZone = document.getElementById('csv-drop-zone');
