@@ -206,16 +206,38 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #breakdown-back:hover { background: var(--border2); }
 #breakdown-title { font-size: 12px; font-weight: 700; color: var(--bright); flex: 1; }
 #breakdown-subtitle { font-size: 11px; color: var(--dim); }
+#breakdown-body {
+  display: flex; height: calc(100vh - 90px); overflow: hidden;
+}
 #breakdown-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px; padding: 14px; overflow-y: auto;
+  gap: 10px; padding: 14px; overflow-y: auto; flex: 1; align-content: start;
 }
+#breakdown-sublist {
+  width: 340px; flex-shrink: 0; border-left: 1px solid var(--border2);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+#breakdown-sublist-hd {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--bright);
+  border-bottom: 1px solid var(--border2); background: var(--hover); flex-shrink: 0;
+}
+#breakdown-sublist-hd span { flex: 1; }
+#breakdown-sublist-close {
+  background: none; border: none; color: var(--dim); font-size: 14px;
+  cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0;
+}
+#breakdown-sublist-close:hover { color: var(--bright); }
+#breakdown-sublist-rows { overflow-y: auto; flex: 1; }
 .bk-card {
   border-radius: 6px; border: 1px solid var(--border2);
   padding: 10px 11px; background: #0d1018;
   display: flex; flex-direction: column; gap: 6px;
+  transition: border-color .15s, background .15s;
 }
+.bk-card:hover { border-color: var(--accent); background: #101420; }
+.bk-card-selected { border-color: var(--accent) !important; background: #111825 !important; box-shadow: 0 0 0 1px var(--accent); }
 .bk-card-hd {
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
 }
@@ -555,7 +577,13 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
           <span id="breakdown-title"></span>
           <span id="breakdown-subtitle"></span>
         </div>
-        <div id="breakdown-grid"></div>
+        <div id="breakdown-body">
+          <div id="breakdown-grid"></div>
+          <div id="breakdown-sublist" style="display:none">
+            <div id="breakdown-sublist-hd"><span></span><button id="breakdown-sublist-close" title="Close">✕</button></div>
+            <div id="breakdown-sublist-rows"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1230,6 +1258,7 @@ function renderListFlat(container, clusters, total, q) {
 
     const row = document.createElement('div');
     row.className = 'cl-row';
+    row.style.cursor = 'pointer';
     row.innerHTML =
       '<span class="cl-dot" style="background:' + col + '"></span>' +
       '<span class="cl-key">' + keyHtml + '</span>' +
@@ -1237,6 +1266,10 @@ function renderListFlat(container, clusters, total, q) {
       '<span class="cl-n">' + c.count.toLocaleString() + '</span>' +
       '<button class="info-btn" title="Deep analysis">i</button>';
 
+    row.addEventListener('click', e => {
+      if (e.target.classList.contains('info-btn')) return;
+      openLeafBreakdown({ key: c.parts[c.parts.length - 1], count: c.count, allRows: c.allRows, clusters: [c], parts: c.parts }, col);
+    });
     row.querySelector('.info-btn').addEventListener('click', e => {
       e.stopPropagation();
       openDrillDown(c, col);
@@ -1312,6 +1345,12 @@ function renderLevel(container, clusters, total, q, depth) {
         if (open && children.innerHTML === '') {
           renderLevel(children, grp.clusters, total, q, depth + 1);
         }
+      });
+    } else {
+      row.addEventListener('click', e => {
+        if (e.target.classList.contains('info-btn')) return;
+        const parts = grp.clusters[0].parts.slice(0, depth + 1);
+        openLeafBreakdown({ key: grp.key, count: grp.count, allRows: grp.allRows, clusters: grp.clusters, parts }, col);
       });
     }
 
@@ -1529,48 +1568,52 @@ const SEG_COLORS = [
   '#a5d6a7','#90caf9','#ffcc02','#ef9a9a','#b39ddb'
 ];
 
+let BREAKDOWN_RETURN_VIEW = 'bubble'; // which view to restore on Back
+
 function openLeafBreakdown(item, accentColor) {
   // item: { key, count, allRows, clusters, parts }
+  BREAKDOWN_RETURN_VIEW = VIEW;
   document.getElementById('bubble-view').style.display = 'none';
   document.getElementById('list-view').style.display = 'none';
+  document.getElementById('breakdown-sublist').style.display = 'none';
 
-  const bv = document.getElementById('breakdown-view');
-  bv.style.display = 'block';
+  document.getElementById('breakdown-view').style.display = 'block';
 
-  // Header
-  const crumbPath = BUBBLE_STACK.map(f => f.label).concat([item.key]).join(' › ');
-  document.getElementById('breakdown-title').textContent = crumbPath;
+  // Header breadcrumb: bubble stack labels (if any) + filter parts + this item's key
+  const pathParts = item.parts && item.parts.length > 1
+    ? item.parts
+    : BUBBLE_STACK.map(f => f.label).concat([item.key]);
+  document.getElementById('breakdown-title').textContent = pathParts.join(' › ');
   document.getElementById('breakdown-subtitle').textContent =
-    item.count.toLocaleString() + ' rows · analysing internal variation';
+    item.count.toLocaleString() + ' rows · click a card to break down by that column';
 
   const grid = document.getElementById('breakdown-grid');
   grid.innerHTML = '';
 
   const analysis = analyzeCluster(item.allRows);
-  // Only show non-filter columns — filter cols are definitionally uniform
   const cols = analysis.filter(a => !a.isFilter);
 
-  // Sort: most uniform (high dominance) first → most diverse last
-  // dominance = top value's share of total
   cols.sort((a, b) => {
     const domA = a.values[0].count / item.count;
     const domB = b.values[0].count / item.count;
     return domB - domA;
   });
 
-  cols.forEach(col_info => {
-    const dom = col_info.values[0].count / item.count; // 0..1, 1=fully uniform
+  let selectedCard = null;
 
-    // Unity label
+  cols.forEach(col_info => {
+    const dom = col_info.values[0].count / item.count;
+
     let unityClass, unityLabel;
-    if (dom >= 0.9)       { unityClass = 'high'; unityLabel = 'Uniform'; }
-    else if (dom >= 0.5)  { unityClass = 'mid';  unityLabel = 'Mixed'; }
-    else                   { unityClass = 'low';  unityLabel = 'Diverse'; }
+    if (dom >= 0.9)      { unityClass = 'high'; unityLabel = 'Uniform'; }
+    else if (dom >= 0.5) { unityClass = 'mid';  unityLabel = 'Mixed'; }
+    else                  { unityClass = 'low';  unityLabel = 'Diverse'; }
 
     const card = document.createElement('div');
     card.className = 'bk-card';
+    card.style.cursor = 'pointer';
+    card.title = 'Click to break down by ' + col_info.header;
 
-    // Header row
     const hd = document.createElement('div');
     hd.className = 'bk-card-hd';
     hd.innerHTML =
@@ -1578,13 +1621,11 @@ function openLeafBreakdown(item, accentColor) {
       '<span class="bk-nuniq">' + col_info.numUniq + (col_info.numUniq === 1 ? ' val' : ' vals') + '</span>';
     card.appendChild(hd);
 
-    // Unity badge
     const badge = document.createElement('div');
     badge.className = 'bk-unity ' + unityClass;
     badge.textContent = unityLabel + ' · ' + Math.round(dom * 100) + '% top';
     card.appendChild(badge);
 
-    // Segmented bar (top values, rest collapsed into "other")
     const MAX_SEGS = 5;
     const shown = col_info.values.slice(0, MAX_SEGS);
     const otherCount = col_info.values.slice(MAX_SEGS).reduce((s, v) => s + v.count, 0);
@@ -1609,7 +1650,6 @@ function openLeafBreakdown(item, accentColor) {
     }
     card.appendChild(bar);
 
-    // Top value rows
     const vals = document.createElement('div');
     vals.className = 'bk-vals';
     shown.forEach((v, si) => {
@@ -1634,16 +1674,62 @@ function openLeafBreakdown(item, accentColor) {
     }
     card.appendChild(vals);
 
+    // Card click → show sub-list for this column
+    card.addEventListener('click', () => {
+      if (selectedCard) selectedCard.classList.remove('bk-card-selected');
+      card.classList.add('bk-card-selected');
+      selectedCard = card;
+      renderBreakdownSublist(col_info, item);
+    });
+
     grid.appendChild(card);
+  });
+}
+
+function renderBreakdownSublist(col_info, item) {
+  const sl = document.getElementById('breakdown-sublist');
+  sl.style.display = 'flex';
+
+  document.querySelector('#breakdown-sublist-hd span').textContent =
+    col_info.header + ' — ' + col_info.numUniq + ' values · ' + item.count.toLocaleString() + ' rows';
+
+  const rows = document.getElementById('breakdown-sublist-rows');
+  rows.innerHTML = '';
+
+  const maxCount = col_info.values[0].count;
+
+  col_info.values.forEach((v, vi) => {
+    const pct = (v.count / item.count * 100).toFixed(1);
+    const barW = (v.count / maxCount * 100).toFixed(1);
+    const col = SEG_COLORS[vi % SEG_COLORS.length];
+
+    const row = document.createElement('div');
+    row.className = 'cl-row';
+    row.style.cssText = 'border-bottom-color:#1e2130;background:#0a0c12;cursor:default';
+    row.innerHTML =
+      '<span class="cl-dot" style="background:' + col + '"></span>' +
+      '<span class="cl-key" style="color:' + col + ';font-size:11px">' + escHtml(v.val || '(empty)') + '</span>' +
+      '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + barW + '%;background:' + col + '60"></span><span class="cl-pct" style="font-size:10px">' + pct + '%</span></span>' +
+      '<span class="cl-n" style="font-size:11px">' + v.count.toLocaleString() + '</span>';
+    rows.appendChild(row);
   });
 }
 
 function closeLeafBreakdown() {
   document.getElementById('breakdown-view').style.display = 'none';
-  document.getElementById('bubble-view').style.display = '';
+  if (BREAKDOWN_RETURN_VIEW === 'list') {
+    document.getElementById('list-view').style.display = 'block';
+  } else {
+    document.getElementById('bubble-view').style.display = '';
+  }
 }
 
 document.getElementById('breakdown-back').addEventListener('click', closeLeafBreakdown);
+document.getElementById('breakdown-sublist-close').addEventListener('click', () => {
+  document.getElementById('breakdown-sublist').style.display = 'none';
+  // Deselect whichever card was highlighted
+  document.querySelectorAll('.bk-card-selected').forEach(c => c.classList.remove('bk-card-selected'));
+});
 
 // ── FILE INPUT ──
 const dropZone = document.getElementById('csv-drop-zone');
