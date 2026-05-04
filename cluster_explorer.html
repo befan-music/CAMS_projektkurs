@@ -1829,6 +1829,19 @@ document.querySelectorAll('.vbtn').forEach(btn => {
 window.addEventListener('resize', () => {
   if (VIEW === 'bubble' && CSV && FILTERS.length) renderClusters();
 });
+
+// ── AUTO-LOAD DEFAULT CSV ──
+const DEFAULT_CSV = 'ALLE POLYVALENZEN.csv';
+(async () => {
+  try {
+    const res = await fetch(DEFAULT_CSV);
+    if (!res.ok) return;
+    const text = await res.text();
+    loadCSV(text, DEFAULT_CSV);
+  } catch (_) {
+    // running as file:// or CSV not found — user picks manually
+  }
+})();
 </script>
 </body>
 </html>
