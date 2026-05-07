@@ -1,3 +1,5 @@
+python -m http.server 8080 --directory "c:\Users\einos\Documents\LMU Master\2. Semester\Projektkurs\Raw input"; Start-Process "http://localhost:8080/LMU_Cluster_Explorer.html"
+
 # Cluster Explorer — How It Works
 
 ## What the tool does

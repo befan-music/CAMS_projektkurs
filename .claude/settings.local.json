@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\einos\\\\Documents\\\\LMU Master\\\\2. Semester\\\\Projektkurs\\\\Raw input\\\\Visualisierung_anderer\\\\\" -Filter \"*.R\" | Select-Object FullName)",
+      "Bash(powershell -Command \"Get-Item 'c:\\\\Users\\\\einos\\\\Documents\\\\LMU Master\\\\2. Semester\\\\Projektkurs\\\\Raw input\\\\Visualisierung_anderer\\\\NETZWERK_FINAL_2 \\(1\\).html' | Select-Object -ExpandProperty Length\")",
+      "Bash(powershell -Command \"Get-Content 'c:\\\\Users\\\\einos\\\\Documents\\\\LMU Master\\\\2. Semester\\\\Projektkurs\\\\Raw input\\\\Visualisierung_anderer\\\\NETZWERK_FINAL_2 \\(1\\).html' -Head 50 | Select-Object -First 10\")",
+      "Bash(powershell -Command ' *)",
+      "Bash(Get-Content \"c:\\\\Users\\\\einos\\\\Documents\\\\LMU Master\\\\2. Semester\\\\Projektkurs\\\\Raw input\\\\Visualisierung_anderer\\\\NETZWERK_FINAL_2 \\(1\\).html\" -TotalCount 100)"
+    ]
+  }
+}

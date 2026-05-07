@@ -156,6 +156,39 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 }
 .vbtn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 .vbtn:hover:not(.on) { border-color: var(--dim); color: var(--text); }
+.vbtn.vbtn-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+/* ── TREEMAP ── */
+#treemap-view { width:100%; height:100%; overflow:auto; }
+#treemap-svg { display:block; }
+.tm-leaf { cursor:pointer; transition:opacity .12s; }
+.tm-leaf:hover { opacity:.78; }
+.tm-group-rect { pointer-events:none; }
+
+/* ── MATRIX ── */
+#matrix-view { width:100%; height:100%; overflow:auto; padding:12px 16px; }
+#matrix-wrap { overflow:auto; }
+.mx-table { border-collapse:collapse; font-size:11px; }
+.mx-table th, .mx-table td { padding:0; }
+.mx-col-label {
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  white-space:nowrap; max-height:120px; overflow:hidden; text-overflow:ellipsis;
+  padding:4px 3px; color:var(--dim); font-weight:600; font-size:10px;
+  vertical-align:bottom; text-align:left; cursor:default;
+}
+.mx-row-label {
+  white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis;
+  padding:3px 8px 3px 0; color:var(--text); font-weight:500;
+  text-align:right; cursor:default;
+}
+.mx-cell {
+  width:22px; min-width:22px; height:22px; cursor:default;
+  border:1px solid var(--bg);
+  transition:opacity .1s;
+}
+.mx-cell:hover { outline:2px solid #fff4; }
+#matrix-controls { display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:11px; color:var(--dim); }
+#matrix-col-sel { background:var(--panel); border:1px solid var(--border2); color:var(--text); padding:3px 6px; border-radius:3px; font-size:11px; outline:none; cursor:pointer; }
 #sort-sel {
   background: var(--bg); border: 1px solid var(--border2); color: var(--text);
   padding: 3px 6px; border-radius: 3px; font-size: 11px; outline: none; cursor: pointer;
@@ -548,6 +581,9 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
       <div style="display:flex;gap:3px" id="view-btns">
         <button class="vbtn on" data-v="bubble">&#9679; Bubbles</button>
         <button class="vbtn" data-v="list">&#9776; List</button>
+        <span style="color:var(--border2);margin:0 4px;font-size:16px;line-height:1">|</span>
+        <button class="vbtn" data-v="treemap">&#9638; Treemap</button>
+        <button class="vbtn" id="matrix-btn" data-v="matrix" style="display:none">&#8862; Matrix</button>
       </div>
       <div class="sep"></div>
       <label style="font-size:11px;color:var(--dim)">Sort:</label>
@@ -571,6 +607,16 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
         <svg id="bubble-svg"></svg>
       </div>
       <div id="list-view"></div>
+      <div id="treemap-view" style="display:none"><svg id="treemap-svg" width="100%"></svg></div>
+      <div id="matrix-view" style="display:none">
+        <div id="matrix-controls">
+          <span>Row axis: <strong id="matrix-row-label"></strong></span>
+          <span style="margin-left:12px">Column axis:</span>
+          <select id="matrix-col-sel"></select>
+          <span id="matrix-stats" style="margin-left:auto;color:var(--dim)"></span>
+        </div>
+        <div id="matrix-wrap"></div>
+      </div>
       <div id="breakdown-view">
         <div id="breakdown-header">
           <button id="breakdown-back">← Back</button>
@@ -899,7 +945,8 @@ function computeClusters() {
   const out = [];
   for (const [key, count] of counts) {
     const { parts, samples, allRows } = meta.get(key);
-    out.push({ key, parts, count, samples, allRows });
+    const partsRaw = key.split('|').map(Number);
+    out.push({ key, parts, partsRaw, count, samples, allRows });
   }
   return out;
 }
@@ -919,15 +966,39 @@ function applySort(clusters) {
 // ── RENDER CLUSTERS ──
 function renderClusters() {
   document.getElementById('breakdown-view').style.display = 'none';
+  // matrix button: only visible when exactly 2 filters active
+  const matrixBtn = document.getElementById('matrix-btn');
+  if (FILTERS.length === 2) matrixBtn.style.display = '';
+  else {
+    matrixBtn.style.display = 'none';
+    if (VIEW === 'matrix') { VIEW = 'bubble'; document.querySelectorAll('.vbtn').forEach(b => { b.classList.remove('on'); if (b.dataset.v==='bubble') b.classList.add('on'); }); }
+  }
+
   if (!CSV || FILTERS.length === 0) { showLanding(); return; }
   hideLanding();
   const clusters = applySort(applyFilters(computeClusters()));
   document.getElementById('cluster-count').textContent = clusters.length.toLocaleString() + ' clusters';
+
+  // hide all views
+  document.getElementById('bubble-view').style.display = 'none';
+  document.getElementById('list-view').style.display = 'none';
+  document.getElementById('treemap-view').style.display = 'none';
+  document.getElementById('matrix-view').style.display = 'none';
+  document.getElementById('bubble-crumbs').style.display = 'none';
+
   if (VIEW === 'bubble') {
+    document.getElementById('bubble-view').style.display = '';
     BUBBLE_STACK = [];
     renderBubblesAtDepth(clusters, 0);
-  } else {
+  } else if (VIEW === 'list') {
+    document.getElementById('list-view').style.display = '';
     renderList(clusters);
+  } else if (VIEW === 'treemap') {
+    document.getElementById('treemap-view').style.display = '';
+    renderTreemap(clusters);
+  } else if (VIEW === 'matrix') {
+    document.getElementById('matrix-view').style.display = '';
+    renderMatrix(clusters);
   }
 }
 
@@ -988,8 +1059,6 @@ function renderBubbleCrumbs(depth) {
 
 // ── BUBBLE VIEW ──
 function renderBubblesAtDepth(clusters, depth) {
-  document.getElementById('bubble-view').style.display = '';
-  document.getElementById('list-view').style.display = 'none';
   renderBubbleCrumbs(depth);
 
   const svg = document.getElementById('bubble-svg');
@@ -1158,7 +1227,6 @@ function renderBubblesAtDepth(clusters, depth) {
 
 // ── LIST VIEW (hierarchical) ──
 function renderList(clusters) {
-  document.getElementById('bubble-view').style.display = 'none';
   const lv = document.getElementById('list-view');
   lv.style.display = 'block';
   lv.innerHTML = '';
@@ -1379,11 +1447,436 @@ function updateStats() {
     ' &nbsp;·&nbsp; delimiter: <strong>' + escHtml(CSV.delimiter === '\t' ? 'Tab' : CSV.delimiter) + '</strong>';
 }
 
+// ── TREEMAP VIEW ──
+function squarify(items, rect) {
+  // Squarified treemap: items must have ._area (normalised fractions summing to 1).
+  // Returns [{x,y,w,h,item}].
+  if (!items.length) return [];
+  if (rect.w <= 0 || rect.h <= 0) return [];
+  const result = [];
+  const totalArea = rect.w * rect.h;
+
+  function worst(row, sideLen) {
+    const s = row.reduce((a,b)=>a+b,0);
+    const max = Math.max(...row), min = Math.min(...row);
+    return Math.max(sideLen*sideLen*max/(s*s), s*s/(sideLen*sideLen*min));
+  }
+
+  function commitRow(rowItems, rowAreas, x, y, w, h) {
+    const s = rowAreas.reduce((a,b)=>a+b,0);
+    // layout direction: along the SHORT side
+    const horiz = w >= h; // horiz=true → strip is horizontal band (full width, short height)
+    const stripLen = horiz ? s/w : s/h; // thickness of the strip
+    let off = 0;
+    rowItems.forEach((item, ri) => {
+      const a = rowAreas[ri];
+      const tw = horiz ? a/stripLen : stripLen;
+      const th = horiz ? stripLen  : a/stripLen;
+      result.push({ x: horiz ? x+off : x, y: horiz ? y : y+off, w: tw, h: th, item });
+      off += horiz ? tw : th;
+    });
+    return horiz
+      ? { x, y: y+stripLen, w, h: h-stripLen }
+      : { x: x+stripLen, y, w: w-stripLen, h };
+  }
+
+  function slice(items, x, y, w, h) {
+    if (!items.length || w < 1 || h < 1) return;
+    const scale = w * h; // convert fractional _area to pixel area within this rect
+    const horiz = w >= h;
+    const sideLen = horiz ? w : h;
+    let row = [], rowItems = [], rowScale = scale;
+    let remaining = items.slice();
+
+    while (remaining.length) {
+      const item = remaining[0];
+      const a = item._area * rowScale;
+      if (!row.length) {
+        row.push(a); rowItems.push(item); remaining.shift();
+      } else if (worst([...row, a], horiz ? w : h) <= worst(row, horiz ? w : h)) {
+        row.push(a); rowItems.push(item); remaining.shift();
+      } else {
+        const rem = commitRow(rowItems, row, x, y, w, h);
+        x=rem.x; y=rem.y; w=rem.w; h=rem.h;
+        rowScale = w*h / remaining.reduce((s,it)=>s+it._area,0);
+        row=[]; rowItems=[];
+      }
+    }
+    if (row.length) commitRow(rowItems, row, x, y, w, h);
+  }
+
+  slice(items, rect.x, rect.y, rect.w, rect.h);
+  return result;
+}
+
+function renderTreemap(clusters) {
+  const container = document.getElementById('treemap-view');
+  const svg = document.getElementById('treemap-svg');
+  svg.innerHTML = '';
+  const svgW = container.clientWidth || 800;
+  const svgH = 580;
+  svg.setAttribute('height', svgH);
+  svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
+
+  const total = clusters.reduce((s,c) => s+c.count, 0);
+  if (!total) return;
+
+  const PAD = 2; // padding between rects
+
+  function makeSvgEl(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k,v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  }
+
+  function drawLeaf(r, item, color, tooltipText, displayLabel) {
+    const rw = Math.max(0, r.w - PAD);
+    const rh = Math.max(0, r.h - PAD);
+    if (rw < 2 || rh < 2) return;
+
+    const rect = makeSvgEl('rect', {
+      x: r.x+PAD/2, y: r.y+PAD/2, width: rw, height: rh,
+      fill: color, rx: 2
+    });
+    rect.classList.add('tm-leaf');
+    rect.addEventListener('click', () => openLeafBreakdown(item, color));
+
+    rect.addEventListener('mouseenter', e => showTip(e, tooltipText));
+    rect.addEventListener('mousemove', e => moveTip(e));
+    rect.addEventListener('mouseleave', hideTip);
+
+    svg.appendChild(rect);
+
+    if (rw > 40 && rh > 18) {
+      const maxChars = Math.max(4, Math.floor(rw / 7));
+      const lbl = displayLabel || item.parts[item.parts.length - 1] || item.key;
+      const labelStr = lbl.length > maxChars ? lbl.slice(0, maxChars-1)+'…' : lbl;
+      const txt = makeSvgEl('text', {
+        x: r.x+PAD/2+5, y: r.y+PAD/2+14,
+        'font-size': '11', fill: '#fff', 'pointer-events': 'none',
+        'font-family': 'Segoe UI,sans-serif'
+      });
+      txt.textContent = labelStr;
+      svg.appendChild(txt);
+      if (rh > 30) {
+        const pct = (item.count/total*100).toFixed(1) + '%';
+        const t2 = makeSvgEl('text', {
+          x: r.x+PAD/2+5, y: r.y+PAD/2+26,
+          'font-size': '10', fill: 'rgba(255,255,255,0.65)', 'pointer-events': 'none',
+          'font-family': 'Segoe UI,sans-serif'
+        });
+        t2.textContent = pct + ' · ' + item.count.toLocaleString();
+        svg.appendChild(t2);
+      }
+    }
+  }
+
+  if (FILTERS.length <= 1) {
+    // Flat treemap
+    const sorted = [...clusters].sort((a,b) => b.count - a.count);
+    const total2 = sorted.reduce((s,c) => s+c.count, 0);
+    sorted.forEach(c => c._area = c.count / total2);
+    const rects = squarify(sorted, { x:0, y:0, w:svgW, h:svgH });
+    rects.forEach((r, ri) => {
+      const col = COLORS[ri % COLORS.length];
+      const lbl = r.item.parts[0] || r.item.key;
+      const tip = lbl + '\n' + r.item.count.toLocaleString() + ' rows · ' + (r.item.count/total*100).toFixed(1) + '%';
+      drawLeaf(r, r.item, col, tip, lbl);
+    });
+  } else {
+    // Nested: outer = groups by FILTERS[0], inner = squarified leaves
+    const groups = groupClustersAtDepth(clusters, 0);
+    groups.sort((a,b) => b.count - a.count);
+    const gtotal = groups.reduce((s,g) => s+g.count, 0);
+    groups.forEach(g => g._area = g.count / gtotal);
+    const groupRects = squarify(groups, { x:0, y:0, w:svgW, h:svgH });
+
+    groupRects.forEach((gr, gi) => {
+      const gcol = COLORS[gi % COLORS.length];
+      const grw = Math.max(0, gr.w - PAD);
+      const grh = Math.max(0, gr.h - PAD);
+      if (grw < 4 || grh < 4) return;
+
+      // outer group rect (semi-transparent)
+      const outerRect = makeSvgEl('rect', {
+        x: gr.x+PAD/2, y: gr.y+PAD/2, width: grw, height: grh,
+        fill: gcol + '28', stroke: gcol, 'stroke-width': '1.5', rx: 3
+      });
+      outerRect.classList.add('tm-group-rect');
+      svg.appendChild(outerRect);
+
+      // group label header bar
+      const HEADER = grh > 24 ? 18 : 0;
+      if (HEADER > 0) {
+        const maxChars = Math.max(4, Math.floor(grw / 7));
+        const glabel = gr.item.key.length > maxChars ? gr.item.key.slice(0,maxChars-1)+'…' : gr.item.key;
+        const tg = makeSvgEl('text', {
+          x: gr.x+PAD/2+5, y: gr.y+PAD/2+13,
+          'font-size': '11', fill: gcol, 'font-weight': '700', 'pointer-events': 'none',
+          'font-family': 'Segoe UI,sans-serif'
+        });
+        tg.textContent = glabel;
+        svg.appendChild(tg);
+      }
+
+      // inner squarified leaves
+      const innerRect = { x: gr.x+PAD/2+1, y: gr.y+PAD/2+HEADER+1, w: grw-2, h: grh-HEADER-2 };
+      if (innerRect.w < 4 || innerRect.h < 4) return;
+      const innerClusters = [...gr.item.clusters].sort((a,b) => b.count - a.count);
+      const itotal = innerClusters.reduce((s,c) => s+c.count, 0);
+      innerClusters.forEach(c => c._area = c.count / itotal);
+      const leafRects = squarify(innerClusters, innerRect);
+      leafRects.forEach(lr => {
+        const leafLbl = lr.item.parts[1] || lr.item.parts[lr.item.parts.length - 1] || lr.item.key;
+        const tip = lr.item.parts.join(' › ') + '\n' + lr.item.count.toLocaleString() + ' rows · ' + (lr.item.count/total*100).toFixed(1) + '%';
+        drawLeaf(lr, lr.item, gcol, tip, leafLbl);
+      });
+    });
+  }
+}
+
+// ── MATRIX VIEW ──
+// State: which column is the column axis (persists across re-renders)
+let MATRIX_COL_CI = -1;
+
+function renderMatrix(clusters) {
+  // FILTERS[0] = row axis, MATRIX_COL_CI = column axis (user-selectable from non-filter cols)
+  const wrap = document.getElementById('matrix-wrap');
+  const rowLabel = document.getElementById('matrix-row-label');
+  const colSel = document.getElementById('matrix-col-sel');
+  const statsEl = document.getElementById('matrix-stats');
+  wrap.innerHTML = '';
+
+  // Row axis = FILTERS[0]
+  rowLabel.textContent = CSV.headers[FILTERS[0]];
+
+  // Build column-axis selector: all columns except the row axis (FILTERS[0])
+  const nonFilterCols = CSV.headers
+    .map((h, ci) => ({ ci, h, uniq: CSV.vocabs[ci].length }))
+    .filter(c => c.ci !== FILTERS[0]);
+
+  // Rebuild dropdown only when needed (col list changed)
+  const optKeys = nonFilterCols.map(c => c.ci).join(',');
+  if (colSel.dataset.optKeys !== optKeys) {
+    colSel.innerHTML = '';
+    nonFilterCols.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.ci;
+      o.textContent = c.h + ' (' + c.uniq + ')';
+      colSel.appendChild(o);
+    });
+    colSel.dataset.optKeys = optKeys;
+    // default to FILTERS[1] (the second active filter), fallback to first available col
+    const defaultCI = nonFilterCols.find(c => c.ci === FILTERS[1])?.ci ?? nonFilterCols[0]?.ci ?? -1;
+    if (MATRIX_COL_CI === -1 || !nonFilterCols.find(c => c.ci === MATRIX_COL_CI)) {
+      MATRIX_COL_CI = defaultCI;
+    }
+    colSel.value = MATRIX_COL_CI;
+    colSel.onchange = () => { MATRIX_COL_CI = +colSel.value; buildTable(); };
+  } else {
+    colSel.value = MATRIX_COL_CI;
+  }
+
+  function buildTable() {
+    wrap.innerHTML = '';
+    const rowCI = FILTERS[0];
+    const colCI = MATRIX_COL_CI;
+    if (colCI < 0) return;
+
+    // Collect all row indices per rowVidx (across all sub-clusters sharing that row value)
+    const allRowsByRowVidx = new Map(); // rowVidx → row index[]
+    for (const c of clusters) {
+      const rv = c.partsRaw[0];
+      if (!allRowsByRowVidx.has(rv)) allRowsByRowVidx.set(rv, []);
+      for (const ri of c.allRows) allRowsByRowVidx.get(rv).push(ri);
+    }
+
+    // Build count map: rowVidx → colVidx → count
+    const countMap = new Map();
+    const colTotals = new Map();
+
+    for (const c of clusters) {
+      const rowVidx = c.partsRaw[0];
+      for (const ri of c.allRows) {
+        const colVidx = CSV.rows[ri][colCI];
+        if (!countMap.has(rowVidx)) countMap.set(rowVidx, new Map());
+        const inner = countMap.get(rowVidx);
+        inner.set(colVidx, (inner.get(colVidx) || 0) + 1);
+        colTotals.set(colVidx, (colTotals.get(colVidx) || 0) + 1);
+      }
+    }
+
+    // Column values sorted by total count desc
+    const colVidxs = [...colTotals.entries()].sort((a,b) => b[1]-a[1]).map(e => e[0]);
+
+    // Row entries sorted by polyvalence (non-zero cols) desc, then total desc
+    const rowEntries = [...countMap.entries()].map(([rvIdx, inner]) => {
+      const rowTotal = [...inner.values()].reduce((s,n)=>s+n,0);
+      const nonZeroCols = inner.size;
+      return { rvIdx, inner, rowTotal, nonZeroCols };
+    }).sort((a,b) => b.nonZeroCols - a.nonZeroCols || b.rowTotal - a.rowTotal);
+
+    // Max cell value for color scaling
+    let maxCell = 0;
+    for (const { inner } of rowEntries) for (const v of inner.values()) if (v > maxCell) maxCell = v;
+
+    statsEl.textContent = rowEntries.length + ' rows × ' + colVidxs.length + ' cols';
+
+    const table = document.createElement('table');
+    table.className = 'mx-table';
+
+    // ── Header row ──
+    const thead = document.createElement('thead');
+    const hrow = document.createElement('tr');
+    const corner = document.createElement('th');
+    corner.style.cssText = 'width:180px;min-width:120px';
+    hrow.appendChild(corner);
+    colVidxs.forEach(cvi => {
+      const th = document.createElement('th');
+      const lbl = document.createElement('div');
+      lbl.className = 'mx-col-label';
+      lbl.textContent = CSV.vocabs[colCI][cvi] || '(empty)';
+      lbl.title = CSV.vocabs[colCI][cvi] || '(empty)';
+      th.appendChild(lbl);
+      hrow.appendChild(th);
+    });
+    // Σ column header
+    const thSum = document.createElement('th');
+    const sumLbl = document.createElement('div');
+    sumLbl.className = 'mx-col-label';
+    sumLbl.textContent = 'Σ';
+    sumLbl.style.cssText = 'color:var(--dim);font-weight:700';
+    thSum.appendChild(sumLbl);
+    hrow.appendChild(thSum);
+    thead.appendChild(hrow);
+    table.appendChild(thead);
+
+    // ── Body rows ──
+    const colSums = new Array(colVidxs.length).fill(0); // accumulate col totals
+    const tbody = document.createElement('tbody');
+
+    rowEntries.forEach(({ rvIdx, inner, rowTotal }) => {
+      const tr = document.createElement('tr');
+      const rowName = CSV.vocabs[rowCI][rvIdx] || '(empty)';
+      const rowAllRows = allRowsByRowVidx.get(rvIdx) || [];
+      const accentColor = COLORS[0];
+
+      // row label
+      const td0 = document.createElement('td');
+      const rlbl = document.createElement('div');
+      rlbl.className = 'mx-row-label';
+      rlbl.textContent = rowName;
+      rlbl.title = rowName + ' · ' + rowTotal.toLocaleString() + ' total';
+      td0.appendChild(rlbl);
+      tr.appendChild(td0);
+
+      colVidxs.forEach((cvi, ci) => {
+        const cnt = inner.get(cvi) || 0;
+        const td = document.createElement('td');
+        td.className = 'mx-cell';
+        if (cnt > 0) {
+          colSums[ci] += cnt;
+          const intensity = Math.pow(cnt / maxCell, 0.45);
+          td.style.background = `rgba(79,142,247,${(0.12 + intensity * 0.88).toFixed(3)})`;
+          const colName = CSV.vocabs[colCI][cvi] || '(empty)';
+          td.title = rowName + ' × ' + colName + ': ' + cnt.toLocaleString();
+          td.style.cursor = 'pointer';
+          td.addEventListener('mouseenter', e => showTip(e, rowName + ' × ' + colName + '\n' + cnt.toLocaleString() + ' rows'));
+          td.addEventListener('mousemove', e => moveTip(e));
+          td.addEventListener('mouseleave', hideTip);
+          td.addEventListener('click', () => {
+            hideTip();
+            const filteredRows = rowAllRows.filter(ri => CSV.rows[ri][colCI] === cvi);
+            openLeafBreakdown({
+              key: rowName + ' × ' + colName,
+              count: filteredRows.length,
+              allRows: filteredRows,
+              clusters: [],
+              parts: [rowName, colName]
+            }, accentColor);
+          });
+        } else {
+          td.style.background = 'var(--panel)';
+        }
+        tr.appendChild(td);
+      });
+
+      // row sum cell
+      const tdRowSum = document.createElement('td');
+      tdRowSum.className = 'mx-cell';
+      tdRowSum.style.cssText = 'color:var(--dim);font-size:10px;text-align:center;vertical-align:middle;background:var(--panel);font-weight:600;width:36px;min-width:36px';
+      tdRowSum.textContent = rowTotal.toLocaleString();
+      tr.appendChild(tdRowSum);
+
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    // ── Footer row (column sums) ──
+    const tfoot = document.createElement('tfoot');
+    const frow = document.createElement('tr');
+    const ftd0 = document.createElement('td');
+    const flbl = document.createElement('div');
+    flbl.className = 'mx-row-label';
+    flbl.textContent = 'Σ';
+    flbl.style.cssText = 'color:var(--dim);font-weight:700';
+    ftd0.appendChild(flbl);
+    frow.appendChild(ftd0);
+    let grandTotal = 0;
+    colSums.forEach(s => {
+      grandTotal += s;
+      const ftd = document.createElement('td');
+      ftd.className = 'mx-cell';
+      ftd.style.cssText = 'color:var(--dim);font-size:10px;text-align:center;vertical-align:middle;background:var(--panel);font-weight:600';
+      ftd.textContent = s > 0 ? s.toLocaleString() : '';
+      frow.appendChild(ftd);
+    });
+    // grand total corner
+    const ftdGrand = document.createElement('td');
+    ftdGrand.className = 'mx-cell';
+    ftdGrand.style.cssText = 'color:var(--accent);font-size:10px;text-align:center;vertical-align:middle;background:var(--panel);font-weight:700;width:36px;min-width:36px';
+    ftdGrand.textContent = grandTotal.toLocaleString();
+    frow.appendChild(ftdGrand);
+    tfoot.appendChild(frow);
+    table.appendChild(tfoot);
+
+    wrap.appendChild(table);
+  }
+
+  buildTable();
+}
+
+// ── TOOLTIP ──
+let _tipEl = null;
+function _ensureTip() {
+  if (_tipEl) return _tipEl;
+  _tipEl = document.createElement('div');
+  _tipEl.style.cssText = 'position:fixed;z-index:9999;background:#1a1d24;color:#c9cdd8;border:1px solid #2a2d35;border-radius:5px;padding:6px 10px;font-size:11px;pointer-events:none;display:none;white-space:pre;line-height:1.5;max-width:280px';
+  document.body.appendChild(_tipEl);
+  return _tipEl;
+}
+function showTip(e, text) {
+  const t = _ensureTip();
+  t.textContent = text;
+  t.style.display = '';
+  moveTip(e);
+}
+function moveTip(e) {
+  const t = _ensureTip();
+  t.style.left = (e.clientX + 14) + 'px';
+  t.style.top  = (e.clientY - 10) + 'px';
+}
+function hideTip() {
+  _ensureTip().style.display = 'none';
+}
+
 // ── UI HELPERS ──
 function showLanding() {
   document.getElementById('landing').style.display = '';
   document.getElementById('bubble-view').style.display = 'none';
   document.getElementById('list-view').style.display = 'none';
+  document.getElementById('treemap-view').style.display = 'none';
+  document.getElementById('matrix-view').style.display = 'none';
   document.getElementById('cluster-count').textContent = '';
 }
 function hideLanding() {
@@ -1575,6 +2068,8 @@ function openLeafBreakdown(item, accentColor) {
   BREAKDOWN_RETURN_VIEW = VIEW;
   document.getElementById('bubble-view').style.display = 'none';
   document.getElementById('list-view').style.display = 'none';
+  document.getElementById('treemap-view').style.display = 'none';
+  document.getElementById('matrix-view').style.display = 'none';
   document.getElementById('breakdown-sublist').style.display = 'none';
 
   document.getElementById('breakdown-view').style.display = 'block';
@@ -1719,6 +2214,10 @@ function closeLeafBreakdown() {
   document.getElementById('breakdown-view').style.display = 'none';
   if (BREAKDOWN_RETURN_VIEW === 'list') {
     document.getElementById('list-view').style.display = 'block';
+  } else if (BREAKDOWN_RETURN_VIEW === 'treemap') {
+    document.getElementById('treemap-view').style.display = '';
+  } else if (BREAKDOWN_RETURN_VIEW === 'matrix') {
+    document.getElementById('matrix-view').style.display = '';
   } else {
     document.getElementById('bubble-view').style.display = '';
   }
@@ -1827,7 +2326,7 @@ document.querySelectorAll('.vbtn').forEach(btn => {
   });
 });
 window.addEventListener('resize', () => {
-  if (VIEW === 'bubble' && CSV && FILTERS.length) renderClusters();
+  if (CSV && FILTERS.length && (VIEW === 'bubble' || VIEW === 'treemap' || VIEW === 'matrix')) renderClusters();
 });
 
 // ── AUTO-LOAD DEFAULT CSV ──
