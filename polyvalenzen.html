@@ -54,9 +54,8 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 #subset-count { font-size: 11px; margin-left: 6px; color: var(--dim); }
 #subset-count strong { color: var(--green); }
 
-#main { max-width: 960px; margin: 0 auto; padding: 28px 20px 80px; }
+#main { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
 
-/* ── SECTION HEADERS ── */
 .section-heading {
   font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
   color: var(--dim); border-bottom: 1px solid var(--border); padding-bottom: 8px;
@@ -85,11 +84,6 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 .pv-qnum {
   font-size: 11px; font-weight: 700; color: var(--accent);
   background: rgba(79,142,247,.12); border: 1px solid rgba(79,142,247,.3);
-  border-radius: 4px; padding: 2px 7px; flex-shrink: 0; margin-top: 2px;
-}
-.pv-vtag {
-  font-size: 11px; font-weight: 700; color: var(--green);
-  background: rgba(62,207,142,.1); border: 1px solid rgba(62,207,142,.3);
   border-radius: 4px; padding: 2px 7px; flex-shrink: 0; margin-top: 2px;
 }
 .pv-qtitle { font-size: 13px; font-weight: 600; color: var(--bright); line-height: 1.5; }
@@ -129,6 +123,79 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 .pv-computing { padding: 18px; text-align: center; color: var(--dim); font-size: 12px; }
 .pv-row-hint { font-size: 10px; color: var(--dim); padding: 4px 8px 8px; font-style: italic; }
 
+/* ── RADIAL CARD ── */
+#radial-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+#radial-controls {
+  display: flex; align-items: center; gap: 12px; padding: 12px 18px;
+  border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+#radial-controls label { font-size: 11px; color: var(--dim); white-space: nowrap; }
+#outer-dim-sel {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;
+}
+.toggle-group {
+  display: flex; border: 1px solid var(--border2); border-radius: 4px; overflow: hidden;
+}
+.toggle-btn {
+  background: none; border: none; color: var(--dim); padding: 5px 14px;
+  font-size: 11px; font-weight: 600; cursor: pointer; transition: all .1s;
+}
+.toggle-btn.active { background: var(--accent); color: #fff; }
+.toggle-btn:not(.active):hover { background: var(--hover); color: var(--text); }
+
+#exam-search-wrap {
+  display: flex; align-items: center; gap: 6px; margin-left: auto;
+}
+#exam-search {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 4px 10px; border-radius: 4px; font-size: 12px; width: 220px;
+}
+#exam-search::placeholder { color: var(--dim); }
+#exam-search-clear {
+  background: none; border: 1px solid var(--border2); color: var(--dim);
+  padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
+}
+#exam-search-clear:hover { color: var(--text); }
+#exam-search-results {
+  position: absolute; z-index: 200; background: #0d0f14;
+  border: 1px solid var(--border2); border-radius: 5px;
+  max-height: 220px; overflow-y: auto; min-width: 280px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.5);
+}
+.exam-sr-item {
+  padding: 6px 12px; font-size: 12px; color: var(--text); cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+.exam-sr-item:last-child { border-bottom: none; }
+.exam-sr-item:hover, .exam-sr-item.active { background: var(--hover); color: var(--bright); }
+
+#radial-stats {
+  padding: 6px 18px 8px; font-size: 11px; color: var(--dim);
+  border-bottom: 1px solid var(--border);
+}
+#radial-stats strong { color: var(--green); }
+#selected-exam-info {
+  padding: 6px 18px 8px; font-size: 11px;
+  border-bottom: 1px solid var(--border); display: none;
+  background: rgba(79,142,247,.06);
+}
+#selected-exam-info strong { color: var(--accent); }
+
+#radial-svg-wrap {
+  background: var(--bg); display: flex; justify-content: center; align-items: center;
+  min-height: 620px; position: relative;
+}
+#radial-svg-wrap svg { display: block; }
+
+#radial-tooltip {
+  position: fixed; pointer-events: none; z-index: 300;
+  background: #0d0f14; border: 1px solid var(--border2); border-radius: 5px;
+  padding: 7px 11px; font-size: 11px; color: var(--bright); max-width: 280px;
+  display: none; line-height: 1.5;
+}
 
 /* ── DETAIL PANEL ── */
 #detail-panel {
@@ -156,6 +223,13 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 }
 .dt-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
 .dt-table tr:hover td { background: var(--hover); }
+
+@keyframes arcPulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+.arc-pulse { animation: arcPulse 0.7s ease-in-out 3; }
 </style>
 </head>
 <body>
@@ -182,7 +256,33 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
   <div class="section-heading">Q &amp; A</div>
   <div id="qa-cards"></div>
 
+  <!-- ── SECTION 2: Radial ── -->
+  <div class="section-heading" style="margin-top:40px">Radial Exam Sharing View</div>
+
+  <div id="radial-card">
+    <div id="radial-controls">
+      <label>Outer ring:</label>
+      <select id="outer-dim-sel"><option value="-1">— select column —</option></select>
+
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="toggle-poly">Polyvalent exams</button>
+        <button class="toggle-btn" id="toggle-unique">Unique exams</button>
+      </div>
+
+      <div id="exam-search-wrap" style="position:relative">
+        <input id="exam-search" type="text" placeholder="Search exam title…">
+        <button id="exam-search-clear">✕</button>
+        <div id="exam-search-results" style="display:none; top:32px; left:0; position:absolute"></div>
+      </div>
+    </div>
+
+    <div id="radial-stats"></div>
+    <div id="selected-exam-info"></div>
+    <div id="radial-svg-wrap"><div class="pv-computing">Select an outer ring column to render the chart</div></div>
+  </div>
 </div>
+
+<div id="radial-tooltip"></div>
 
 <!-- Detail panel -->
 <div id="detail-panel">
@@ -266,6 +366,10 @@ if (!metaRaw) {
 
 let meta = null, headers, vocabs, rows, colIdx = {};
 let subsetCI = -1, subsetVal = '';
+let radialMode = 'poly';
+let outerCI = -1;
+let selectedExamEv = null; // currently selected exam vidx
+
 try { meta = metaRaw ? JSON.parse(metaRaw) : null; } catch(e) {}
 
 function getActiveRows() {
@@ -493,8 +597,527 @@ function onSubsetChange() {
       setTimeout(() => { state.computed = state.q.compute(); renderResults(state.resultsDiv, state.computed, state.q.jumpCol); }, 10);
     }
   });
+  selectedExamEv = null;
+  renderRadial();
 }
 
+// ── COLOUR PALETTE ──
+const PALETTE = [
+  '#4f8ef7','#3ecf8e','#f7c948','#e05c5c','#a78bfa','#fb923c','#38bdf8',
+  '#f472b6','#4ade80','#facc15','#60a5fa','#c084fc','#34d399','#f87171',
+  '#fbbf24','#818cf8','#e879f9','#2dd4bf','#fb7185','#a3e635'
+];
+
+// ── TOOLTIP ──
+const tooltip = document.getElementById('radial-tooltip');
+function showTooltip(evt, html) {
+  tooltip.innerHTML = html;
+  tooltip.style.display = 'block';
+  moveTooltip(evt);
+}
+function moveTooltip(evt) {
+  tooltip.style.left = (evt.clientX + 14) + 'px';
+  tooltip.style.top  = (evt.clientY - 10) + 'px';
+}
+function hideTooltip() { tooltip.style.display = 'none'; }
+
+// ── EXAM SEARCH ──
+const examSearchInput = document.getElementById('exam-search');
+const examSearchResults = document.getElementById('exam-search-results');
+const examSearchClear = document.getElementById('exam-search-clear');
+let searchResultEvs = [];
+let searchCursor = -1;
+
+function updateExamSearch() {
+  const q = examSearchInput.value.trim().toLowerCase();
+  examSearchResults.style.display = 'none';
+  searchResultEvs = [];
+  if (!q || !vocabs || colIdx.exam < 0) return;
+
+  // Only search within exams currently in the chart
+  const activeRows = getActiveRows();
+  const examCI = colIdx.exam;
+  const seenEv = new Set();
+  for (const r of activeRows) seenEv.add(r[examCI]);
+
+  searchResultEvs = [...seenEv]
+    .filter(ev => (vocabs[examCI][ev] || '').toLowerCase().includes(q))
+    .slice(0, 30);
+
+  if (!searchResultEvs.length) return;
+  examSearchResults.innerHTML = '';
+  searchResultEvs.forEach((ev, idx) => {
+    const item = document.createElement('div');
+    item.className = 'exam-sr-item';
+    item.textContent = vocabs[examCI][ev] || '?';
+    item.addEventListener('mousedown', e => { e.preventDefault(); selectExam(ev); });
+    examSearchResults.appendChild(item);
+  });
+  searchCursor = -1;
+  examSearchResults.style.display = '';
+}
+
+examSearchInput.addEventListener('input', updateExamSearch);
+examSearchInput.addEventListener('keydown', e => {
+  const items = examSearchResults.querySelectorAll('.exam-sr-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    searchCursor = Math.min(searchCursor + 1, items.length - 1);
+    items.forEach((it, i) => it.classList.toggle('active', i === searchCursor));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    searchCursor = Math.max(searchCursor - 1, 0);
+    items.forEach((it, i) => it.classList.toggle('active', i === searchCursor));
+  } else if (e.key === 'Enter') {
+    if (searchCursor >= 0 && searchResultEvs[searchCursor] !== undefined) {
+      selectExam(searchResultEvs[searchCursor]);
+    } else if (searchResultEvs.length) {
+      selectExam(searchResultEvs[0]);
+    }
+  } else if (e.key === 'Escape') {
+    examSearchResults.style.display = 'none';
+    examSearchInput.blur();
+  }
+});
+examSearchInput.addEventListener('blur', () => {
+  setTimeout(() => { examSearchResults.style.display = 'none'; }, 150);
+});
+examSearchClear.addEventListener('click', () => {
+  examSearchInput.value = '';
+  examSearchResults.style.display = 'none';
+  selectedExamEv = null;
+  document.getElementById('selected-exam-info').style.display = 'none';
+  renderRadial();
+});
+
+function selectExam(ev) {
+  selectedExamEv = ev;
+  examSearchInput.value = (vocabs && colIdx.exam >= 0) ? (vocabs[colIdx.exam][ev] || '') : '';
+  examSearchResults.style.display = 'none';
+  renderRadial();
+  updateSelectedExamInfo();
+}
+
+function updateSelectedExamInfo() {
+  const infoEl = document.getElementById('selected-exam-info');
+  if (selectedExamEv === null || outerCI < 0 || !vocabs) { infoEl.style.display = 'none'; return; }
+  // Build examToOuter fresh
+  const examCI = colIdx.exam;
+  const activeRows = getActiveRows();
+  const outerSet = new Set();
+  for (const r of activeRows) {
+    if (r[examCI] === selectedExamEv) outerSet.add(r[outerCI]);
+  }
+  const outerLabels = [...outerSet].map(ov => vocabs[outerCI][ov] || '?').join(', ');
+  infoEl.style.display = '';
+  infoEl.innerHTML =
+    'Selected: <strong>' + escHtml(vocabs[examCI][selectedExamEv] || '?') + '</strong> &nbsp;·&nbsp; ' +
+    'appears in <strong style="color:var(--green)">' + outerSet.size + '</strong> ' +
+    escHtml(headers[outerCI] || 'groups') +
+    (outerSet.size <= 8 ? ': <span style="color:var(--dim)">' + escHtml(outerLabels) + '</span>' : '') +
+    ' &nbsp;<span style="color:var(--dim);cursor:pointer" id="clear-sel-x">✕ clear</span>';
+  document.getElementById('clear-sel-x').addEventListener('click', () => {
+    selectedExamEv = null; examSearchInput.value = '';
+    infoEl.style.display = 'none';
+    renderRadial();
+  });
+}
+
+// ── RADIAL DATA ──
+function buildRadialData() {
+  if (outerCI < 0 || colIdx.exam < 0) return null;
+  const examCI = colIdx.exam;
+  const activeRows = getActiveRows();
+
+  const examToOuter = new Map();
+  for (const row of activeRows) {
+    const ev = row[examCI], ov = row[outerCI];
+    if (!examToOuter.has(ev)) examToOuter.set(ev, new Set());
+    examToOuter.get(ev).add(ov);
+  }
+
+  const outerMap = new Map();
+  for (const [ev, outerSet] of examToOuter) {
+    const outerCount = outerSet.size;
+    const keep = radialMode === 'poly' ? outerCount > 1 : outerCount === 1;
+    if (!keep) continue;
+    for (const ov of outerSet) {
+      if (!outerMap.has(ov)) outerMap.set(ov, []);
+      outerMap.get(ov).push({ ev, outerCount });
+    }
+  }
+
+  const outerGroups = [...outerMap.entries()]
+    .map(([ov, exams]) => ({
+      ov, label: vocabs[outerCI][ov] || '?',
+      exams: exams.sort((a,b) => b.outerCount - a.outerCount)
+    }))
+    .sort((a,b) => b.exams.length - a.exams.length);
+
+  const allExamVidxSet = new Set();
+  for (const g of outerGroups) for (const e of g.exams) allExamVidxSet.add(e.ev);
+
+  return { outerGroups, examToOuter, allExamCount: allExamVidxSet.size };
+}
+
+// ── RADIAL RENDER ──
+function renderRadial() {
+  const wrap = document.getElementById('radial-svg-wrap');
+  const statsEl = document.getElementById('radial-stats');
+
+  if (outerCI < 0) {
+    wrap.innerHTML = '<div class="pv-computing">Select an outer ring column to render the chart</div>';
+    statsEl.innerHTML = '';
+    return;
+  }
+
+  const data = buildRadialData();
+  if (!data) { wrap.innerHTML = '<div class="pv-computing">No data.</div>'; return; }
+
+  const { outerGroups, examToOuter } = data;
+
+  if (!outerGroups.length) {
+    wrap.innerHTML = '<div class="pv-computing">No ' + (radialMode === 'poly' ? 'polyvalent' : 'unique') + ' exams found for this dimension.</div>';
+    statsEl.innerHTML = '';
+    return;
+  }
+
+  const totalExams = data.allExamCount;
+  const totalOuter = outerGroups.length;
+  statsEl.innerHTML =
+    '<strong>' + totalExams.toLocaleString() + '</strong> distinct exam titles (' +
+    (radialMode === 'poly' ? 'appear in ≥2 outer values' : 'appear in exactly 1 outer value') +
+    ') across <strong>' + totalOuter + '</strong> ' + escHtml(headers[outerCI] || 'groups') +
+    ' &nbsp;·&nbsp; arc width = exam variety &nbsp;·&nbsp; click an exam node or arc to select';
+
+  // Selected exam outer set
+  const selectedOuterSet = selectedExamEv !== null
+    ? (examToOuter.get(selectedExamEv) || new Set())
+    : null;
+
+  // Layout
+  const W = Math.min(wrap.clientWidth || 900, 900);
+  const H = W;
+  const cx = W / 2, cy = H / 2;
+  const outerRingOuter = W * 0.46;
+  const outerRingInner = W * 0.38;
+  const innerRingR     = W * 0.26;
+
+  const totalWeight = outerGroups.reduce((s, g) => s + g.exams.length, 0);
+  const GAP_RAD = outerGroups.length > 1 ? 0.012 : 0;
+  let angle = -Math.PI / 2;
+
+  outerGroups.forEach((g, gi) => {
+    const sweep = (g.exams.length / totalWeight) * (2 * Math.PI) - GAP_RAD;
+    g.startAngle = angle + GAP_RAD / 2;
+    g.endAngle   = angle + GAP_RAD / 2 + sweep;
+    g.midAngle   = (g.startAngle + g.endAngle) / 2;
+    g.color      = PALETTE[gi % PALETTE.length];
+    angle += sweep + GAP_RAD;
+  });
+
+  // Collect unique exam vidxes
+  const shownExamVidxes = [];
+  const seenExams = new Set();
+  for (const g of outerGroups) {
+    for (const e of g.exams) {
+      if (!seenExams.has(e.ev)) { seenExams.add(e.ev); shownExamVidxes.push(e.ev); }
+    }
+  }
+
+  function examMidAngle(ev) {
+    const outerSet = examToOuter.get(ev) || new Set();
+    let sumAngle = 0, count = 0;
+    for (const g of outerGroups) {
+      if (outerSet.has(g.ov)) { sumAngle += g.midAngle; count++; }
+    }
+    return count ? sumAngle / count : 0;
+  }
+
+  shownExamVidxes.sort((a, b) => examMidAngle(a) - examMidAngle(b));
+
+  const examAngleStep = shownExamVidxes.length > 0 ? (2 * Math.PI) / shownExamVidxes.length : 0;
+  const examAngleMap = new Map();
+  shownExamVidxes.forEach((ev, i) => {
+    examAngleMap.set(ev, -Math.PI / 2 + i * examAngleStep);
+  });
+
+  const maxOuterCount = Math.max(...[...examToOuter.values()].map(s => s.size), 1);
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+  // click on background = deselect
+  const bgRect = document.createElementNS(ns, 'rect');
+  bgRect.setAttribute('width', W); bgRect.setAttribute('height', H);
+  bgRect.setAttribute('fill', 'transparent');
+  bgRect.style.cursor = 'default';
+  bgRect.addEventListener('click', () => {
+    selectedExamEv = null; examSearchInput.value = '';
+    document.getElementById('selected-exam-info').style.display = 'none';
+    renderRadial();
+  });
+  svg.appendChild(bgRect);
+
+  function arcPath(cx, cy, r1, r2, startA, endA) {
+    const x1o = cx + r2 * Math.cos(startA), y1o = cy + r2 * Math.sin(startA);
+    const x2o = cx + r2 * Math.cos(endA),   y2o = cy + r2 * Math.sin(endA);
+    const x1i = cx + r1 * Math.cos(endA),   y1i = cy + r1 * Math.sin(endA);
+    const x2i = cx + r1 * Math.cos(startA), y2i = cy + r1 * Math.sin(startA);
+    const large = (endA - startA) > Math.PI ? 1 : 0;
+    return `M ${x1o} ${y1o} A ${r2} ${r2} 0 ${large} 1 ${x2o} ${y2o} L ${x1i} ${y1i} A ${r1} ${r1} 0 ${large} 0 ${x2i} ${y2i} Z`;
+  }
+
+  // ── Lines (only drawn when an exam is selected, or always in dim mode) ──
+  const lineGroup = document.createElementNS(ns, 'g');
+
+  if (selectedExamEv !== null) {
+    // Only draw lines for the selected exam
+    const ea = examAngleMap.get(selectedExamEv);
+    if (ea !== undefined) {
+      const ex = cx + innerRingR * Math.cos(ea);
+      const ey = cy + innerRingR * Math.sin(ea);
+      for (const g of outerGroups) {
+        if (!selectedOuterSet.has(g.ov)) continue;
+        const outerMx = cx + (outerRingInner - 4) * Math.cos(g.midAngle);
+        const outerMy = cy + (outerRingInner - 4) * Math.sin(g.midAngle);
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', ex); line.setAttribute('y1', ey);
+        line.setAttribute('x2', outerMx); line.setAttribute('y2', outerMy);
+        line.setAttribute('stroke', g.color);
+        line.setAttribute('stroke-width', '1.5');
+        line.setAttribute('opacity', '0.9');
+        lineGroup.appendChild(line);
+      }
+    }
+  } else {
+    // Draw all lines, dimmed
+    lineGroup.setAttribute('opacity', '0.18');
+    for (const g of outerGroups) {
+      const outerMx = cx + (outerRingInner - 4) * Math.cos(g.midAngle);
+      const outerMy = cy + (outerRingInner - 4) * Math.sin(g.midAngle);
+      for (const e of g.exams) {
+        const ea = examAngleMap.get(e.ev);
+        if (ea === undefined) continue;
+        const ex = cx + innerRingR * Math.cos(ea);
+        const ey = cy + innerRingR * Math.sin(ea);
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', ex); line.setAttribute('y1', ey);
+        line.setAttribute('x2', outerMx); line.setAttribute('y2', outerMy);
+        line.setAttribute('stroke', g.color);
+        line.setAttribute('stroke-width', '0.7');
+        lineGroup.appendChild(line);
+      }
+    }
+  }
+  svg.appendChild(lineGroup);
+
+  // ── Outer arcs ──
+  const arcEls = new Map(); // ov -> SVG path element
+  const arcGroup = document.createElementNS(ns, 'g');
+  outerGroups.forEach(g => {
+    const isHighlighted = selectedOuterSet && selectedOuterSet.has(g.ov);
+    const isDimmed = selectedOuterSet && !selectedOuterSet.has(g.ov);
+
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', arcPath(cx, cy, outerRingInner, outerRingOuter, g.startAngle, g.endAngle));
+    path.setAttribute('fill', g.color);
+    path.setAttribute('opacity', isDimmed ? '0.15' : '1');
+    path.style.cursor = 'pointer';
+    path.style.transition = 'opacity 0.2s';
+    arcEls.set(g.ov, path);
+
+    if (isHighlighted) {
+      // Add glow ring
+      const glow = document.createElementNS(ns, 'path');
+      glow.setAttribute('d', arcPath(cx, cy, outerRingInner - 3, outerRingOuter + 4, g.startAngle, g.endAngle));
+      glow.setAttribute('fill', 'none');
+      glow.setAttribute('stroke', g.color);
+      glow.setAttribute('stroke-width', '3');
+      glow.setAttribute('opacity', '0.6');
+      arcGroup.appendChild(glow);
+    }
+
+    path.addEventListener('mouseenter', evt => {
+      if (!isDimmed) path.setAttribute('opacity', '0.75');
+      showTooltip(evt,
+        '<strong style="color:' + g.color + '">' + escHtml(g.label) + '</strong><br>' +
+        '<strong>' + g.exams.length + '</strong> distinct exam titles<br>' +
+        (isHighlighted ? '<span style="color:var(--green)">✓ contains selected exam</span>' : '')
+      );
+    });
+    path.addEventListener('mousemove', moveTooltip);
+    path.addEventListener('mouseleave', () => {
+      path.setAttribute('opacity', isDimmed ? '0.15' : '1');
+      hideTooltip();
+    });
+    path.addEventListener('click', evt => {
+      evt.stopPropagation();
+      showDetail(headers[outerCI], g.label, g.exams.length + ' exams');
+    });
+    arcGroup.appendChild(path);
+  });
+  svg.appendChild(arcGroup);
+
+  // ── Arc labels ──
+  const labelR = outerRingOuter + 10;
+  outerGroups.forEach(g => {
+    const sweep = g.endAngle - g.startAngle;
+    if (sweep < 0.07) return;
+    const isDimmed = selectedOuterSet && !selectedOuterSet.has(g.ov);
+    const lx = cx + labelR * Math.cos(g.midAngle);
+    const ly = cy + labelR * Math.sin(g.midAngle);
+    const txt = document.createElementNS(ns, 'text');
+    txt.setAttribute('x', lx); txt.setAttribute('y', ly);
+    txt.setAttribute('fill', isDimmed ? '#333' : g.color);
+    txt.setAttribute('font-size', '9');
+    txt.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
+    txt.setAttribute('font-weight', '600');
+    txt.setAttribute('text-anchor', Math.cos(g.midAngle) > 0 ? 'start' : 'end');
+    txt.setAttribute('dominant-baseline', 'middle');
+    txt.setAttribute('pointer-events', 'none');
+    const maxLen = Math.max(8, Math.round(sweep * 60));
+    txt.textContent = g.label.length > maxLen ? g.label.slice(0, maxLen - 1) + '…' : g.label;
+    svg.appendChild(txt);
+  });
+
+  // ── Exam nodes ──
+  const nodeGroup = document.createElementNS(ns, 'g');
+  shownExamVidxes.forEach(ev => {
+    const ea = examAngleMap.get(ev);
+    const outerCount = examToOuter.get(ev) ? examToOuter.get(ev).size : 1;
+    const nr = 2.5 + (outerCount / maxOuterCount) * 3.5;
+    const nx = cx + innerRingR * Math.cos(ea);
+    const ny = cy + innerRingR * Math.sin(ea);
+
+    const isSelected = ev === selectedExamEv;
+    const isDimmed = selectedExamEv !== null && !isSelected;
+
+    let nodeColor = '#c9cdd8';
+    const outerSet = examToOuter.get(ev) || new Set();
+    if (outerSet.size === 1) {
+      const ov = [...outerSet][0];
+      const g = outerGroups.find(g => g.ov === ov);
+      if (g) nodeColor = g.color;
+    }
+
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', nx); circle.setAttribute('cy', ny);
+    circle.setAttribute('r', isSelected ? nr + 3 : nr);
+    circle.setAttribute('fill', isSelected ? '#fff' : nodeColor);
+    circle.setAttribute('opacity', isDimmed ? '0.12' : '0.85');
+    circle.style.cursor = 'pointer';
+    circle.style.transition = 'opacity 0.2s, r 0.1s';
+
+    if (isSelected) {
+      const ring = document.createElementNS(ns, 'circle');
+      ring.setAttribute('cx', nx); ring.setAttribute('cy', ny);
+      ring.setAttribute('r', nr + 6);
+      ring.setAttribute('fill', 'none');
+      ring.setAttribute('stroke', '#fff');
+      ring.setAttribute('stroke-width', '1.5');
+      ring.setAttribute('opacity', '0.7');
+      ring.setAttribute('pointer-events', 'none');
+      nodeGroup.appendChild(ring);
+    }
+
+    const examLabel = vocabs[colIdx.exam][ev] || '?';
+    const outerLabels = [...outerSet].map(ov => vocabs[outerCI][ov] || '?');
+
+    circle.addEventListener('mouseenter', me => {
+      if (!isDimmed) circle.setAttribute('r', (isSelected ? nr + 3 : nr) + 2);
+      showTooltip(me,
+        '<strong>' + escHtml(examLabel) + '</strong><br>' +
+        outerLabels.slice(0, 6).map(l => '· ' + escHtml(l)).join('<br>') +
+        (outerLabels.length > 6 ? '<br>· …' + (outerLabels.length - 6) + ' more' : '') +
+        '<br><span style="color:var(--dim)">' + outerCount + ' ' + escHtml(headers[outerCI] || 'groups') + '</span>'
+      );
+    });
+    circle.addEventListener('mousemove', moveTooltip);
+    circle.addEventListener('mouseleave', () => {
+      circle.setAttribute('r', isSelected ? nr + 3 : nr);
+      hideTooltip();
+    });
+    circle.addEventListener('click', evt => {
+      evt.stopPropagation();
+      if (selectedExamEv === ev) {
+        selectedExamEv = null;
+        examSearchInput.value = '';
+        document.getElementById('selected-exam-info').style.display = 'none';
+      } else {
+        selectedExamEv = ev;
+        examSearchInput.value = examLabel;
+      }
+      renderRadial();
+      if (selectedExamEv !== null) updateSelectedExamInfo();
+    });
+
+    nodeGroup.appendChild(circle);
+  });
+  svg.appendChild(nodeGroup);
+
+  // ── Center label ──
+  const cLabel = document.createElementNS(ns, 'text');
+  cLabel.setAttribute('x', cx); cLabel.setAttribute('y', cy - 10);
+  cLabel.setAttribute('text-anchor', 'middle'); cLabel.setAttribute('dominant-baseline', 'middle');
+  cLabel.setAttribute('fill', '#606674'); cLabel.setAttribute('font-size', '11');
+  cLabel.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
+  cLabel.setAttribute('pointer-events', 'none');
+  cLabel.textContent = radialMode === 'poly' ? 'Polyvalent exams' : 'Unique exams';
+  svg.appendChild(cLabel);
+
+  const cLabel2 = document.createElementNS(ns, 'text');
+  cLabel2.setAttribute('x', cx); cLabel2.setAttribute('y', cy + 8);
+  cLabel2.setAttribute('text-anchor', 'middle'); cLabel2.setAttribute('dominant-baseline', 'middle');
+  cLabel2.setAttribute('fill', '#4f8ef7'); cLabel2.setAttribute('font-size', '14');
+  cLabel2.setAttribute('font-weight', '700');
+  cLabel2.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
+  cLabel2.setAttribute('pointer-events', 'none');
+  cLabel2.textContent = totalExams.toLocaleString();
+  svg.appendChild(cLabel2);
+
+  wrap.innerHTML = '';
+  wrap.appendChild(svg);
+
+  // Pulse highlighted arcs after render
+  if (selectedOuterSet && selectedOuterSet.size > 0) {
+    requestAnimationFrame(() => {
+      for (const [ov, el] of arcEls) {
+        if (selectedOuterSet.has(ov)) {
+          el.classList.remove('arc-pulse');
+          void el.offsetWidth;
+          el.classList.add('arc-pulse');
+        }
+      }
+    });
+  }
+}
+
+// ── TOGGLE TABS ──
+document.getElementById('toggle-poly').addEventListener('click', () => {
+  radialMode = 'poly';
+  document.getElementById('toggle-poly').classList.add('active');
+  document.getElementById('toggle-unique').classList.remove('active');
+  selectedExamEv = null; examSearchInput.value = '';
+  document.getElementById('selected-exam-info').style.display = 'none';
+  renderRadial();
+});
+document.getElementById('toggle-unique').addEventListener('click', () => {
+  radialMode = 'unique';
+  document.getElementById('toggle-unique').classList.add('active');
+  document.getElementById('toggle-poly').classList.remove('active');
+  selectedExamEv = null; examSearchInput.value = '';
+  document.getElementById('selected-exam-info').style.display = 'none';
+  renderRadial();
+});
+document.getElementById('outer-dim-sel').addEventListener('change', () => {
+  outerCI = parseInt(document.getElementById('outer-dim-sel').value, 10);
+  selectedExamEv = null; examSearchInput.value = '';
+  document.getElementById('selected-exam-info').style.display = 'none';
+  renderRadial();
+});
 
 // ── INIT ──
 async function init() {
@@ -549,7 +1172,18 @@ async function init() {
 
   buildQACards();
 
-  // ── Populate subset selector ──
+  // Populate outer ring selector
+  const outerSel = document.getElementById('outer-dim-sel');
+  headers.forEach((h, i) => {
+    if (i === colIdx.exam) return;
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = h + ' (' + (vocabs[i] ? vocabs[i].length : 0) + ')';
+    outerSel.appendChild(opt);
+    if (i === colIdx.studiengang) { outerSel.value = String(i); outerCI = i; }
+  });
+
+  // Populate subset selector
   const colSel = document.getElementById('subset-col-sel');
   const valInp = document.getElementById('subset-val-inp');
   const clearBtn = document.getElementById('subset-clear-btn');
@@ -571,6 +1205,8 @@ async function init() {
 
   document.getElementById('subset-bar').style.display = 'flex';
   updateSubsetCount();
+
+  if (outerCI >= 0) renderRadial();
 }
 
 init();
