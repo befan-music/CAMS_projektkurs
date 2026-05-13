@@ -2725,43 +2725,153 @@ function renderVenn() {
     }
   }
 
-  // ── Draw circles and labels ──
+  // ── Current animated positions (start = ring layout) ──
+  const curPos = positions.map(p => ({ x: p.x, y: p.y }));
+  let animFrame = null;
   let selectedIdx = null;
 
+  // Compute spread layout: selected circle center-left, connected circles fanned right
+  // Unconnected circles pushed to far edges (still visible but clearly secondary)
+  function computeSpreadPositions(idx) {
+    const detailPanelW = 360; // approx width of venn-detail panel when open
+    const usableW = W - detailPanelW;
+    const pad = 60;
+
+    // Selected circle goes center-left of usable area
+    const selX = pad + radii[idx] + 10;
+    const selY = H / 2;
+
+    // Connected circles: those with overlap > 0
+    const connected = [];
+    const unconnected = [];
+    for (let j = 0; j < n; j++) {
+      if (j === idx) continue;
+      if (overlaps[idx][j] > 0) connected.push(j);
+      else unconnected.push(j);
+    }
+
+    // Fan connected circles on the right half, sorted by overlap desc
+    connected.sort((a, b) => overlaps[idx][b] - overlaps[idx][a]);
+
+    const result = new Array(n);
+    result[idx] = { x: selX, y: selY };
+
+    // Spread connected vertically across usable height, horizontally spread across right portion
+    const nConn = connected.length;
+    if (nConn > 0) {
+      // Use 2 columns if many connections
+      const cols = nConn > 8 ? 2 : 1;
+      const perCol = Math.ceil(nConn / cols);
+      const colW = (usableW - selX - radii[idx] * 2 - pad * 2) / cols;
+      const baseX = selX + radii[idx] + pad * 2;
+
+      connected.forEach((j, ki) => {
+        const col = Math.floor(ki / perCol);
+        const row = ki % perCol;
+        const rowCount = (col === cols - 1) ? nConn - col * perCol : perCol;
+        const x = baseX + col * colW + colW / 2;
+        const ySpan = H - pad * 2;
+        const y = pad + radii[j] + (rowCount > 1 ? (row / (rowCount - 1)) * (ySpan - radii[j] * 2) : ySpan / 2);
+        result[j] = { x, y };
+      });
+    }
+
+    // Push unconnected circles off to left edge, stacked
+    unconnected.forEach((j, ki) => {
+      result[j] = {
+        x: -radii[j] * 0.6,   // mostly off-screen left
+        y: pad + ki * (radii[j] * 1.2 + 8)
+      };
+    });
+
+    return result;
+  }
+
+  function animateTo(targetPos, duration) {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    const startPos = curPos.map(p => ({ x: p.x, y: p.y }));
+    const start = performance.now();
+
+    function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const e = ease(t);
+
+      for (let i = 0; i < n; i++) {
+        curPos[i].x = startPos[i].x + (targetPos[i].x - startPos[i].x) * e;
+        curPos[i].y = startPos[i].y + (targetPos[i].y - startPos[i].y) * e;
+        updateNodePosition(i);
+      }
+      updateAllLines();
+
+      if (t < 1) animFrame = requestAnimationFrame(step);
+      else animFrame = null;
+    }
+    animFrame = requestAnimationFrame(step);
+  }
+
+  function updateNodePosition(i) {
+    const p = curPos[i];
+    const r = radii[i];
+    circEls[i].setAttribute('cx', p.x.toFixed(1));
+    circEls[i].setAttribute('cy', p.y.toFixed(1));
+    const labelY = p.y - r * 0.22;
+    textEls[i].name.setAttribute('x', p.x.toFixed(1));
+    textEls[i].name.setAttribute('y', labelY.toFixed(1));
+    textEls[i].cnt.setAttribute('x', p.x.toFixed(1));
+    textEls[i].cnt.setAttribute('y', (labelY + 13).toFixed(1));
+  }
+
+  function updateAllLines() {
+    for (let i = 0; i < n; i++) {
+      for (let j = i+1; j < n; j++) {
+        const key = i+'-'+j;
+        const line = lineEls[key];
+        const lbl  = lineLbls[key];
+        if (!line) continue;
+        const pi = curPos[i], pj = curPos[j];
+        line.setAttribute('x1', pi.x.toFixed(1));
+        line.setAttribute('y1', pi.y.toFixed(1));
+        line.setAttribute('x2', pj.x.toFixed(1));
+        line.setAttribute('y2', pj.y.toFixed(1));
+        if (lbl) {
+          lbl.setAttribute('x', ((pi.x + pj.x) / 2).toFixed(1));
+          lbl.setAttribute('y', ((pi.y + pj.y) / 2).toFixed(1));
+        }
+      }
+    }
+  }
+
   function applySelection(idx) {
-    // idx = null → reset everything to default
     selectedIdx = idx;
 
+    // Visibility / styling
     for (let i = 0; i < n; i++) {
-      const isSelected = (idx === null || i === idx);
       const circle = circEls[i];
-      const col = VENN_COLORS[i % VENN_COLORS.length];
-
       if (idx === null) {
-        // Reset
         circle.setAttribute('fill-opacity', '0.18');
         circle.setAttribute('stroke-opacity', '1');
         circle.setAttribute('stroke-width', '2');
         textEls[i].name.setAttribute('opacity', '1');
         textEls[i].cnt.setAttribute('opacity', '0.8');
       } else if (i === idx) {
-        // Selected circle: highlight
         circle.setAttribute('fill-opacity', '0.35');
         circle.setAttribute('stroke-opacity', '1');
         circle.setAttribute('stroke-width', '3');
         textEls[i].name.setAttribute('opacity', '1');
         textEls[i].cnt.setAttribute('opacity', '1');
       } else {
-        // Other circles: dim
-        circle.setAttribute('fill-opacity', '0.06');
-        circle.setAttribute('stroke-opacity', '0.3');
-        circle.setAttribute('stroke-width', '1');
-        textEls[i].name.setAttribute('opacity', '0.35');
-        textEls[i].cnt.setAttribute('opacity', '0.25');
+        const connected = overlaps[idx][i] > 0;
+        circle.setAttribute('fill-opacity', connected ? '0.15' : '0.04');
+        circle.setAttribute('stroke-opacity', connected ? '0.7' : '0.15');
+        circle.setAttribute('stroke-width', connected ? '1.5' : '1');
+        textEls[i].name.setAttribute('opacity', connected ? '0.9' : '0.2');
+        textEls[i].cnt.setAttribute('opacity', connected ? '0.7' : '0.12');
       }
     }
 
-    // Lines and labels
+    // Line styling
     for (let i = 0; i < n; i++) {
       for (let j = i+1; j < n; j++) {
         const key = i+'-'+j;
@@ -2770,30 +2880,55 @@ function renderVenn() {
         if (!line) continue;
         const ov = overlaps[i][j];
         if (idx === null) {
-          // Default: faint lines, no labels
           const alpha = 0.04 + 0.18 * (ov / maxOv);
           line.setAttribute('stroke-opacity', alpha.toFixed(3));
           line.setAttribute('stroke', '#999');
+          line.setAttribute('stroke-width', Math.max(1, 7 * (ov / maxOv)).toFixed(1));
           lbl.setAttribute('opacity', '0');
         } else if (i === idx || j === idx) {
-          // Connected to selected: highlight line with the OTHER circle's color
           const otherIdx = (i === idx) ? j : i;
           const otherCol = VENN_COLORS[otherIdx % VENN_COLORS.length];
-          const w = Math.max(1.5, 7 * (ov / maxOv));
+          const w = Math.max(2, 8 * (ov / maxOv));
           line.setAttribute('stroke', otherCol);
           line.setAttribute('stroke-width', w.toFixed(1));
-          line.setAttribute('stroke-opacity', (0.5 + 0.5 * (ov / maxOv)).toFixed(2));
+          line.setAttribute('stroke-opacity', (0.55 + 0.45 * (ov / maxOv)).toFixed(2));
           lbl.setAttribute('fill', otherCol);
           lbl.setAttribute('font-weight', '700');
-          lbl.setAttribute('font-size', '11');
+          lbl.setAttribute('font-size', '12');
           lbl.setAttribute('opacity', '1');
         } else {
-          // Unrelated: fully hide
-          line.setAttribute('stroke-opacity', '0.02');
+          line.setAttribute('stroke-opacity', '0.01');
           lbl.setAttribute('opacity', '0');
         }
       }
     }
+
+    // Update label text truncation
+    for (let i = 0; i < n; i++) {
+      const te = textEls[i];
+      const fullName = te.fullName;
+      let displayName;
+      if (idx === null) {
+        // Ring layout: truncate to fit radius
+        const maxChars = Math.max(8, Math.floor(te.r / 4.5));
+        displayName = fullName.length > maxChars ? fullName.slice(0, maxChars) + '…' : fullName;
+        te.name.setAttribute('font-size', n > 12 ? '9' : '10');
+      } else if (i === idx) {
+        displayName = fullName; // selected: always full
+        te.name.setAttribute('font-size', '13');
+      } else if (overlaps[idx][i] > 0) {
+        displayName = fullName; // connected: full name, larger
+        te.name.setAttribute('font-size', '11');
+      } else {
+        displayName = fullName.slice(0, 4) + '…'; // unconnected: very short (off-screen)
+        te.name.setAttribute('font-size', '9');
+      }
+      te.name.textContent = displayName;
+    }
+
+    // Animate positions
+    const target = (idx === null) ? positions.map(p => ({ x: p.x, y: p.y })) : computeSpreadPositions(idx);
+    animateTo(target, 420);
   }
 
   groups.forEach((g, i) => {
@@ -2805,19 +2940,18 @@ function renderVenn() {
       cx: pos.x, cy: pos.y, r,
       fill: col, 'fill-opacity': '0.18',
       stroke: col, 'stroke-width': '2',
-      style: 'cursor:pointer;transition:fill-opacity .12s,stroke-opacity .12s,stroke-width .12s'
+      style: 'cursor:pointer;transition:fill-opacity .15s,stroke-opacity .15s,stroke-width .15s'
     });
 
     circle.addEventListener('mouseenter', () => {
-      if (selectedIdx !== i) circle.setAttribute('fill-opacity', selectedIdx === null ? '0.28' : '0.06');
+      if (selectedIdx !== i) circle.setAttribute('fill-opacity', selectedIdx === null ? '0.28' : (overlaps[selectedIdx]?.[i] > 0 ? '0.25' : '0.04'));
     });
     circle.addEventListener('mouseleave', () => {
-      if (selectedIdx !== i) circle.setAttribute('fill-opacity', selectedIdx === null ? '0.18' : '0.06');
+      if (selectedIdx !== i) circle.setAttribute('fill-opacity', selectedIdx === null ? '0.18' : (overlaps[selectedIdx]?.[i] > 0 ? '0.15' : '0.04'));
     });
     circle.addEventListener('click', (e) => {
       e.stopPropagation();
       if (selectedIdx === i) {
-        // Deselect on second click
         applySelection(null);
         document.getElementById('venn-detail').style.display = 'none';
       } else {
@@ -2829,7 +2963,6 @@ function renderVenn() {
     circLayer.appendChild(circle);
     circEls[i] = circle;
 
-    // Labels
     const labelY = pos.y - r * 0.22;
     const maxChars = Math.max(8, Math.floor(r / 4.5));
     const name = g.gVal.length > maxChars ? g.gVal.slice(0, maxChars) + '…' : g.gVal;
@@ -2837,25 +2970,23 @@ function renderVenn() {
 
     const nameLbl = svgEl('text', {
       x: pos.x, y: labelY, 'text-anchor': 'middle', 'dominant-baseline': 'middle',
-      'font-size': fontSize, 'font-weight': '700', fill: col, 'pointer-events': 'none',
-      style: 'transition:opacity .12s'
+      'font-size': fontSize, 'font-weight': '700', fill: col, 'pointer-events': 'none'
     });
     nameLbl.textContent = name;
     textLayer.appendChild(nameLbl);
 
     const cntLbl = svgEl('text', {
-      x: pos.x, y: labelY + (n > 12 ? 11 : 13),
+      x: pos.x, y: labelY + 13,
       'text-anchor': 'middle', 'dominant-baseline': 'middle',
-      'font-size': '8', fill: col, opacity: '0.8', 'pointer-events': 'none',
-      style: 'transition:opacity .12s'
+      'font-size': '8', fill: col, opacity: '0.8', 'pointer-events': 'none'
     });
     cntLbl.textContent = g.uniqueExams.length + 'u · ' + g.polyExams.length + 'p';
     textLayer.appendChild(cntLbl);
 
-    textEls[i] = { name: nameLbl, cnt: cntLbl };
+    textEls[i] = { name: nameLbl, cnt: cntLbl, fullName: g.gVal, r };
   });
 
-  // Click on SVG background → deselect
+  // Click background → deselect
   svg.addEventListener('click', () => {
     if (selectedIdx !== null) {
       applySelection(null);
