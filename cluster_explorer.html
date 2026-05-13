@@ -353,12 +353,36 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 .cv-load-more:hover { border-color: var(--accent); color: var(--accent); }
 /* VENN VIEW */
 #venn-view { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:var(--bg); z-index:15; flex-direction:column; overflow:hidden; }
-#venn-header { padding:10px 14px; background:var(--hover); border-bottom:1px solid var(--border2); display:flex; align-items:center; gap:10px; flex-shrink:0; }
-#venn-back { background:none; border:1px solid var(--border2); color:var(--accent); border-radius:4px; padding:3px 10px; font-size:11px; cursor:pointer; }
-#venn-title { font-size:12px; font-weight:700; color:var(--bright); flex:1; }
-#venn-hint { font-size:11px; color:var(--dim); }
-#venn-svg-wrap { flex:1; overflow:hidden; position:relative; }
-#venn-svg { width:100%; height:100%; }
+#venn-header { padding:8px 12px; background:var(--hover); border-bottom:1px solid var(--border2); display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+#venn-back { background:none; border:1px solid var(--border2); color:var(--accent); border-radius:4px; padding:3px 10px; font-size:11px; cursor:pointer; white-space:nowrap; }
+#venn-title { font-size:12px; font-weight:700; color:var(--bright); }
+#venn-hint { font-size:10px; color:var(--dim); flex:1; }
+#venn-zoom-controls { display:flex; align-items:center; gap:6px; margin-left:auto; flex-shrink:0; }
+.vz-group {
+  display:flex; align-items:center;
+  border:1px solid var(--border2); border-radius:5px; overflow:hidden;
+  background:var(--bg);
+}
+.vz-group .vz-btn {
+  border:none; border-radius:0;
+  border-right:1px solid var(--border2);
+}
+.vz-group .vz-btn:last-child { border-right:none; }
+.vz-btn {
+  background:var(--bg); border:1px solid var(--border2); color:var(--dim);
+  border-radius:4px; padding:3px 9px; font-size:11px; cursor:pointer;
+  white-space:nowrap; transition:background .1s, color .1s, border-color .1s;
+  display:flex; align-items:center; gap:4px;
+}
+.vz-btn:hover { background:var(--hover); color:var(--text); }
+.vz-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+#venn-zoom-level, #venn-circle-level {
+  font-size:10px; color:var(--dim); min-width:34px; text-align:center;
+  padding:0 4px; background:var(--bg);
+}
+#venn-svg-wrap { flex:1; overflow:hidden; position:relative; cursor:grab; }
+#venn-svg-wrap.panning { cursor:grabbing; }
+#venn-svg { width:100%; height:100%; display:block; }
 #venn-detail { display:none; position:absolute; top:0; right:0; bottom:0; width:340px; background:var(--bg); border-left:1px solid var(--border2); flex-direction:column; overflow:hidden; box-shadow:-3px 0 12px rgba(0,0,0,.08); }
 #venn-detail-hd { padding:10px 14px; background:var(--hover); border-bottom:1px solid var(--border2); display:flex; align-items:center; gap:8px; flex-shrink:0; font-size:11px; font-weight:700; color:var(--bright); }
 #venn-detail-close { background:none; border:none; color:var(--dim); font-size:14px; cursor:pointer; padding:0 2px; margin-left:auto; }
@@ -730,11 +754,35 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
         <div id="venn-view">
           <div id="venn-header">
             <button id="venn-back">← Cards</button>
-            <span id="venn-title">Venn — exam overlap between groups</span>
-            <span id="venn-hint">Click a circle to see its connections · circle positions are fixed in a ring (visual overlap is not meaningful — the lines show actual shared exams)</span>
+            <span id="venn-title">Venn — exam overlap</span>
+            <span id="venn-hint">Scroll to zoom · drag to pan · click circle to inspect</span>
+            <div id="venn-zoom-controls">
+              <!-- Group 0: All / Focus mode -->
+              <div class="vz-group">
+                <button class="vz-btn active" id="vz-all" title="Show all circles (deselect)">All</button>
+                <button class="vz-btn" id="vz-focus" title="Focus on selected circle and its connections">Focus</button>
+              </div>
+              <!-- Group 1: viewport zoom -->
+              <div class="vz-group">
+                <button class="vz-btn" id="vz-zoom-out" title="Zoom out">－</button>
+                <span id="venn-zoom-level">100%</span>
+                <button class="vz-btn" id="vz-zoom-in" title="Zoom in">＋</button>
+              </div>
+              <!-- Group 2: fit + orbit -->
+              <div class="vz-group">
+                <button class="vz-btn" id="vz-fit" title="Fit all circles to screen">⊡ Fit</button>
+                <button class="vz-btn" id="vz-orbit" title="Orbit: center selected circle, all others orbit around it">⊙ Orbit</button>
+              </div>
+              <!-- Group 3: circle radius scale -->
+              <div class="vz-group">
+                <button class="vz-btn" id="vz-circle-out" title="Shrink all circles">◎－</button>
+                <span id="venn-circle-level">100%</span>
+                <button class="vz-btn" id="vz-circle-in" title="Grow all circles">◎＋</button>
+              </div>
+            </div>
           </div>
           <div id="venn-svg-wrap">
-            <svg id="venn-svg"></svg>
+            <svg id="venn-svg"><g id="venn-cam"></g></svg>
             <div id="venn-detail">
               <div id="venn-detail-hd">
                 <span id="venn-detail-title">—</span>
@@ -2470,6 +2518,10 @@ function renderCardView() {
   const info = document.getElementById('cards-info');
   grid.innerHTML = '';
   _vennGroups = null;
+  vennSelectedIdx = null;
+  renderVenn._savedPos = null;
+  vennCam.x = 0; vennCam.y = 0; vennCam.scale = 1;
+  vennRadiusScale = 1.0;
   document.getElementById('cards-detail').style.display = 'none';
   document.getElementById('venn-view').style.display = 'none';
 
@@ -2636,13 +2688,58 @@ document.getElementById('cards-detail-back').addEventListener('click', () => {
 // ── VENN DIAGRAM ──
 let _vennGroups = null; // cached from last renderCardView
 
+// ── VENN CAMERA STATE (pan + zoom, persists across re-renders) ──
+const vennCam = { x: 0, y: 0, scale: 1 };
+let vennRadiusScale = 1.0;   // multiplier applied to all circle radii
+let vennSelectedIdx = null;  // persists across radius re-renders
+let vennIsDragging = false;  // set true during drag so circle clicks are suppressed
+// Module-level callbacks set by renderVenn so external handlers can call into the current render's closures
+let _vennClickBg = null;
+let _vennOrbit   = null;
+
+function applyVennCam() {
+  const cam = document.getElementById('venn-cam');
+  if (cam) cam.setAttribute('transform', `translate(${vennCam.x.toFixed(2)},${vennCam.y.toFixed(2)}) scale(${vennCam.scale.toFixed(4)})`);
+  const lvl = document.getElementById('venn-zoom-level');
+  if (lvl) lvl.textContent = Math.round(vennCam.scale * 100) + '%';
+}
+
+function vennZoomAt(screenX, screenY, factor) {
+  // Zoom around a screen point
+  vennCam.x = screenX + (vennCam.x - screenX) * factor;
+  vennCam.y = screenY + (vennCam.y - screenY) * factor;
+  vennCam.scale *= factor;
+  applyVennCam();
+}
+
+function vennFitAll(W, H, positions, radii) {
+  if (!positions || positions.length === 0) return;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  positions.forEach((p, i) => {
+    const r = radii[i];
+    minX = Math.min(minX, p.x - r); minY = Math.min(minY, p.y - r);
+    maxX = Math.max(maxX, p.x + r); maxY = Math.max(maxY, p.y + r);
+  });
+  const pad = 40;
+  const scaleX = (W - pad * 2) / (maxX - minX);
+  const scaleY = (H - pad * 2) / (maxY - minY);
+  vennCam.scale = Math.min(scaleX, scaleY, 2);
+  vennCam.x = W / 2 - ((minX + maxX) / 2) * vennCam.scale;
+  vennCam.y = H / 2 - ((minY + maxY) / 2) * vennCam.scale;
+  applyVennCam();
+}
+
 function renderVenn() {
   if (!_vennGroups || _vennGroups.length === 0) return;
   const svg = document.getElementById('venn-svg');
-  svg.innerHTML = '';
   const W = svg.clientWidth || svg.parentElement.clientWidth;
   const H = svg.clientHeight || svg.parentElement.clientHeight;
   if (!W || !H) return;
+
+  // Clear camera group, keep the <g id="venn-cam"> element
+  let cam = document.getElementById('venn-cam');
+  if (!cam) { cam = document.createElementNS('http://www.w3.org/2000/svg','g'); cam.id = 'venn-cam'; svg.appendChild(cam); }
+  cam.innerHTML = '';
 
   const groups = _vennGroups;
   const n = groups.length;
@@ -2662,14 +2759,22 @@ function renderVenn() {
 
   const maxTotal = Math.max(...groups.map(g => g.exams.length), 1);
   const MIN_R = 28, MAX_R = Math.min(W, H) * 0.21;
-  const radii = groups.map(g => MIN_R + (MAX_R - MIN_R) * Math.sqrt(g.exams.length / maxTotal));
+  const radii = groups.map(g => (MIN_R + (MAX_R - MIN_R) * Math.sqrt(g.exams.length / maxTotal)) * vennRadiusScale);
 
+  // Ring layout positions in world space (camera-independent)
   const cx = W / 2, cy = H / 2;
   const ringR = Math.min(W, H) * 0.30;
   const positions = groups.map((_, i) => {
     const angle = (2 * Math.PI * i / n) - Math.PI / 2;
     return { x: cx + ringR * Math.cos(angle), y: cy + ringR * Math.sin(angle) };
   });
+
+  // Reset camera to fit on first render (scale===1 means never set)
+  if (vennCam.scale === 1 && vennCam.x === 0 && vennCam.y === 0) {
+    vennFitAll(W, H, positions, radii);
+  } else {
+    applyVennCam();
+  }
 
   const VENN_COLORS = ['#655479','#00883A','#b8860b','#c0392b','#1a7a6e','#8b4513','#2e86ab','#6d4c41','#4a7c59','#7b3f6e','#3d6b4f','#5c4033','#1a5276','#7d6608','#512e5f'];
 
@@ -2680,15 +2785,15 @@ function renderVenn() {
     return el;
   }
 
-  // Layer groups: lines → labels → circles → circle-labels (so circles are always on top)
+  // All layers go inside cam (camera group)
   const lineLayer  = svgEl('g', { id: 'venn-lines'  });
   const lblLayer   = svgEl('g', { id: 'venn-lbl-lines' });
   const circLayer  = svgEl('g', { id: 'venn-circles' });
   const textLayer  = svgEl('g', { id: 'venn-texts'  });
-  svg.appendChild(lineLayer);
-  svg.appendChild(lblLayer);
-  svg.appendChild(circLayer);
-  svg.appendChild(textLayer);
+  cam.appendChild(lineLayer);
+  cam.appendChild(lblLayer);
+  cam.appendChild(circLayer);
+  cam.appendChild(textLayer);
 
   // Store references keyed by pair and by index for later dimming
   const lineEls  = {};  // "i-j" -> line element
@@ -2725,10 +2830,17 @@ function renderVenn() {
     }
   }
 
-  // ── Current animated positions (start = ring layout) ──
-  const curPos = positions.map(p => ({ x: p.x, y: p.y }));
+  // ── Current animated positions — persist across radius re-renders ──
+  // If we already have positions saved (same group count), restore them
+  let curPos;
+  if (renderVenn._savedPos && renderVenn._savedPos.length === n) {
+    curPos = renderVenn._savedPos;
+  } else {
+    curPos = positions.map(p => ({ x: p.x, y: p.y }));
+    renderVenn._savedPos = curPos;
+  }
   let animFrame = null;
-  let selectedIdx = null;
+  let selectedIdx = vennSelectedIdx;
 
   // Compute spread layout: selected circle center-left, connected circles fanned right
   // Unconnected circles pushed to far edges (still visible but clearly secondary)
@@ -2845,6 +2957,7 @@ function renderVenn() {
 
   function applySelection(idx) {
     selectedIdx = idx;
+    vennSelectedIdx = idx;
 
     // Visibility / styling
     for (let i = 0; i < n; i++) {
@@ -2951,13 +3064,15 @@ function renderVenn() {
     });
     circle.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (selectedIdx === i) {
-        applySelection(null);
-        document.getElementById('venn-detail').style.display = 'none';
-      } else {
+      if (vennIsDragging) return; // suppress click after pan drag
+      // Always select this circle and enter Focus mode (even if already selected — allows re-centering)
+      if (selectedIdx !== i) {
         applySelection(i);
         showVennDetail(g, i, overlaps, groups, VENN_COLORS);
       }
+      // Switch to Focus mode
+      document.getElementById('vz-all').classList.remove('active');
+      document.getElementById('vz-focus').classList.add('active');
     });
 
     circLayer.appendChild(circle);
@@ -2986,13 +3101,53 @@ function renderVenn() {
     textEls[i] = { name: nameLbl, cnt: cntLbl, fullName: g.gVal, r };
   });
 
-  // Click background → deselect
-  svg.addEventListener('click', () => {
-    if (selectedIdx !== null) {
-      applySelection(null);
-      document.getElementById('venn-detail').style.display = 'none';
-    }
-  });
+  // ── ORBIT VIEW ──
+  function computeOrbitPositions(idx) {
+    const wrap = document.getElementById('venn-svg-wrap');
+    const viewW = wrap.clientWidth;
+    const viewH = wrap.clientHeight;
+    // World center = inverse of camera transform
+    const worldCx = (viewW / 2 - vennCam.x) / vennCam.scale;
+    const worldCy = (viewH / 2 - vennCam.y) / vennCam.scale;
+
+    const result = new Array(n);
+    result[idx] = { x: worldCx, y: worldCy };
+
+    const others = [];
+    for (let j = 0; j < n; j++) { if (j !== idx) others.push(j); }
+    others.sort((a, b) => overlaps[idx][b] - overlaps[idx][a]);
+
+    const orbitR = Math.min(viewW, viewH) * 0.34 / vennCam.scale;
+    others.forEach((j, ki) => {
+      const angle = (2 * Math.PI * ki / others.length) - Math.PI / 2;
+      result[j] = {
+        x: worldCx + orbitR * Math.cos(angle),
+        y: worldCy + orbitR * Math.sin(angle)
+      };
+    });
+    return result;
+  }
+
+  // Restore selection state after radius re-render (positions already restored via _savedPos)
+  if (selectedIdx !== null) {
+    applySelection(selectedIdx);
+  }
+
+  // Register module-level callbacks for external button handlers
+  _vennClickBg = () => {
+    applySelection(null);
+    document.getElementById('venn-detail').style.display = 'none';
+    document.getElementById('vz-orbit').classList.remove('active');
+    document.getElementById('vz-all').classList.add('active');
+    document.getElementById('vz-focus').classList.remove('active');
+  };
+  _vennOrbit = () => {
+    if (selectedIdx === null) return;
+    const orbitBtn = document.getElementById('vz-orbit');
+    orbitBtn.classList.toggle('active');
+    const target = computeOrbitPositions(selectedIdx);
+    animateTo(target, 500);
+  };
 }
 
 function showVennDetail(g, idx, overlaps, groups, colors) {
@@ -3058,18 +3213,152 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
 
 document.getElementById('venn-back').addEventListener('click', () => {
   document.getElementById('venn-view').style.display = 'none';
+  vennCam.x = 0; vennCam.y = 0; vennCam.scale = 1;
+  vennRadiusScale = 1.0;
+  vennSelectedIdx = null;
+  renderVenn._savedPos = null;
+  document.getElementById('venn-circle-level').textContent = '100%';
+  document.getElementById('vz-orbit').classList.remove('active');
+  document.getElementById('vz-all').classList.add('active');
+  document.getElementById('vz-focus').classList.remove('active');
 });
 document.getElementById('venn-detail-close').addEventListener('click', () => {
   document.getElementById('venn-detail').style.display = 'none';
 });
 document.getElementById('venn-btn').addEventListener('click', () => {
   if (!_vennGroups) return;
+  vennCam.x = 0; vennCam.y = 0; vennCam.scale = 1;
+  vennSelectedIdx = null;
+  renderVenn._savedPos = null;
+  document.getElementById('vz-orbit').classList.remove('active');
+  document.getElementById('vz-all').classList.add('active');
+  document.getElementById('vz-focus').classList.remove('active');
   document.getElementById('venn-view').style.display = 'flex';
-  // Defer render until after layout
   requestAnimationFrame(() => requestAnimationFrame(renderVenn));
 });
 window.addEventListener('resize', () => {
   if (document.getElementById('venn-view').style.display === 'flex') renderVenn();
+});
+
+// ── VENN PAN + ZOOM (wheel, drag) ──
+(function() {
+  const wrap = document.getElementById('venn-svg-wrap');
+  const svg  = document.getElementById('venn-svg');
+
+  // Wheel → zoom around cursor
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    const rect = svg.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+    vennZoomAt(mx, my, factor);
+  }, { passive: false });
+
+  // Drag → pan
+  let dragging = false, dragStartX = 0, dragStartY = 0, camStartX = 0, camStartY = 0;
+  // vennIsDragging: exposed so circle click handlers can bail if drag occurred
+  let didDrag = false;
+
+  wrap.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    dragging = true; didDrag = false; vennIsDragging = false;
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    camStartX = vennCam.x; camStartY = vennCam.y;
+    wrap.classList.add('panning');
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) { didDrag = true; vennIsDragging = true; }
+    vennCam.x = camStartX + dx;
+    vennCam.y = camStartY + dy;
+    applyVennCam();
+  });
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+    wrap.classList.remove('panning');
+    // Reset drag flag after a tick so click handlers can check it
+    setTimeout(() => { vennIsDragging = false; }, 50);
+  });
+
+  // Touch pan + pinch zoom
+  let lastTouches = null;
+  wrap.addEventListener('touchstart', e => {
+    lastTouches = e.touches;
+  }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
+    if (!lastTouches) return;
+    if (e.touches.length === 1 && lastTouches.length === 1) {
+      const dx = e.touches[0].clientX - lastTouches[0].clientX;
+      const dy = e.touches[0].clientY - lastTouches[0].clientY;
+      vennCam.x += dx; vennCam.y += dy;
+      applyVennCam();
+    } else if (e.touches.length === 2 && lastTouches.length === 2) {
+      const d0 = Math.hypot(lastTouches[0].clientX - lastTouches[1].clientX, lastTouches[0].clientY - lastTouches[1].clientY);
+      const d1 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      const rect = svg.getBoundingClientRect();
+      const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+      const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+      if (d0 > 0) vennZoomAt(mx, my, d1 / d0);
+      e.preventDefault();
+    }
+    lastTouches = e.touches;
+  }, { passive: false });
+})();
+
+// ── VENN ZOOM BUTTONS ──
+document.getElementById('vz-zoom-in').addEventListener('click', () => {
+  const wrap = document.getElementById('venn-svg-wrap');
+  vennZoomAt(wrap.clientWidth / 2, wrap.clientHeight / 2, 1.25);
+});
+document.getElementById('vz-zoom-out').addEventListener('click', () => {
+  const wrap = document.getElementById('venn-svg-wrap');
+  vennZoomAt(wrap.clientWidth / 2, wrap.clientHeight / 2, 1 / 1.25);
+});
+document.getElementById('vz-fit').addEventListener('click', () => {
+  const circles = document.querySelectorAll('#venn-circles circle');
+  if (!circles.length) return;
+  const wrap = document.getElementById('venn-svg-wrap');
+  const pts = [], rs = [];
+  circles.forEach(c => {
+    pts.push({ x: parseFloat(c.getAttribute('cx')), y: parseFloat(c.getAttribute('cy')) });
+    rs.push(parseFloat(c.getAttribute('r')));
+  });
+  vennFitAll(wrap.clientWidth, wrap.clientHeight, pts, rs);
+});
+document.getElementById('vz-orbit').addEventListener('click', () => {
+  if (_vennOrbit) _vennOrbit();
+});
+
+// ── CIRCLE RADIUS BUTTONS ──
+function changeVennRadius(factor) {
+  vennRadiusScale = Math.max(0.15, Math.min(4, vennRadiusScale * factor));
+  document.getElementById('venn-circle-level').textContent = Math.round(vennRadiusScale * 100) + '%';
+  // Re-render in place — camera stays, positions stay, only radii change
+  renderVenn();
+}
+document.getElementById('vz-circle-in').addEventListener('click', () => changeVennRadius(1.2));
+document.getElementById('vz-circle-out').addEventListener('click', () => changeVennRadius(1 / 1.2));
+
+// SVG background click → do nothing (All/Focus mode is only changed by buttons or circle clicks)
+
+// ── ALL / FOCUS MODE ──
+function setVennMode(mode) {
+  // mode: 'all' | 'focus'
+  document.getElementById('vz-all').classList.toggle('active', mode === 'all');
+  document.getElementById('vz-focus').classList.toggle('active', mode === 'focus');
+  if (mode === 'all') {
+    document.getElementById('vz-orbit').classList.remove('active');
+    if (_vennClickBg) _vennClickBg(); // deselect + restore ring layout
+  }
+}
+document.getElementById('vz-all').addEventListener('click', () => setVennMode('all'));
+document.getElementById('vz-focus').addEventListener('click', () => {
+  // Focus without a selection is a no-op — user must click a circle first
+  if (vennSelectedIdx !== null) setVennMode('focus');
 });
 
 document.getElementById('cards-group-sel').addEventListener('change', renderCardView);
