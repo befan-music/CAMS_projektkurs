@@ -756,6 +756,11 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
             <button id="venn-back">← Cards</button>
             <span id="venn-title">Venn — exam overlap</span>
             <span id="venn-hint">Scroll to zoom · drag to pan · click circle to inspect</span>
+            <div id="venn-search-wrap" style="position:relative">
+              <input id="venn-search" type="text" placeholder="Search group…" autocomplete="off"
+                style="width:180px;padding:4px 8px;border:1px solid var(--border2);border-radius:4px;background:var(--bg);color:var(--text);font-size:11px;outline:none">
+              <div id="venn-search-dropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--bg);border:1px solid var(--border2);border-radius:4px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)"></div>
+            </div>
             <div id="venn-zoom-controls">
               <!-- Group 0: All / Focus mode -->
               <div class="vz-group">
@@ -2687,6 +2692,8 @@ document.getElementById('cards-detail-back').addEventListener('click', () => {
 
 // ── VENN DIAGRAM ──
 let _vennGroups = null; // cached from last renderCardView
+let _vennOverlaps = null; // cached from last renderVenn
+let _vennColors = null;   // cached from last renderVenn
 
 // ── VENN CAMERA STATE (pan + zoom, persists across re-renders) ──
 const vennCam = { x: 0, y: 0, scale: 1 };
@@ -2755,6 +2762,7 @@ function renderVenn() {
       overlaps[i][j] = overlaps[j][i] = shared;
     }
 
+  _vennOverlaps = overlaps;
   const maxOv = Math.max(...groups.flatMap((_, a) => groups.map((__, b) => a < b ? overlaps[a][b] : 0)), 1);
 
   const maxTotal = Math.max(...groups.map(g => g.exams.length), 1);
@@ -2777,6 +2785,7 @@ function renderVenn() {
   }
 
   const VENN_COLORS = ['#655479','#00883A','#b8860b','#c0392b','#1a7a6e','#8b4513','#2e86ab','#6d4c41','#4a7c59','#7b3f6e','#3d6b4f','#5c4033','#1a5276','#7d6608','#512e5f'];
+  _vennColors = VENN_COLORS;
 
   const ns = 'http://www.w3.org/2000/svg';
   function svgEl(tag, attrs) {
@@ -3106,24 +3115,31 @@ function renderVenn() {
     const wrap = document.getElementById('venn-svg-wrap');
     const viewW = wrap.clientWidth;
     const viewH = wrap.clientHeight;
-    // World center = inverse of camera transform
     const worldCx = (viewW / 2 - vennCam.x) / vennCam.scale;
     const worldCy = (viewH / 2 - vennCam.y) / vennCam.scale;
 
     const result = new Array(n);
     result[idx] = { x: worldCx, y: worldCy };
 
-    const others = [];
-    for (let j = 0; j < n; j++) { if (j !== idx) others.push(j); }
-    others.sort((a, b) => overlaps[idx][b] - overlaps[idx][a]);
+    const connected = [], unconnected = [];
+    for (let j = 0; j < n; j++) {
+      if (j === idx) continue;
+      if (overlaps[idx][j] > 0) connected.push(j);
+      else unconnected.push(j);
+    }
+    connected.sort((a, b) => overlaps[idx][b] - overlaps[idx][a]);
 
-    const orbitR = Math.min(viewW, viewH) * 0.34 / vennCam.scale;
-    others.forEach((j, ki) => {
-      const angle = (2 * Math.PI * ki / others.length) - Math.PI / 2;
-      result[j] = {
-        x: worldCx + orbitR * Math.cos(angle),
-        y: worldCy + orbitR * Math.sin(angle)
-      };
+    const base = Math.min(viewW, viewH) / vennCam.scale;
+    const innerR = base * 0.26;
+    const outerR = base * 0.46;
+
+    connected.forEach((j, ki) => {
+      const angle = (2 * Math.PI * ki / Math.max(connected.length, 1)) - Math.PI / 2;
+      result[j] = { x: worldCx + innerR * Math.cos(angle), y: worldCy + innerR * Math.sin(angle) };
+    });
+    unconnected.forEach((j, ki) => {
+      const angle = (2 * Math.PI * ki / Math.max(unconnected.length, 1)) - Math.PI / 2;
+      result[j] = { x: worldCx + outerR * Math.cos(angle), y: worldCy + outerR * Math.sin(angle) };
     });
     return result;
   }
@@ -3144,9 +3160,45 @@ function renderVenn() {
   _vennOrbit = () => {
     if (selectedIdx === null) return;
     const orbitBtn = document.getElementById('vz-orbit');
-    orbitBtn.classList.toggle('active');
+    const isActive = orbitBtn.classList.toggle('active');
     const target = computeOrbitPositions(selectedIdx);
     animateTo(target, 500);
+
+    // Draw / remove dashed orbit guide rings
+    const existingGuides = cam.querySelectorAll('.orbit-guide');
+    existingGuides.forEach(el => el.remove());
+    if (isActive) {
+      const wrap2 = document.getElementById('venn-svg-wrap');
+      const vW = wrap2.clientWidth, vH = wrap2.clientHeight;
+      const cx = (vW / 2 - vennCam.x) / vennCam.scale;
+      const cy = (vH / 2 - vennCam.y) / vennCam.scale;
+      const base = Math.min(vW, vH) / vennCam.scale;
+
+      // Check which rings have circles
+      let hasConnected = false, hasUnconnected = false;
+      for (let j = 0; j < n; j++) {
+        if (j === selectedIdx) continue;
+        if (overlaps[selectedIdx][j] > 0) hasConnected = true;
+        else hasUnconnected = true;
+      }
+
+      if (hasConnected) {
+        const innerGuide = svgEl('circle', {
+          cx, cy, r: base * 0.26,
+          fill: 'none', stroke: 'var(--accent)', 'stroke-width': '0.5',
+          'stroke-dasharray': '4 6', opacity: '0.35', class: 'orbit-guide'
+        });
+        cam.insertBefore(innerGuide, lineLayer);
+      }
+      if (hasUnconnected) {
+        const outerGuide = svgEl('circle', {
+          cx, cy, r: base * 0.46,
+          fill: 'none', stroke: 'var(--dim)', 'stroke-width': '0.5',
+          'stroke-dasharray': '4 6', opacity: '0.3', class: 'orbit-guide'
+        });
+        cam.insertBefore(outerGuide, lineLayer);
+      }
+    }
   };
 }
 
@@ -3192,17 +3244,57 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
       const pct = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
       const barW = (count / maxOv * 100).toFixed(1);
       const otherCol = colors[j % colors.length];
-      const row = document.createElement('div');
-      row.style.cssText = 'margin-bottom:8px';
-      row.innerHTML =
+
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'margin-bottom:8px';
+
+      const header = document.createElement('div');
+      header.style.cssText = 'cursor:pointer;user-select:none';
+      header.innerHTML =
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">' +
           '<span style="font-size:11px;font-weight:600;color:' + otherCol + '">' + escHtml(other.gVal) + '</span>' +
-          '<span style="font-size:10px;color:var(--dim)">' + count.toLocaleString() + ' shared · ' + pct + '% of ' + escHtml(g.gVal) + '</span>' +
+          '<span style="font-size:10px;color:var(--dim)">' + count.toLocaleString() + ' shared · ' + pct + '% of ' + escHtml(g.gVal) + ' ▸</span>' +
         '</div>' +
         '<div style="height:6px;border-radius:3px;overflow:hidden;background:var(--border)">' +
           '<div style="height:100%;width:' + barW + '%;background:' + otherCol + ';border-radius:3px"></div>' +
         '</div>';
-      body.appendChild(row);
+
+      const expandPanel = document.createElement('div');
+      expandPanel.style.cssText = 'display:none;margin-top:5px;padding:6px 8px;background:var(--panel);border-radius:4px;border:1px solid var(--border)';
+      let expanded = false;
+
+      header.addEventListener('click', () => {
+        expanded = !expanded;
+        const arrow = header.querySelector('span:last-child');
+        if (expanded) {
+          arrow.textContent = arrow.textContent.replace('▸', '▾');
+          if (!expandPanel.hasChildNodes()) {
+            // Compute intersection of exam titles
+            const gExamSet = new Set(g.exams.map(e => e[0]));
+            const sharedExams = other.exams.filter(e => gExamSet.has(e[0]));
+            sharedExams.sort((a, b) => b[1] - a[1]);
+            if (sharedExams.length === 0) {
+              expandPanel.textContent = 'No shared exam titles found.';
+            } else {
+              sharedExams.forEach(([title, cnt]) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border);font-size:10px';
+                item.innerHTML = '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px">' + escHtml(title) + '</span>' +
+                  '<span style="color:var(--dim);flex-shrink:0">' + cnt.toLocaleString() + '</span>';
+                expandPanel.appendChild(item);
+              });
+            }
+          }
+          expandPanel.style.display = 'block';
+        } else {
+          arrow.textContent = arrow.textContent.replace('▾', '▸');
+          expandPanel.style.display = 'none';
+        }
+      });
+
+      wrap.appendChild(header);
+      wrap.appendChild(expandPanel);
+      body.appendChild(wrap);
     });
   }
 
@@ -3239,6 +3331,59 @@ document.getElementById('venn-btn').addEventListener('click', () => {
 window.addEventListener('resize', () => {
   if (document.getElementById('venn-view').style.display === 'flex') renderVenn();
 });
+
+// ── VENN SEARCH BAR ──
+(function() {
+  const searchInput = document.getElementById('venn-search');
+  const dropdown = document.getElementById('venn-search-dropdown');
+
+  function closeDropdown() {
+    dropdown.style.display = 'none';
+    dropdown.innerHTML = '';
+  }
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    closeDropdown();
+    if (!q || !_vennGroups) return;
+    const matches = _vennGroups
+      .map((g, i) => ({ g, i }))
+      .filter(({ g }) => g.gVal.toLowerCase().includes(q));
+    if (matches.length === 0) return;
+    matches.slice(0, 20).forEach(({ g, i }) => {
+      const item = document.createElement('div');
+      item.style.cssText = 'padding:5px 10px;cursor:pointer;font-size:11px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+      item.textContent = g.gVal;
+      item.addEventListener('mouseenter', () => item.style.background = 'var(--hover)');
+      item.addEventListener('mouseleave', () => item.style.background = '');
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        searchInput.value = '';
+        closeDropdown();
+        // Trigger focus view as if this circle was clicked
+        vennSelectedIdx = i;
+        renderVenn();
+        requestAnimationFrame(() => {
+          if (_vennGroups && _vennGroups[i] && _vennOverlaps && _vennColors) {
+            showVennDetail(_vennGroups[i], i, _vennOverlaps, _vennGroups, _vennColors);
+            document.getElementById('vz-focus').classList.add('active');
+            document.getElementById('vz-all').classList.remove('active');
+          }
+        });
+      });
+      dropdown.appendChild(item);
+    });
+    dropdown.style.display = 'block';
+  });
+
+  searchInput.addEventListener('blur', () => {
+    setTimeout(closeDropdown, 150);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDropdown();
+  });
+})();
 
 // ── VENN PAN + ZOOM (wheel, drag) ──
 (function() {
