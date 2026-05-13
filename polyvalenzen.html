@@ -5,32 +5,32 @@
 <title>Polyvalenzen — Exam Sharing Analysis</title>
 <style>
 :root {
-  --bg: #111318; --panel: #16191f; --sidebar: #1a1d24;
-  --border: #2a2d35; --border2: #353840;
-  --text: #c9cdd8; --dim: #606674; --bright: #e8eaf0;
-  --accent: #4f8ef7; --green: #3ecf8e; --yellow: #f7c948;
-  --hover: #1f2330;
+  --bg: #FFF9E5; --panel: #f5f0d8; --sidebar: #ede8d2;
+  --border: #d4cdb0; --border2: #c4bc98;
+  --text: #2a2418; --dim: #7a6e50; --bright: #1a1208;
+  --accent: #00883A; --accent2: #655479; --green: #00883A; --yellow: #b8860b;
+  --hover: #ede5c4;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background: var(--bg); color: var(--text); }
 
 #topbar {
-  height: 46px; background: #0d0f14;
-  border-bottom: 1px solid var(--border);
+  height: 46px; background: #00883A;
+  border-bottom: 1px solid #006d2e;
   display: flex; align-items: center; gap: 12px; padding: 0 18px; flex-shrink: 0;
 }
-#topbar h1 { font-size: 14px; font-weight: 700; color: var(--bright); }
-#topbar h1 em { color: var(--accent); font-style: normal; }
+#topbar h1 { font-size: 14px; font-weight: 700; color: #fff; }
+#topbar h1 em { color: #FFF9E5; font-style: normal; }
 #cluster-link-btn {
   display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(79,142,247,.12); border: 1px solid rgba(79,142,247,.35);
-  color: var(--accent); padding: 4px 11px; border-radius: 4px;
+  background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.5);
+  color: #fff; padding: 4px 11px; border-radius: 4px;
   font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap;
   transition: all .1s;
 }
-#cluster-link-btn:hover { background: rgba(79,142,247,.22); border-color: var(--accent); }
-#col-info { font-size: 11px; color: var(--dim); margin-left: auto; }
-#col-info strong { color: var(--text); }
+#cluster-link-btn:hover { background: rgba(255,255,255,.35); border-color: #fff; }
+#col-info { font-size: 11px; color: rgba(255,255,255,.75); margin-left: auto; }
+#col-info strong { color: #fff; }
 
 #subset-bar {
   background: var(--panel); border-bottom: 1px solid var(--border);
@@ -64,8 +64,8 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 .section-heading:first-child { margin-top: 0; }
 
 #error-banner {
-  background: #2d1515; border: 1px solid #6b2020; border-radius: 6px;
-  padding: 14px 18px; color: #f08080; margin-bottom: 20px; font-size: 12px; display:none;
+  background: #fde8e8; border: 1px solid #e8b4b4; border-radius: 6px;
+  padding: 14px 18px; color: #8b1a1a; margin-bottom: 20px; font-size: 12px; display:none;
 }
 #loading-bar {
   background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
@@ -83,7 +83,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 }
 .pv-qnum {
   font-size: 11px; font-weight: 700; color: var(--accent);
-  background: rgba(79,142,247,.12); border: 1px solid rgba(79,142,247,.3);
+  background: rgba(0,136,58,.1); border: 1px solid rgba(0,136,58,.3);
   border-radius: 4px; padding: 2px 7px; flex-shrink: 0; margin-top: 2px;
 }
 .pv-qtitle { font-size: 13px; font-weight: 600; color: var(--bright); line-height: 1.5; }
@@ -95,7 +95,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
   font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap;
   transition: all .1s; align-self: center;
 }
-.pv-show-btn:hover:not(:disabled) { background: rgba(79,142,247,.12); border-color: var(--accent); }
+.pv-show-btn:hover:not(:disabled) { background: rgba(0,136,58,.1); border-color: var(--accent); }
 .pv-show-btn.open { background: var(--accent); color: #fff; border-color: var(--accent); }
 .pv-show-btn:disabled { opacity: .4; cursor: not-allowed; }
 
@@ -180,7 +180,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 #selected-exam-info {
   padding: 6px 18px 8px; font-size: 11px;
   border-bottom: 1px solid var(--border); display: none;
-  background: rgba(79,142,247,.06);
+  background: rgba(0,136,58,.07);
 }
 #selected-exam-info strong { color: var(--accent); }
 
@@ -192,8 +192,8 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 
 #radial-tooltip {
   position: fixed; pointer-events: none; z-index: 300;
-  background: #0d0f14; border: 1px solid var(--border2); border-radius: 5px;
-  padding: 7px 11px; font-size: 11px; color: var(--bright); max-width: 280px;
+  background: #2a2418; border: 1px solid #1a1208; border-radius: 5px;
+  padding: 7px 11px; font-size: 11px; color: #FFF9E5; max-width: 280px;
   display: none; line-height: 1.5;
 }
 
@@ -203,16 +203,16 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
   display: none; flex-direction: column;
 }
 #detail-topbar {
-  height: 46px; background: #0d0f14; border-bottom: 1px solid var(--border);
+  height: 46px; background: #00883A; border-bottom: 1px solid #006d2e;
   display: flex; align-items: center; gap: 12px; padding: 0 18px; flex-shrink: 0;
 }
 #detail-back {
-  background: none; border: 1px solid var(--border2); color: var(--text);
+  background: none; border: 1px solid rgba(255,255,255,.5); color: #fff;
   padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;
 }
-#detail-back:hover { border-color: var(--dim); }
-#detail-title { font-size: 13px; font-weight: 600; color: var(--bright); }
-#detail-subtitle { font-size: 11px; color: var(--dim); margin-left: 4px; }
+#detail-back:hover { border-color: #fff; }
+#detail-title { font-size: 13px; font-weight: 600; color: #fff; }
+#detail-subtitle { font-size: 11px; color: rgba(255,255,255,.7); margin-left: 4px; }
 #detail-body { flex: 1; overflow: auto; padding: 20px 28px; }
 
 .dt-table { border-collapse: collapse; width: 100%; font-size: 12px; }
@@ -357,12 +357,10 @@ function parseCSV(text, delimOverride) {
 }
 
 // ── STATE ──
+const DEFAULT_POLYV_CSV = 'allePolyvalenzen_inLabSpalte.csv';
 const metaRaw = sessionStorage.getItem('polyvData');
-if (!metaRaw) {
-  document.getElementById('error-banner').style.display = '';
-  document.getElementById('error-banner').textContent =
-    'No data found. Open this page from the Cluster Explorer via the ⬡ Polyvalenzen button.';
-}
+// If no sessionStorage, auto-load the default CSV directly
+const _fallbackMeta = metaRaw ? null : { filename: DEFAULT_POLYV_CSV, delimiter: 'auto' };
 
 let meta = null, headers, vocabs, rows, colIdx = {};
 let subsetCI = -1, subsetVal = '';
@@ -370,7 +368,7 @@ let radialMode = 'poly';
 let outerCI = -1;
 let selectedExamEv = null; // currently selected exam vidx
 
-try { meta = metaRaw ? JSON.parse(metaRaw) : null; } catch(e) {}
+try { meta = metaRaw ? JSON.parse(metaRaw) : _fallbackMeta; } catch(e) { meta = _fallbackMeta; }
 
 function getActiveRows() {
   if (subsetCI < 0 || subsetVal === '') return rows;
@@ -603,9 +601,9 @@ function onSubsetChange() {
 
 // ── COLOUR PALETTE ──
 const PALETTE = [
-  '#4f8ef7','#3ecf8e','#f7c948','#e05c5c','#a78bfa','#fb923c','#38bdf8',
-  '#f472b6','#4ade80','#facc15','#60a5fa','#c084fc','#34d399','#f87171',
-  '#fbbf24','#818cf8','#e879f9','#2dd4bf','#fb7185','#a3e635'
+  '#00883A','#655479','#b8860b','#c0392b','#1a7a6e','#8b4513','#2e86ab',
+  '#6d4c41','#4a7c59','#7b3f6e','#3d6b4f','#5c4033','#1a5276','#7d6608',
+  '#512e5f','#1e8449','#922b21','#1a6b5c','#8b6914','#4a235a'
 ];
 
 // ── TOOLTIP ──
@@ -971,7 +969,7 @@ function renderRadial() {
     const ly = cy + labelR * Math.sin(g.midAngle);
     const txt = document.createElementNS(ns, 'text');
     txt.setAttribute('x', lx); txt.setAttribute('y', ly);
-    txt.setAttribute('fill', isDimmed ? '#333' : g.color);
+    txt.setAttribute('fill', isDimmed ? '#d4cdb0' : g.color);
     txt.setAttribute('font-size', '9');
     txt.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
     txt.setAttribute('font-weight', '600');
@@ -995,7 +993,7 @@ function renderRadial() {
     const isSelected = ev === selectedExamEv;
     const isDimmed = selectedExamEv !== null && !isSelected;
 
-    let nodeColor = '#c9cdd8';
+    let nodeColor = '#7a6e50';
     const outerSet = examToOuter.get(ev) || new Set();
     if (outerSet.size === 1) {
       const ov = [...outerSet][0];
@@ -1006,7 +1004,7 @@ function renderRadial() {
     const circle = document.createElementNS(ns, 'circle');
     circle.setAttribute('cx', nx); circle.setAttribute('cy', ny);
     circle.setAttribute('r', isSelected ? nr + 3 : nr);
-    circle.setAttribute('fill', isSelected ? '#fff' : nodeColor);
+    circle.setAttribute('fill', isSelected ? '#00883A' : nodeColor);
     circle.setAttribute('opacity', isDimmed ? '0.12' : '0.85');
     circle.style.cursor = 'pointer';
     circle.style.transition = 'opacity 0.2s, r 0.1s';
@@ -1016,9 +1014,9 @@ function renderRadial() {
       ring.setAttribute('cx', nx); ring.setAttribute('cy', ny);
       ring.setAttribute('r', nr + 6);
       ring.setAttribute('fill', 'none');
-      ring.setAttribute('stroke', '#fff');
-      ring.setAttribute('stroke-width', '1.5');
-      ring.setAttribute('opacity', '0.7');
+      ring.setAttribute('stroke', '#00883A');
+      ring.setAttribute('stroke-width', '2');
+      ring.setAttribute('opacity', '0.8');
       ring.setAttribute('pointer-events', 'none');
       nodeGroup.appendChild(ring);
     }
@@ -1062,7 +1060,7 @@ function renderRadial() {
   const cLabel = document.createElementNS(ns, 'text');
   cLabel.setAttribute('x', cx); cLabel.setAttribute('y', cy - 10);
   cLabel.setAttribute('text-anchor', 'middle'); cLabel.setAttribute('dominant-baseline', 'middle');
-  cLabel.setAttribute('fill', '#606674'); cLabel.setAttribute('font-size', '11');
+  cLabel.setAttribute('fill', '#7a6e50'); cLabel.setAttribute('font-size', '11');
   cLabel.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
   cLabel.setAttribute('pointer-events', 'none');
   cLabel.textContent = radialMode === 'poly' ? 'Polyvalent exams' : 'Unique exams';
@@ -1071,7 +1069,7 @@ function renderRadial() {
   const cLabel2 = document.createElementNS(ns, 'text');
   cLabel2.setAttribute('x', cx); cLabel2.setAttribute('y', cy + 8);
   cLabel2.setAttribute('text-anchor', 'middle'); cLabel2.setAttribute('dominant-baseline', 'middle');
-  cLabel2.setAttribute('fill', '#4f8ef7'); cLabel2.setAttribute('font-size', '14');
+  cLabel2.setAttribute('fill', '#00883A'); cLabel2.setAttribute('font-size', '14');
   cLabel2.setAttribute('font-weight', '700');
   cLabel2.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
   cLabel2.setAttribute('pointer-events', 'none');

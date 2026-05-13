@@ -5,62 +5,64 @@
 <title>Cluster Explorer</title>
 <style>
 :root {
-  --bg: #111318;
-  --panel: #16191f;
-  --sidebar: #1a1d24;
-  --border: #2a2d35;
-  --border2: #353840;
-  --text: #c9cdd8;
-  --dim: #606674;
-  --bright: #e8eaf0;
-  --accent: #4f8ef7;
-  --green: #3ecf8e;
-  --yellow: #f7c948;
-  --red: #e05c5c;
-  --hover: #1f2330;
-  --drag: #1e2a3a;
+  --bg: #FFF9E5;
+  --panel: #f5f0d8;
+  --sidebar: #ede8d2;
+  --border: #d4cdb0;
+  --border2: #c4bc98;
+  --text: #2a2418;
+  --dim: #7a6e50;
+  --bright: #1a1208;
+  --accent: #00883A;
+  --accent2: #655479;
+  --green: #00883A;
+  --yellow: #b8860b;
+  --red: #c0392b;
+  --hover: #ede5c4;
+  --drag: #ddd5b0;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background: var(--bg); color: var(--text); }
+::selection { background: rgba(101,84,121,.25); }
 
 /* ── TOPBAR ── */
 #topbar {
-  height: 46px; background: #0d0f14;
-  border-bottom: 1px solid var(--border);
+  height: 46px; background: #00883A;
+  border-bottom: 1px solid #006d2e;
   display: flex; align-items: center; gap: 10px;
   padding: 0 14px; flex-shrink: 0; z-index: 10;
 }
-#topbar h1 { font-size: 13px; font-weight: 700; color: var(--bright); white-space: nowrap; }
-#topbar h1 em { color: var(--accent); font-style: normal; }
-.sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+#topbar h1 { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; }
+#topbar h1 em { color: #FFF9E5; font-style: normal; }
+.sep { width: 1px; height: 20px; background: rgba(255,255,255,.35); flex-shrink: 0; }
 
 /* CSV upload area */
 #csv-drop-zone {
   display: flex; align-items: center; gap: 8px;
-  background: var(--panel); border: 1px dashed var(--border2);
+  background: rgba(255,255,255,.25); border: 1px dashed rgba(255,255,255,.6);
   border-radius: 5px; padding: 4px 10px; cursor: pointer;
   transition: border-color .15s, background .15s;
   min-width: 260px;
 }
 #csv-drop-zone:hover, #csv-drop-zone.dragover {
-  border-color: var(--accent); background: #1a2535;
+  border-color: #fff; background: rgba(255,255,255,.35);
 }
 #csv-drop-zone .dz-icon { font-size: 15px; }
-#csv-drop-zone .dz-text { font-size: 11px; color: var(--dim); }
-#csv-drop-zone .dz-text strong { color: var(--accent); font-weight: 600; }
-#csv-drop-zone .dz-file { font-size: 11px; color: var(--green); font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#csv-drop-zone .dz-text { font-size: 11px; color: rgba(255,255,255,.8); }
+#csv-drop-zone .dz-text strong { color: #fff; font-weight: 600; }
+#csv-drop-zone .dz-file { font-size: 11px; color: #FFF9E5; font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #csv-input { display: none; }
 
 /* delimiter selector */
 #delim-wrap { display: flex; align-items: center; gap: 5px; }
-#delim-wrap label { font-size: 11px; color: var(--dim); }
+#delim-wrap label { font-size: 11px; color: rgba(255,255,255,.8); }
 #delim-select {
   background: var(--panel); border: 1px solid var(--border2); color: var(--text);
   padding: 3px 6px; border-radius: 3px; font-size: 11px; outline: none; cursor: pointer;
 }
 
-#stats-bar { margin-left: auto; font-size: 11px; color: var(--dim); white-space: nowrap; }
-#stats-bar strong { color: var(--text); }
+#stats-bar { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.75); white-space: nowrap; }
+#stats-bar strong { color: #fff; }
 
 /* ── LAYOUT ── */
 #layout { display: flex; height: calc(100vh - 46px); overflow: hidden; }
@@ -74,7 +76,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 .panel-title {
   padding: 8px 12px; font-size: 10px; font-weight: 700;
   color: var(--dim); text-transform: uppercase; letter-spacing: .09em;
-  border-bottom: 1px solid var(--border); background: #0f1117; flex-shrink: 0;
+  border-bottom: 1px solid var(--border); background: #e0d9c0; flex-shrink: 0;
   display: flex; align-items: center; justify-content: space-between;
 }
 .panel-title button {
@@ -92,7 +94,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 
 .chip {
   display: flex; align-items: center; gap: 6px;
-  background: var(--panel); border: 1px solid var(--border2);
+  background: #fff; border: 1px solid var(--border2);
   border-radius: 4px; padding: 4px 7px;
   cursor: grab; user-select: none; transition: background .1s;
 }
@@ -131,7 +133,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 }
 .col-item:hover { background: var(--hover); }
 .col-item:hover .col-add { display: flex; }
-.col-item.used { background: #182030; border-color: var(--accent); cursor: default; }
+.col-item.used { background: rgba(0,136,58,.12); border-color: var(--accent); cursor: default; }
 .col-item.used .col-name { color: var(--accent); }
 .col-item.used .col-add { display: none !important; }
 .col-name { font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -147,7 +149,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #cluster-bar {
   padding: 7px 12px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-  background: var(--panel);
+  background: #ede8d2;
 }
 .vbtn {
   background: var(--bg); border: 1px solid var(--border2);
@@ -200,7 +202,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #cluster-search:focus { border-color: var(--accent); }
 #cluster-count { margin-left: auto; font-size: 11px; color: var(--dim); }
 
-#cluster-area { flex: 1; overflow: auto; padding: 14px; }
+#cluster-area { flex: 1; overflow: auto; padding: 14px; position: relative; }
 #cluster-area::-webkit-scrollbar { width: 6px; height: 6px; }
 #cluster-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
@@ -265,12 +267,12 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #breakdown-sublist-rows { overflow-y: auto; flex: 1; }
 .bk-card {
   border-radius: 6px; border: 1px solid var(--border2);
-  padding: 10px 11px; background: #0d1018;
+  padding: 10px 11px; background: #fff;
   display: flex; flex-direction: column; gap: 6px;
   transition: border-color .15s, background .15s;
 }
-.bk-card:hover { border-color: var(--accent); background: #101420; }
-.bk-card-selected { border-color: var(--accent) !important; background: #111825 !important; box-shadow: 0 0 0 1px var(--accent); }
+.bk-card:hover { border-color: var(--accent); background: var(--hover); }
+.bk-card-selected { border-color: var(--accent) !important; background: rgba(0,136,58,.08) !important; box-shadow: 0 0 0 1px var(--accent); }
 .bk-card-hd {
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
 }
@@ -284,15 +286,83 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
   font-size: 10px; font-weight: 700; letter-spacing: .03em;
   padding: 2px 5px; border-radius: 3px; text-align: center; align-self: flex-start;
 }
-.bk-unity.high  { background: #1a3a1f; color: #4caf50; }
-.bk-unity.mid   { background: #3a2e0a; color: #f7c948; }
-.bk-unity.low   { background: #3a1010; color: #e05c5c; }
+.bk-unity.high  { background: rgba(0,136,58,.15); color: #005a27; }
+.bk-unity.mid   { background: rgba(184,134,11,.15); color: #7a5800; }
+.bk-unity.low   { background: rgba(192,57,43,.12); color: #8b1a1a; }
 /* top values list */
 .bk-vals { display: flex; flex-direction: column; gap: 3px; }
 .bk-val-row { display: flex; align-items: center; gap: 5px; }
 .bk-val-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .bk-val-label { font-size: 10px; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bk-val-pct { font-size: 10px; color: var(--dim); white-space: nowrap; }
+
+/* CARD VIEW */
+#cards-view { position: relative; }
+.cv-card {
+  border-radius: 6px; border: 1px solid var(--border2);
+  background: #fff; padding: 12px 13px;
+  display: flex; flex-direction: column; gap: 8px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.cv-card:hover { border-color: var(--accent); background: var(--hover); }
+.cv-card-title { font-size: 12px; font-weight: 700; color: var(--bright); line-height: 1.3; }
+.cv-card-row { display: flex; align-items: center; gap: 8px; }
+.cv-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 4px; padding: 3px 7px; font-size: 11px; font-weight: 600;
+}
+.cv-badge-uniq { background: rgba(101,84,121,.12); color: #3d2f52; }
+.cv-badge-poly { background: rgba(0,136,58,.12); color: #005a27; }
+.cv-badge-total { background: rgba(184,134,11,.12); color: #7a5800; }
+.cv-bar { height: 6px; border-radius: 3px; overflow: hidden; display: flex; width: 100%; }
+.cv-bar-uniq { background: #655479; }
+.cv-bar-poly { background: #00883A; }
+.cv-detail-section { margin-bottom: 10px; border: 1px solid var(--border2); border-radius: 5px; overflow: hidden; }
+.cv-detail-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px; font-size: 11px; font-weight: 700; color: var(--bright);
+  background: var(--hover); cursor: pointer; user-select: none;
+  border-bottom: 1px solid transparent; transition: background .1s;
+}
+.cv-detail-hd:hover { background: var(--border2); }
+.cv-detail-hd-arrow { font-size: 9px; color: var(--dim); transition: transform .15s; }
+.cv-detail-hd.open { border-bottom-color: var(--border2); }
+.cv-detail-hd.open .cv-detail-hd-arrow { transform: rotate(90deg); }
+.cv-detail-body { display: none; padding: 6px 8px; }
+.cv-detail-body.open { display: block; }
+.cv-exam-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 8px; border-radius: 3px; cursor: pointer;
+  border: 1px solid transparent; margin-bottom: 2px;
+  transition: background .1s;
+}
+.cv-exam-row:hover { background: var(--hover); border-color: var(--border2); }
+.cv-exam-name { flex: 1; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv-exam-cnt { font-size: 10px; color: var(--dim); white-space: nowrap; }
+.cv-freq-table { font-size: 11px; margin: 4px 8px 6px; padding: 8px 10px; background: var(--panel); border-radius: 4px; border: 1px solid var(--border2); }
+.cv-freq-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; border-bottom: 1px solid var(--border); }
+.cv-freq-row:last-child { border-bottom: none; }
+.cv-freq-grp { flex: 1; font-size: 10px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv-freq-n { font-size: 10px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.cv-load-more {
+  display: block; width: calc(100% - 16px); margin: 4px 8px 8px;
+  background: none; border: 1px dashed var(--border2); color: var(--dim);
+  border-radius: 3px; padding: 5px; font-size: 10px; cursor: pointer; text-align: center;
+  transition: border-color .1s, color .1s;
+}
+.cv-load-more:hover { border-color: var(--accent); color: var(--accent); }
+/* VENN VIEW */
+#venn-view { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:var(--bg); z-index:15; flex-direction:column; overflow:hidden; }
+#venn-header { padding:10px 14px; background:var(--hover); border-bottom:1px solid var(--border2); display:flex; align-items:center; gap:10px; flex-shrink:0; }
+#venn-back { background:none; border:1px solid var(--border2); color:var(--accent); border-radius:4px; padding:3px 10px; font-size:11px; cursor:pointer; }
+#venn-title { font-size:12px; font-weight:700; color:var(--bright); flex:1; }
+#venn-hint { font-size:11px; color:var(--dim); }
+#venn-svg-wrap { flex:1; overflow:hidden; position:relative; }
+#venn-svg { width:100%; height:100%; }
+#venn-detail { display:none; position:absolute; top:0; right:0; bottom:0; width:340px; background:var(--bg); border-left:1px solid var(--border2); flex-direction:column; overflow:hidden; box-shadow:-3px 0 12px rgba(0,0,0,.08); }
+#venn-detail-hd { padding:10px 14px; background:var(--hover); border-bottom:1px solid var(--border2); display:flex; align-items:center; gap:8px; flex-shrink:0; font-size:11px; font-weight:700; color:var(--bright); }
+#venn-detail-close { background:none; border:none; color:var(--dim); font-size:14px; cursor:pointer; padding:0 2px; margin-left:auto; }
+#venn-detail-body { flex:1; overflow-y:auto; padding:12px; }
 
 /* LIST VIEW */
 #list-view { display: none; }
@@ -329,19 +399,19 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 /* TOOLTIP */
 #tip {
   position: fixed; pointer-events: none; display: none;
-  background: #1a1d24; border: 1px solid var(--border2);
+  background: #2a2418; border: 1px solid #1a1208;
   border-radius: 5px; padding: 8px 12px; font-size: 12px;
-  color: var(--text); max-width: 360px; line-height: 1.7;
-  box-shadow: 0 4px 20px rgba(0,0,0,.5); z-index: 999;
+  color: #FFF9E5; max-width: 360px; line-height: 1.7;
+  box-shadow: 0 4px 20px rgba(0,0,0,.3); z-index: 999;
 }
 .tip-row { display: flex; gap: 8px; }
-.tip-k { color: var(--dim); white-space: nowrap; }
-.tip-v { color: var(--green); word-break: break-word; }
-.tip-count { color: var(--yellow); font-weight: 700; }
+.tip-k { color: rgba(255,249,229,.6); white-space: nowrap; }
+.tip-v { color: #3ecf8e; word-break: break-word; }
+.tip-count { color: #f7c948; font-weight: 700; }
 
 /* LOADING overlay */
 #overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  position: fixed; inset: 0; background: rgba(255,249,229,.8);
   display: none; flex-direction: column; align-items: center; justify-content: center;
   z-index: 9999; gap: 14px;
 }
@@ -354,7 +424,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2px; }
+mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2px; }
 
 /* ── DRILL-DOWN PANEL ── */
 #dd-overlay {
@@ -367,13 +437,13 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
 #dd-panel {
   position: fixed; top: 0; right: 0; bottom: 0;
   width: 460px; max-width: 92vw;
-  background: #13161d;
+  background: #f5f0d8;
   border-left: 1px solid var(--border2);
   z-index: 201;
   display: flex; flex-direction: column;
   transform: translateX(100%);
   transition: transform .22s cubic-bezier(.4,0,.2,1);
-  box-shadow: -6px 0 32px rgba(0,0,0,.5);
+  box-shadow: -6px 0 32px rgba(0,0,0,.2);
 }
 #dd-panel.open { transform: translateX(0); }
 
@@ -404,7 +474,7 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
   padding: 8px 14px 5px;
   font-size: 10px; font-weight: 700; color: var(--dim);
   text-transform: uppercase; letter-spacing: .09em;
-  background: #0f1117; border-bottom: 1px solid var(--border);
+  background: #e0d9c0; border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 1;
   display: flex; align-items: center; justify-content: space-between;
 }
@@ -461,7 +531,7 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
 #subset-title {
   padding: 7px 12px; font-size: 10px; font-weight: 700;
   color: var(--dim); text-transform: uppercase; letter-spacing: .09em;
-  background: #0f1117; display: flex; align-items: center; justify-content: space-between;
+  background: #e0d9c0; display: flex; align-items: center; justify-content: space-between;
   cursor: pointer; user-select: none;
 }
 #subset-title:hover { color: var(--text); }
@@ -487,10 +557,24 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
 #subset-clear-btn:hover { color: var(--red); border-color: var(--red); }
 #subset-badge {
   font-size: 10px; padding: 2px 8px; border-radius: 10px;
-  background: var(--green); color: #0a1a12; font-weight: 700;
+  background: var(--green); color: #fff; font-weight: 700;
   display: none; align-self: flex-start;
 }
 #subset-badge.active { display: block; }
+
+/* ── QUICK FILTER BUTTONS ── */
+.qf-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 8px; border-radius: 4px; font-size: 11px;
+  background: #fff; border: 1px solid var(--border2); color: var(--text);
+  cursor: pointer; text-align: left; transition: background .1s, border-color .1s;
+  width: 100%;
+}
+.qf-btn:hover { background: var(--hover); border-color: var(--accent); }
+.qf-btn.qf-active { background: rgba(0,136,58,.1); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.qf-btn .qf-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qf-btn .qf-badge { font-size: 10px; color: var(--dim); margin-left: 6px; flex-shrink: 0; }
+.qf-btn.qf-active .qf-badge { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -536,7 +620,7 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
 
   <div class="sep"></div>
   <div id="stats-bar">No file loaded</div>
-  <button id="poly-btn" style="display:none;margin-left:10px;background:var(--panel);border:1px solid var(--border2);color:var(--accent);padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Open Polyvalenzen analysis">⬡ Polyvalenzen</button>
+  <button id="poly-btn" style="display:none;margin-left:10px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Open Polyvalenzen analysis">⬡ Polyvalenzen</button>
 </div>
 
 <!-- MAIN LAYOUT -->
@@ -574,6 +658,15 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
       <input type="text" id="col-search" placeholder="Search columns…">
       <div id="col-list"></div>
     </div>
+
+    <!-- QUICK FILTERS (advanced / rarely used columns) -->
+    <div id="quick-filter-section" style="border-top:1px solid var(--border);flex-shrink:0">
+      <div id="quick-filter-title" style="padding:7px 12px;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;background:#e0d9c0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">
+        <span>&#9654; Advanced columns</span>
+        <span id="qf-arrow" style="font-size:9px;transition:transform .15s">&#9654;</span>
+      </div>
+      <div id="quick-filter-body" style="display:none;padding:6px 8px;flex-direction:column;gap:3px"></div>
+    </div>
   </div>
 
   <!-- RIGHT: clusters -->
@@ -585,6 +678,8 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
         <span style="color:var(--border2);margin:0 4px;font-size:16px;line-height:1">|</span>
         <button class="vbtn" data-v="treemap">&#9638; Treemap</button>
         <button class="vbtn" id="matrix-btn" data-v="matrix" style="display:none">&#8862; Matrix</button>
+        <span style="color:var(--border2);margin:0 4px;font-size:16px;line-height:1">|</span>
+        <button class="vbtn" data-v="cards">&#9646; Cards</button>
       </div>
       <div class="sep"></div>
       <label style="font-size:11px;color:var(--dim)">Sort:</label>
@@ -618,6 +713,46 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
         </div>
         <div id="matrix-wrap"></div>
       </div>
+      <!-- CARD VIEW -->
+      <div id="cards-view" style="display:none;width:100%;height:100%;overflow:hidden;flex-direction:column">
+        <div id="cards-controls" style="padding:8px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;flex-shrink:0">
+          <span style="font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Group by:</span>
+          <select id="cards-group-sel" style="background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:3px 8px;border-radius:3px;font-size:11px;outline:none;cursor:pointer">
+            <option value="AbschlussTxt">AbschlussTxt</option>
+            <option value="StudiengangTxT">StudiengangTxT</option>
+            <option value="Vertiefung">Vertiefung</option>
+          </select>
+          <span id="cards-info" style="font-size:11px;color:var(--dim);margin-left:4px"></span>
+          <button id="venn-btn" style="margin-left:auto;background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Open Venn diagram">&#9711; Venn diagram</button>
+        </div>
+        <div id="cards-grid" style="flex:1;overflow-y:auto;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-content:start"></div>
+        <!-- VENN VIEW (inside cards-view) -->
+        <div id="venn-view">
+          <div id="venn-header">
+            <button id="venn-back">← Cards</button>
+            <span id="venn-title">Venn — exam overlap between groups</span>
+            <span id="venn-hint">Click a circle to see its connections · circle positions are fixed in a ring (visual overlap is not meaningful — the lines show actual shared exams)</span>
+          </div>
+          <div id="venn-svg-wrap">
+            <svg id="venn-svg"></svg>
+            <div id="venn-detail">
+              <div id="venn-detail-hd">
+                <span id="venn-detail-title">—</span>
+                <button id="venn-detail-close">✕</button>
+              </div>
+              <div id="venn-detail-body"></div>
+            </div>
+          </div>
+        </div>
+        <div id="cards-detail" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:20;flex-direction:column;overflow:hidden">
+          <div style="padding:10px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;flex-shrink:0">
+            <button id="cards-detail-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Back</button>
+            <span id="cards-detail-title" style="font-size:12px;font-weight:700;color:var(--bright);flex:1"></span>
+          </div>
+          <div id="cards-detail-body" style="flex:1;overflow-y:auto;padding:14px"></div>
+        </div>
+      </div>
+
       <div id="breakdown-view">
         <div id="breakdown-header">
           <button id="breakdown-back">← Back</button>
@@ -638,7 +773,7 @@ mark { background: rgba(247,201,72,.18); color: var(--yellow); border-radius: 2p
 
 <script>
 // ── PALETTE ──
-const COLORS = ['#4f8ef7','#3ecf8e','#f7c948','#e05c5c','#b06ef7','#f7874f','#4fc9f7','#e8f74f','#f74fb8','#4ff79e','#4f7ff7','#c9f74f','#f7c24f','#4ff7d8','#d4a8ff','#f7504f','#7ef74f'];
+const COLORS = ['#00883A','#655479','#b8860b','#c0392b','#1a7a6e','#8b4513','#2e86ab','#6d4c41','#4a7c59','#7b3f6e','#3d6b4f','#5c4033','#1a5276','#7d6608','#512e5f','#1e8449','#922b21'];
 
 // ── STATE ──
 let CSV = null;       // { headers: [], vocabs: [], rows: [] (encoded) }
@@ -847,6 +982,7 @@ function getActiveRows() {
 // ── COLUMN LIST ──
 function buildColList() {
   renderColList();
+  renderQuickFilters();
 }
 
 function renderColList() {
@@ -854,7 +990,9 @@ function renderColList() {
   list.innerHTML = '';
   if (!CSV) return;
   const q = COL_Q.toLowerCase();
+  const qfLower = new Set(QUICK_FILTER_NAMES.map(n => n.toLowerCase()));
   CSV.headers.forEach((h, ci) => {
+    if (qfLower.has(h.toLowerCase())) return; // hidden in Advanced columns
     if (q && !h.toLowerCase().includes(q)) return;
     const used = FILTERS.includes(ci);
     const item = document.createElement('div');
@@ -870,12 +1008,52 @@ function renderColList() {
   });
 }
 
+// ── QUICK FILTERS ──
+const QUICK_FILTER_NAMES = ['AnkerID (veranstid)','Abschluss','Studiengang','SchwerpunktTxt','KzFa','Porgnr','Pordnr','Prüfungstext'];
+
+function renderQuickFilters() {
+  const body = document.getElementById('quick-filter-body');
+  body.innerHTML = '';
+  if (!CSV) return;
+  QUICK_FILTER_NAMES.forEach(name => {
+    const ci = CSV.headers.findIndex(h => h.toLowerCase() === name.toLowerCase());
+    const btn = document.createElement('button');
+    btn.className = 'qf-btn' + (ci >= 0 && FILTERS.includes(ci) ? ' qf-active' : '');
+    btn.disabled = ci < 0;
+    btn.title = ci < 0 ? 'Column "' + name + '" not found in CSV' : '';
+    btn.innerHTML =
+      '<span class="qf-label">' + escHtml(name) + '</span>' +
+      '<span class="qf-badge">' + (ci >= 0 ? (FILTERS.includes(ci) ? '✓' : CSV.vocabs[ci].length + ' vals') : 'n/a') + '</span>';
+    if (ci >= 0) {
+      btn.addEventListener('click', () => {
+        if (FILTERS.includes(ci)) removeFilter(ci);
+        else addFilter(ci);
+      });
+    }
+    body.appendChild(btn);
+  });
+}
+
+// Toggle quick filter section open/close
+(function() {
+  const title = document.getElementById('quick-filter-title');
+  const bodyEl = document.getElementById('quick-filter-body');
+  const arrow = document.getElementById('qf-arrow');
+  let open = false;
+  title.addEventListener('click', () => {
+    open = !open;
+    bodyEl.style.display = open ? 'flex' : 'none';
+    arrow.style.transform = open ? 'rotate(90deg)' : '';
+  });
+})();
+
 // ── FILTERS ──
 function addFilter(ci) {
   if (FILTERS.includes(ci)) return;
   FILTERS.push(ci);
   renderFilters();
   renderColList();
+  renderQuickFilters();
   renderClusters();
 }
 
@@ -883,6 +1061,7 @@ function removeFilter(ci) {
   FILTERS = FILTERS.filter(f => f !== ci);
   renderFilters();
   renderColList();
+  renderQuickFilters();
   renderClusters();
 }
 
@@ -977,6 +1156,19 @@ function renderClusters() {
     if (VIEW === 'matrix') { VIEW = 'bubble'; document.querySelectorAll('.vbtn').forEach(b => { b.classList.remove('on'); if (b.dataset.v==='bubble') b.classList.add('on'); }); }
   }
 
+  if (VIEW === 'cards') {
+    if (!CSV) { showLanding(); return; }
+    hideLanding();
+    document.getElementById('bubble-view').style.display = 'none';
+    document.getElementById('list-view').style.display = 'none';
+    document.getElementById('treemap-view').style.display = 'none';
+    document.getElementById('matrix-view').style.display = 'none';
+    document.getElementById('breakdown-view').style.display = 'none';
+    document.getElementById('cards-view').style.display = 'flex';
+    renderCardView();
+    return;
+  }
+
   if (!CSV || FILTERS.length === 0) { showLanding(); return; }
   hideLanding();
   const clusters = applySort(applyFilters(computeClusters()));
@@ -987,6 +1179,7 @@ function renderClusters() {
   document.getElementById('list-view').style.display = 'none';
   document.getElementById('treemap-view').style.display = 'none';
   document.getElementById('matrix-view').style.display = 'none';
+  document.getElementById('cards-view').style.display = 'none';
   document.getElementById('bubble-crumbs').style.display = 'none';
 
   if (VIEW === 'bubble') {
@@ -1002,6 +1195,9 @@ function renderClusters() {
   } else if (VIEW === 'matrix') {
     document.getElementById('matrix-view').style.display = '';
     renderMatrix(clusters);
+  } else if (VIEW === 'cards') {
+    document.getElementById('cards-view').style.display = 'flex';
+    renderCardView();
   }
 }
 
@@ -1880,6 +2076,7 @@ function showLanding() {
   document.getElementById('list-view').style.display = 'none';
   document.getElementById('treemap-view').style.display = 'none';
   document.getElementById('matrix-view').style.display = 'none';
+  document.getElementById('cards-view').style.display = 'none';
   document.getElementById('cluster-count').textContent = '';
 }
 function hideLanding() {
@@ -2088,6 +2285,39 @@ function openLeafBreakdown(item, accentColor) {
   const grid = document.getElementById('breakdown-grid');
   grid.innerHTML = '';
 
+  // ── inLAB summary card (prepended) ──
+  const inlabCI = CSV.headers.findIndex(h => h.toLowerCase() === 'inlab' || h === 'inLAB');
+  if (inlabCI >= 0) {
+    let trueCount = 0, noCount = 0;
+    for (const ri of item.allRows) {
+      const val = (CSV.vocabs[inlabCI][CSV.rows[ri][inlabCI]] || '').toUpperCase();
+      if (val === 'TRUE') trueCount++; else noCount++;
+    }
+    const total = item.allRows.length;
+    const pctTrue = total ? (trueCount / total * 100).toFixed(1) : '0.0';
+    const pctNo   = total ? (noCount   / total * 100).toFixed(1) : '0.0';
+    const inlabCard = document.createElement('div');
+    inlabCard.className = 'bk-card';
+    inlabCard.style.gridColumn = '1 / -1';
+    inlabCard.style.cursor = 'default';
+    inlabCard.style.borderColor = 'var(--accent)';
+    inlabCard.style.background = 'rgba(0,136,58,.05)';
+    inlabCard.innerHTML =
+      '<div class="bk-card-hd"><span class="bk-col-name" style="color:var(--accent)">inLAB — actually taken?</span>' +
+      '<span class="bk-nuniq">' + total.toLocaleString() + ' rows</span></div>' +
+      '<div class="bk-seg-bar">' +
+        '<div class="bk-seg" style="width:' + pctTrue + '%;background:#00883A" title="TRUE · ' + trueCount.toLocaleString() + '"></div>' +
+        '<div class="bk-seg" style="width:' + pctNo   + '%;background:#c0392b" title="NO · '   + noCount.toLocaleString()   + '"></div>' +
+      '</div>' +
+      '<div class="bk-vals">' +
+        '<div class="bk-val-row"><span class="bk-val-dot" style="background:#00883A"></span>' +
+        '<span class="bk-val-label">TRUE (taken)</span><span class="bk-val-pct">' + trueCount.toLocaleString() + ' · ' + pctTrue + '%</span></div>' +
+        '<div class="bk-val-row"><span class="bk-val-dot" style="background:#c0392b"></span>' +
+        '<span class="bk-val-label">NO (not taken)</span><span class="bk-val-pct">' + noCount.toLocaleString() + ' · ' + pctNo + '%</span></div>' +
+      '</div>';
+    grid.appendChild(inlabCard);
+  }
+
   const analysis = analyzeCluster(item.allRows);
   const cols = analysis.filter(a => !a.isFilter);
 
@@ -2203,11 +2433,11 @@ function renderBreakdownSublist(col_info, item) {
 
     const row = document.createElement('div');
     row.className = 'cl-row';
-    row.style.cssText = 'border-bottom-color:#1e2130;background:#0a0c12;cursor:default';
+    row.style.cursor = 'default';
     row.innerHTML =
       '<span class="cl-dot" style="background:' + col + '"></span>' +
-      '<span class="cl-key" style="color:' + col + ';font-size:11px">' + escHtml(v.val || '(empty)') + '</span>' +
-      '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + barW + '%;background:' + col + '60"></span><span class="cl-pct" style="font-size:10px">' + pct + '%</span></span>' +
+      '<span class="cl-key" style="font-size:11px">' + escHtml(v.val || '(empty)') + '</span>' +
+      '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + barW + '%;background:' + col + '80"></span><span class="cl-pct" style="font-size:10px">' + pct + '%</span></span>' +
       '<span class="cl-n" style="font-size:11px">' + v.count.toLocaleString() + '</span>';
     rows.appendChild(row);
   });
@@ -2221,12 +2451,497 @@ function closeLeafBreakdown() {
     document.getElementById('treemap-view').style.display = '';
   } else if (BREAKDOWN_RETURN_VIEW === 'matrix') {
     document.getElementById('matrix-view').style.display = '';
+  } else if (BREAKDOWN_RETURN_VIEW === 'cards') {
+    document.getElementById('cards-view').style.display = 'flex';
   } else {
     document.getElementById('bubble-view').style.display = '';
   }
 }
 
 document.getElementById('breakdown-back').addEventListener('click', closeLeafBreakdown);
+
+// ── CARD VIEW ──
+function renderCardView() {
+  if (!CSV) return;
+  const groupSel = document.getElementById('cards-group-sel').value;
+  const groupCI = CSV.headers.findIndex(h => h.toLowerCase() === groupSel.toLowerCase());
+  const examCI  = CSV.headers.findIndex(h => h.toLowerCase() === 'veranstaltungstitel');
+  const grid = document.getElementById('cards-grid');
+  const info = document.getElementById('cards-info');
+  grid.innerHTML = '';
+  _vennGroups = null;
+  document.getElementById('cards-detail').style.display = 'none';
+  document.getElementById('venn-view').style.display = 'none';
+
+  if (groupCI < 0 || examCI < 0) {
+    info.textContent = groupCI < 0
+      ? 'Column "' + groupSel + '" not found in CSV.'
+      : 'Column "Veranstaltungstitel" not found in CSV.';
+    return;
+  }
+
+  // Build: groupVal -> Set of unique exam titles, and Map of exam -> Set of groups it appears in
+  const sourceRows = SUBSET_ROWS ? SUBSET_ROWS.map(i => CSV.rows[i]) : CSV.rows;
+  const groupMap = new Map(); // groupVal -> Map<examTitle, count>
+  const examGroups = new Map(); // examTitle -> Set<groupVal>
+
+  for (const row of sourceRows) {
+    const gVal  = CSV.vocabs[groupCI][row[groupCI]] || '(empty)';
+    const eVal  = CSV.vocabs[examCI][row[examCI]]   || '(empty)';
+    if (!groupMap.has(gVal)) groupMap.set(gVal, new Map());
+    const eg = groupMap.get(gVal);
+    eg.set(eVal, (eg.get(eVal) || 0) + 1);
+    if (!examGroups.has(eVal)) examGroups.set(eVal, new Set());
+    examGroups.get(eVal).add(gVal);
+  }
+
+  // For each group: unique exams = appear in only that group; poly = appear in >1 group
+  const groups = [...groupMap.entries()].map(([gVal, examCounts]) => {
+    const exams = [...examCounts.entries()]; // [title, count]
+    const uniqueExams = exams.filter(([t]) => examGroups.get(t).size === 1);
+    const polyExams   = exams.filter(([t]) => examGroups.get(t).size >  1);
+    return { gVal, exams, uniqueExams, polyExams };
+  });
+  groups.sort((a, b) => b.exams.length - a.exams.length);
+  _vennGroups = groups;
+
+  info.textContent = groups.length + ' groups · ' + [...examGroups.keys()].length.toLocaleString() + ' distinct exam titles';
+
+  groups.forEach(g => {
+    const total  = g.exams.length;
+    const nUniq  = g.uniqueExams.length;
+    const nPoly  = g.polyExams.length;
+    const pUniq  = total ? (nUniq / total * 100).toFixed(0) : 0;
+    const pPoly  = total ? (nPoly / total * 100).toFixed(0) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'cv-card';
+    card.innerHTML =
+      '<div class="cv-card-title">' + escHtml(g.gVal) + '</div>' +
+      '<div class="cv-bar"><div class="cv-bar-uniq" style="width:' + pUniq + '%"></div><div class="cv-bar-poly" style="width:' + pPoly + '%"></div></div>' +
+      '<div class="cv-card-row">' +
+        '<span class="cv-badge cv-badge-uniq">&#9670; ' + nUniq.toLocaleString() + ' unique</span>' +
+        '<span class="cv-badge cv-badge-poly">&#9632; ' + nPoly.toLocaleString() + ' polyvalent</span>' +
+        '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' total</span>' +
+      '</div>';
+    card.addEventListener('click', () => showCardDetail(g, groupSel));
+    grid.appendChild(card);
+  });
+}
+
+function buildExamFreqEl(examTitle) {
+  const examCI  = CSV.headers.findIndex(h => h.toLowerCase() === 'veranstaltungstitel');
+  const groupSel = document.getElementById('cards-group-sel').value;
+  const groupCI  = CSV.headers.findIndex(h => h.toLowerCase() === groupSel.toLowerCase());
+  const sourceRows = SUBSET_ROWS ? SUBSET_ROWS.map(i => CSV.rows[i]) : CSV.rows;
+  const freqMap = new Map();
+  for (const r of sourceRows) {
+    if ((CSV.vocabs[examCI][r[examCI]] || '') === examTitle) {
+      const gv = CSV.vocabs[groupCI][r[groupCI]] || '(empty)';
+      freqMap.set(gv, (freqMap.get(gv) || 0) + 1);
+    }
+  }
+  const freqEntries = [...freqMap.entries()].sort((a, b) => b[1] - a[1]);
+  const el = document.createElement('div');
+  el.className = 'cv-freq-table';
+  el.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--dim);margin-bottom:6px">Appears in ' + freqEntries.length + ' group(s):</div>' +
+    freqEntries.map(([gv, n]) =>
+      '<div class="cv-freq-row"><span class="cv-freq-grp">' + escHtml(gv) + '</span><span class="cv-freq-n">' + n + '×</span></div>'
+    ).join('');
+  return el;
+}
+
+function makeExamSection(title, examList, colorClass) {
+  const PAGE = 10;
+  examList = [...examList].sort((a, b) => b[1] - a[1]);
+
+  const sec = document.createElement('div');
+  sec.className = 'cv-detail-section';
+
+  const hd = document.createElement('div');
+  hd.className = 'cv-detail-hd';
+  hd.innerHTML = '<span>' + escHtml(title) + ' <span style="color:var(--dim);font-weight:400">(' + examList.length + ')</span></span>' +
+    '<span class="cv-detail-hd-arrow">&#9654;</span>';
+
+  const bodyEl = document.createElement('div');
+  bodyEl.className = 'cv-detail-body';
+  sec.appendChild(hd);
+  sec.appendChild(bodyEl);
+
+  let shown = 0;
+  let loadMoreBtn = null;
+
+  function renderRows(from, to) {
+    examList.slice(from, to).forEach(([examTitle, cnt]) => {
+      const row = document.createElement('div');
+      row.className = 'cv-exam-row';
+      row.innerHTML =
+        '<span class="cv-exam-name">' + escHtml(examTitle) + '</span>' +
+        '<span class="cv-exam-cnt">' + cnt.toLocaleString() + '×</span>';
+      let freqOpen = false;
+      let freqEl = null;
+      row.addEventListener('click', e => {
+        e.stopPropagation();
+        if (freqOpen && freqEl) { freqEl.remove(); freqOpen = false; freqEl = null; return; }
+        freqEl = buildExamFreqEl(examTitle);
+        row.after(freqEl);
+        freqOpen = true;
+      });
+      if (loadMoreBtn) bodyEl.insertBefore(row, loadMoreBtn);
+      else bodyEl.appendChild(row);
+    });
+    shown = to;
+  }
+
+  function addLoadMore() {
+    if (loadMoreBtn) loadMoreBtn.remove();
+    if (shown >= examList.length) { loadMoreBtn = null; return; }
+    loadMoreBtn = document.createElement('button');
+    loadMoreBtn.className = 'cv-load-more';
+    loadMoreBtn.textContent = 'Load 10 more (' + (examList.length - shown) + ' remaining)';
+    loadMoreBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      renderRows(shown, Math.min(shown + PAGE, examList.length));
+      addLoadMore();
+    });
+    bodyEl.appendChild(loadMoreBtn);
+  }
+
+  hd.addEventListener('click', () => {
+    const isOpen = hd.classList.toggle('open');
+    bodyEl.classList.toggle('open', isOpen);
+    if (isOpen && shown === 0) {
+      renderRows(0, Math.min(PAGE, examList.length));
+      addLoadMore();
+    }
+  });
+
+  return sec;
+}
+
+function showCardDetail(g, groupLabel) {
+  const detail = document.getElementById('cards-detail');
+  detail.style.display = 'flex';
+  document.getElementById('cards-detail-title').textContent = g.gVal + ' — ' + groupLabel;
+  const body = document.getElementById('cards-detail-body');
+  body.innerHTML = '';
+  body.appendChild(makeExamSection('Unique exam titles (not shared with other groups)', g.uniqueExams, 'cv-badge-uniq'));
+  body.appendChild(makeExamSection('Polyvalent exam titles (shared across groups)', g.polyExams, 'cv-badge-poly'));
+}
+
+document.getElementById('cards-detail-back').addEventListener('click', () => {
+  document.getElementById('cards-detail').style.display = 'none';
+});
+
+// ── VENN DIAGRAM ──
+let _vennGroups = null; // cached from last renderCardView
+
+function renderVenn() {
+  if (!_vennGroups || _vennGroups.length === 0) return;
+  const svg = document.getElementById('venn-svg');
+  svg.innerHTML = '';
+  const W = svg.clientWidth || svg.parentElement.clientWidth;
+  const H = svg.clientHeight || svg.parentElement.clientHeight;
+  if (!W || !H) return;
+
+  const groups = _vennGroups;
+  const n = groups.length;
+  if (n === 0) return;
+
+  // Compute pairwise overlap counts
+  const examSets = groups.map(g => new Set(g.exams.map(([t]) => t)));
+  const overlaps = Array.from({length:n}, () => new Array(n).fill(0));
+  for (let i = 0; i < n; i++)
+    for (let j = i+1; j < n; j++) {
+      let shared = 0;
+      for (const t of examSets[i]) if (examSets[j].has(t)) shared++;
+      overlaps[i][j] = overlaps[j][i] = shared;
+    }
+
+  const maxOv = Math.max(...groups.flatMap((_, a) => groups.map((__, b) => a < b ? overlaps[a][b] : 0)), 1);
+
+  const maxTotal = Math.max(...groups.map(g => g.exams.length), 1);
+  const MIN_R = 28, MAX_R = Math.min(W, H) * 0.21;
+  const radii = groups.map(g => MIN_R + (MAX_R - MIN_R) * Math.sqrt(g.exams.length / maxTotal));
+
+  const cx = W / 2, cy = H / 2;
+  const ringR = Math.min(W, H) * 0.30;
+  const positions = groups.map((_, i) => {
+    const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    return { x: cx + ringR * Math.cos(angle), y: cy + ringR * Math.sin(angle) };
+  });
+
+  const VENN_COLORS = ['#655479','#00883A','#b8860b','#c0392b','#1a7a6e','#8b4513','#2e86ab','#6d4c41','#4a7c59','#7b3f6e','#3d6b4f','#5c4033','#1a5276','#7d6608','#512e5f'];
+
+  const ns = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs) {
+    const el = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  }
+
+  // Layer groups: lines → labels → circles → circle-labels (so circles are always on top)
+  const lineLayer  = svgEl('g', { id: 'venn-lines'  });
+  const lblLayer   = svgEl('g', { id: 'venn-lbl-lines' });
+  const circLayer  = svgEl('g', { id: 'venn-circles' });
+  const textLayer  = svgEl('g', { id: 'venn-texts'  });
+  svg.appendChild(lineLayer);
+  svg.appendChild(lblLayer);
+  svg.appendChild(circLayer);
+  svg.appendChild(textLayer);
+
+  // Store references keyed by pair and by index for later dimming
+  const lineEls  = {};  // "i-j" -> line element
+  const lineLbls = {};  // "i-j" -> text element
+  const circEls  = [];  // [i] -> circle element
+  const textEls  = [];  // [i] -> { name, cnt }
+
+  // ── Default state: draw ALL lines at low opacity, no labels ──
+  for (let i = 0; i < n; i++) {
+    for (let j = i+1; j < n; j++) {
+      const ov = overlaps[i][j];
+      if (ov === 0) continue;
+      const pi = positions[i], pj = positions[j];
+      const w = Math.max(1, 7 * (ov / maxOv));
+      const alpha = 0.04 + 0.18 * (ov / maxOv);
+      const line = svgEl('line', {
+        x1: pi.x, y1: pi.y, x2: pj.x, y2: pj.y,
+        stroke: '#999', 'stroke-width': w.toFixed(1),
+        'stroke-opacity': alpha.toFixed(3), 'stroke-linecap': 'round'
+      });
+      lineLayer.appendChild(line);
+      lineEls[i+'-'+j] = line;
+
+      // Overlap label — hidden by default
+      const mx = (pi.x + pj.x) / 2, my = (pi.y + pj.y) / 2;
+      const lbl = svgEl('text', {
+        x: mx, y: my, 'text-anchor': 'middle', 'dominant-baseline': 'middle',
+        'font-size': '10', fill: '#555', 'pointer-events': 'none',
+        opacity: '0'
+      });
+      lbl.textContent = ov.toLocaleString();
+      lblLayer.appendChild(lbl);
+      lineLbls[i+'-'+j] = lbl;
+    }
+  }
+
+  // ── Draw circles and labels ──
+  let selectedIdx = null;
+
+  function applySelection(idx) {
+    // idx = null → reset everything to default
+    selectedIdx = idx;
+
+    for (let i = 0; i < n; i++) {
+      const isSelected = (idx === null || i === idx);
+      const circle = circEls[i];
+      const col = VENN_COLORS[i % VENN_COLORS.length];
+
+      if (idx === null) {
+        // Reset
+        circle.setAttribute('fill-opacity', '0.18');
+        circle.setAttribute('stroke-opacity', '1');
+        circle.setAttribute('stroke-width', '2');
+        textEls[i].name.setAttribute('opacity', '1');
+        textEls[i].cnt.setAttribute('opacity', '0.8');
+      } else if (i === idx) {
+        // Selected circle: highlight
+        circle.setAttribute('fill-opacity', '0.35');
+        circle.setAttribute('stroke-opacity', '1');
+        circle.setAttribute('stroke-width', '3');
+        textEls[i].name.setAttribute('opacity', '1');
+        textEls[i].cnt.setAttribute('opacity', '1');
+      } else {
+        // Other circles: dim
+        circle.setAttribute('fill-opacity', '0.06');
+        circle.setAttribute('stroke-opacity', '0.3');
+        circle.setAttribute('stroke-width', '1');
+        textEls[i].name.setAttribute('opacity', '0.35');
+        textEls[i].cnt.setAttribute('opacity', '0.25');
+      }
+    }
+
+    // Lines and labels
+    for (let i = 0; i < n; i++) {
+      for (let j = i+1; j < n; j++) {
+        const key = i+'-'+j;
+        const line = lineEls[key];
+        const lbl  = lineLbls[key];
+        if (!line) continue;
+        const ov = overlaps[i][j];
+        if (idx === null) {
+          // Default: faint lines, no labels
+          const alpha = 0.04 + 0.18 * (ov / maxOv);
+          line.setAttribute('stroke-opacity', alpha.toFixed(3));
+          line.setAttribute('stroke', '#999');
+          lbl.setAttribute('opacity', '0');
+        } else if (i === idx || j === idx) {
+          // Connected to selected: highlight line with the OTHER circle's color
+          const otherIdx = (i === idx) ? j : i;
+          const otherCol = VENN_COLORS[otherIdx % VENN_COLORS.length];
+          const w = Math.max(1.5, 7 * (ov / maxOv));
+          line.setAttribute('stroke', otherCol);
+          line.setAttribute('stroke-width', w.toFixed(1));
+          line.setAttribute('stroke-opacity', (0.5 + 0.5 * (ov / maxOv)).toFixed(2));
+          lbl.setAttribute('fill', otherCol);
+          lbl.setAttribute('font-weight', '700');
+          lbl.setAttribute('font-size', '11');
+          lbl.setAttribute('opacity', '1');
+        } else {
+          // Unrelated: fully hide
+          line.setAttribute('stroke-opacity', '0.02');
+          lbl.setAttribute('opacity', '0');
+        }
+      }
+    }
+  }
+
+  groups.forEach((g, i) => {
+    const pos = positions[i];
+    const r = radii[i];
+    const col = VENN_COLORS[i % VENN_COLORS.length];
+
+    const circle = svgEl('circle', {
+      cx: pos.x, cy: pos.y, r,
+      fill: col, 'fill-opacity': '0.18',
+      stroke: col, 'stroke-width': '2',
+      style: 'cursor:pointer;transition:fill-opacity .12s,stroke-opacity .12s,stroke-width .12s'
+    });
+
+    circle.addEventListener('mouseenter', () => {
+      if (selectedIdx !== i) circle.setAttribute('fill-opacity', selectedIdx === null ? '0.28' : '0.06');
+    });
+    circle.addEventListener('mouseleave', () => {
+      if (selectedIdx !== i) circle.setAttribute('fill-opacity', selectedIdx === null ? '0.18' : '0.06');
+    });
+    circle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (selectedIdx === i) {
+        // Deselect on second click
+        applySelection(null);
+        document.getElementById('venn-detail').style.display = 'none';
+      } else {
+        applySelection(i);
+        showVennDetail(g, i, overlaps, groups, VENN_COLORS);
+      }
+    });
+
+    circLayer.appendChild(circle);
+    circEls[i] = circle;
+
+    // Labels
+    const labelY = pos.y - r * 0.22;
+    const maxChars = Math.max(8, Math.floor(r / 4.5));
+    const name = g.gVal.length > maxChars ? g.gVal.slice(0, maxChars) + '…' : g.gVal;
+    const fontSize = n > 12 ? '9' : '10';
+
+    const nameLbl = svgEl('text', {
+      x: pos.x, y: labelY, 'text-anchor': 'middle', 'dominant-baseline': 'middle',
+      'font-size': fontSize, 'font-weight': '700', fill: col, 'pointer-events': 'none',
+      style: 'transition:opacity .12s'
+    });
+    nameLbl.textContent = name;
+    textLayer.appendChild(nameLbl);
+
+    const cntLbl = svgEl('text', {
+      x: pos.x, y: labelY + (n > 12 ? 11 : 13),
+      'text-anchor': 'middle', 'dominant-baseline': 'middle',
+      'font-size': '8', fill: col, opacity: '0.8', 'pointer-events': 'none',
+      style: 'transition:opacity .12s'
+    });
+    cntLbl.textContent = g.uniqueExams.length + 'u · ' + g.polyExams.length + 'p';
+    textLayer.appendChild(cntLbl);
+
+    textEls[i] = { name: nameLbl, cnt: cntLbl };
+  });
+
+  // Click on SVG background → deselect
+  svg.addEventListener('click', () => {
+    if (selectedIdx !== null) {
+      applySelection(null);
+      document.getElementById('venn-detail').style.display = 'none';
+    }
+  });
+}
+
+function showVennDetail(g, idx, overlaps, groups, colors) {
+  const detail = document.getElementById('venn-detail');
+  detail.style.display = 'flex';
+  document.getElementById('venn-detail-title').textContent = g.gVal;
+  const body = document.getElementById('venn-detail-body');
+  body.innerHTML = '';
+
+  const col = colors[idx % colors.length];
+  const total = g.exams.length;
+
+  // Summary badges
+  const sum = document.createElement('div');
+  sum.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px';
+  sum.innerHTML =
+    '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' exam titles</span>' +
+    '<span class="cv-badge cv-badge-uniq">&#9670; ' + g.uniqueExams.length + ' unique</span>' +
+    '<span class="cv-badge cv-badge-poly">&#9632; ' + g.polyExams.length + ' polyvalent</span>';
+  body.appendChild(sum);
+
+  // Overlap breakdown with other groups
+  const ovHd = document.createElement('div');
+  ovHd.style.cssText = 'font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px';
+  ovHd.textContent = 'Shared exam titles with other groups';
+  body.appendChild(ovHd);
+
+  // Build sorted overlap list
+  const ovList = groups
+    .map((other, j) => ({ other, j, count: overlaps[idx][j] }))
+    .filter(x => x.j !== idx && x.count > 0)
+    .sort((a, b) => b.count - a.count);
+
+  if (ovList.length === 0) {
+    const none = document.createElement('div');
+    none.style.cssText = 'font-size:11px;color:var(--dim);font-style:italic';
+    none.textContent = 'No shared exams with other groups.';
+    body.appendChild(none);
+  } else {
+    const maxOv = ovList[0].count;
+    ovList.forEach(({ other, j, count }) => {
+      const pct = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
+      const barW = (count / maxOv * 100).toFixed(1);
+      const otherCol = colors[j % colors.length];
+      const row = document.createElement('div');
+      row.style.cssText = 'margin-bottom:8px';
+      row.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">' +
+          '<span style="font-size:11px;font-weight:600;color:' + otherCol + '">' + escHtml(other.gVal) + '</span>' +
+          '<span style="font-size:10px;color:var(--dim)">' + count.toLocaleString() + ' shared · ' + pct + '% of ' + escHtml(g.gVal) + '</span>' +
+        '</div>' +
+        '<div style="height:6px;border-radius:3px;overflow:hidden;background:var(--border)">' +
+          '<div style="height:100%;width:' + barW + '%;background:' + otherCol + ';border-radius:3px"></div>' +
+        '</div>';
+      body.appendChild(row);
+    });
+  }
+
+  // Collapsible unique & poly sections
+  body.appendChild(makeExamSection('Unique exam titles', g.uniqueExams, 'cv-badge-uniq'));
+  body.appendChild(makeExamSection('Polyvalent exam titles', g.polyExams, 'cv-badge-poly'));
+}
+
+document.getElementById('venn-back').addEventListener('click', () => {
+  document.getElementById('venn-view').style.display = 'none';
+});
+document.getElementById('venn-detail-close').addEventListener('click', () => {
+  document.getElementById('venn-detail').style.display = 'none';
+});
+document.getElementById('venn-btn').addEventListener('click', () => {
+  if (!_vennGroups) return;
+  document.getElementById('venn-view').style.display = 'flex';
+  // Defer render until after layout
+  requestAnimationFrame(() => requestAnimationFrame(renderVenn));
+});
+window.addEventListener('resize', () => {
+  if (document.getElementById('venn-view').style.display === 'flex') renderVenn();
+});
+
+document.getElementById('cards-group-sel').addEventListener('change', renderCardView);
 document.getElementById('breakdown-sublist-close').addEventListener('click', () => {
   document.getElementById('breakdown-sublist').style.display = 'none';
   // Deselect whichever card was highlighted
@@ -2305,7 +3020,7 @@ document.getElementById('subset-clear-btn').addEventListener('click', () => clea
 
 // ── CONTROLS ──
 document.getElementById('btn-clear').addEventListener('click', () => {
-  FILTERS = []; renderFilters(); renderColList(); renderClusters();
+  FILTERS = []; renderFilters(); renderColList(); renderQuickFilters(); renderClusters();
 });
 document.getElementById('sort-sel').addEventListener('change', e => {
   SORT = e.target.value; renderClusters();
@@ -2363,7 +3078,7 @@ function applyPolyJump() {
 window.addEventListener('load', () => { if (sessionStorage.getItem('polyvJump')) applyPolyJump(); });
 
 // ── AUTO-LOAD DEFAULT CSV ──
-const DEFAULT_CSV = 'ALLE POLYVALENZEN.csv';
+const DEFAULT_CSV = 'allePolyvalenzen_inLabSpalte.csv';
 (async () => {
   try {
     const res = await fetch(DEFAULT_CSV);
