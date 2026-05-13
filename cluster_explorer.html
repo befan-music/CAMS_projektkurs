@@ -387,6 +387,11 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #venn-detail-hd { padding:10px 14px; background:var(--hover); border-bottom:1px solid var(--border2); display:flex; align-items:center; gap:8px; flex-shrink:0; font-size:11px; font-weight:700; color:var(--bright); }
 #venn-detail-close { background:none; border:none; color:var(--dim); font-size:14px; cursor:pointer; padding:0 2px; margin-left:auto; }
 #venn-detail-body { flex:1; overflow-y:auto; padding:12px; }
+/* Exam rows table */
+.venn-dt-table { border-collapse:collapse; width:100%; font-size:11px; }
+.venn-dt-table th { position:sticky; top:0; background:var(--sidebar); padding:6px 10px; text-align:left; font-size:10px; font-weight:700; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; border-bottom:2px solid var(--border2); white-space:nowrap; z-index:1; }
+.venn-dt-table td { padding:5px 10px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:top; white-space:nowrap; max-width:220px; overflow:hidden; text-overflow:ellipsis; }
+.venn-dt-table tr:hover td { background:var(--hover); }
 
 /* LIST VIEW */
 #list-view { display: none; }
@@ -756,10 +761,14 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
             <button id="venn-back">← Cards</button>
             <span id="venn-title">Venn — exam overlap</span>
             <span id="venn-hint">Scroll to zoom · drag to pan · click circle to inspect</span>
-            <div id="venn-search-wrap" style="position:relative">
+            <div id="venn-search-wrap" style="position:relative;display:flex;align-items:center;gap:4px">
               <input id="venn-search" type="text" placeholder="Search group…" autocomplete="off"
-                style="width:180px;padding:4px 8px;border:1px solid var(--border2);border-radius:4px;background:var(--bg);color:var(--text);font-size:11px;outline:none">
-              <div id="venn-search-dropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--bg);border:1px solid var(--border2);border-radius:4px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)"></div>
+                style="width:160px;padding:4px 8px;border:1px solid var(--border2);border-radius:4px;background:var(--bg);color:var(--text);font-size:11px;outline:none">
+              <div id="venn-search-dropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;width:160px;background:var(--bg);border:1px solid var(--border2);border-radius:4px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)"></div>
+              <div class="vz-group">
+                <button class="vz-btn" id="vz-prev" title="Previous group">&#8249;</button>
+                <button class="vz-btn" id="vz-next" title="Next group">&#8250;</button>
+              </div>
             </div>
             <div id="venn-zoom-controls">
               <!-- Group 0: All / Focus mode -->
@@ -784,6 +793,10 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
                 <span id="venn-circle-level">100%</span>
                 <button class="vz-btn" id="vz-circle-in" title="Grow all circles">◎＋</button>
               </div>
+              <!-- Group 4: label position mode -->
+              <div class="vz-group">
+                <button class="vz-btn active" id="vz-label-mode" title="Cycle label position: inside → edge → outside">⊜ Labels</button>
+              </div>
             </div>
           </div>
           <div id="venn-svg-wrap">
@@ -794,6 +807,15 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
                 <button id="venn-detail-close">✕</button>
               </div>
               <div id="venn-detail-body"></div>
+            </div>
+            <!-- Exam rows table overlay -->
+            <div id="venn-rows-overlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:30;flex-direction:column;overflow:hidden">
+              <div style="padding:10px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;flex-shrink:0">
+                <button id="venn-rows-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Back</button>
+                <span id="venn-rows-title" style="font-size:12px;font-weight:700;color:var(--bright);flex:1"></span>
+                <span id="venn-rows-count" style="font-size:10px;color:var(--dim)"></span>
+              </div>
+              <div id="venn-rows-body" style="flex:1;overflow:auto;padding:0"></div>
             </div>
           </div>
         </div>
@@ -2608,7 +2630,7 @@ function buildExamFreqEl(examTitle) {
   return el;
 }
 
-function makeExamSection(title, examList, colorClass) {
+function makeExamSection(title, examList, colorClass, onExamClick) {
   const PAGE = 10;
   examList = [...examList].sort((a, b) => b[1] - a[1]);
 
@@ -2632,6 +2654,8 @@ function makeExamSection(title, examList, colorClass) {
     examList.slice(from, to).forEach(([examTitle, cnt]) => {
       const row = document.createElement('div');
       row.className = 'cv-exam-row';
+      row.style.cursor = 'pointer';
+      row.title = 'Click to view all CSV rows for this exam';
       row.innerHTML =
         '<span class="cv-exam-name">' + escHtml(examTitle) + '</span>' +
         '<span class="cv-exam-cnt">' + cnt.toLocaleString() + '×</span>';
@@ -2639,6 +2663,10 @@ function makeExamSection(title, examList, colorClass) {
       let freqEl = null;
       row.addEventListener('click', e => {
         e.stopPropagation();
+        if (onExamClick) {
+          onExamClick(examTitle);
+          return;
+        }
         if (freqOpen && freqEl) { freqEl.remove(); freqOpen = false; freqEl = null; return; }
         freqEl = buildExamFreqEl(examTitle);
         row.after(freqEl);
@@ -2703,6 +2731,12 @@ let vennIsDragging = false;  // set true during drag so circle clicks are suppre
 // Module-level callbacks set by renderVenn so external handlers can call into the current render's closures
 let _vennClickBg = null;
 let _vennOrbit   = null;
+let _vennHighlightPair = null; // (otherIdx|null) → dim all lines except focus↔other
+let _vennRefreshLabels = null; // () → re-apply label positions for current mode
+// Label placement modes: 0=inside-center  1=edge-radial  2=outside-full
+let vennLabelMode = 0;
+const VENN_LABEL_MODES = ['inside', 'edge', 'outside'];
+const VENN_LABEL_ICONS = ['⊜ Inside', '⊙ Edge', '⤢ Outside'];
 
 function applyVennCam() {
   const cam = document.getElementById('venn-cam');
@@ -2769,7 +2803,7 @@ function renderVenn() {
   const MIN_R = 28, MAX_R = Math.min(W, H) * 0.21;
   const radii = groups.map(g => (MIN_R + (MAX_R - MIN_R) * Math.sqrt(g.exams.length / maxTotal)) * vennRadiusScale);
 
-  // Ring layout positions in world space (camera-independent)
+  // Ring layout: all groups on a single ring, evenly spaced
   const cx = W / 2, cy = H / 2;
   const ringR = Math.min(W, H) * 0.30;
   const positions = groups.map((_, i) => {
@@ -2932,16 +2966,65 @@ function renderVenn() {
     animFrame = requestAnimationFrame(step);
   }
 
-  function updateNodePosition(i) {
+  function applyLabelPos(i) {
     const p = curPos[i];
     const r = radii[i];
+    const mode = vennLabelMode;
+    const te = textEls[i];
+
+    if (mode === 0) {
+      // Inside-center: label sits slightly above center
+      const ly = p.y - r * 0.22;
+      te.name.setAttribute('x', p.x.toFixed(1));
+      te.name.setAttribute('y', ly.toFixed(1));
+      te.cnt.setAttribute('x', p.x.toFixed(1));
+      te.cnt.setAttribute('y', (ly + 13).toFixed(1));
+      te.name.setAttribute('text-anchor', 'middle');
+      te.cnt.setAttribute('text-anchor', 'middle');
+      // Truncate in inside mode
+      const maxChars = Math.max(8, Math.floor(r / 4.5));
+      te.name.textContent = te.fullName.length > maxChars ? te.fullName.slice(0, maxChars) + '…' : te.fullName;
+    } else {
+      // Compute angle from ring center (cx,cy) to this circle
+      const dx = p.x - cx, dy = p.y - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const ux = dx / dist, uy = dy / dist; // unit vector outward
+
+      if (mode === 1) {
+        // Edge mode: label placed at the circle edge in the outward direction
+        const ex = p.x + ux * r;
+        const ey = p.y + uy * r;
+        const anchor = ux > 0.2 ? 'start' : ux < -0.2 ? 'end' : 'middle';
+        const maxChars = Math.max(10, Math.floor(r / 3.5));
+        te.name.textContent = te.fullName.length > maxChars ? te.fullName.slice(0, maxChars) + '…' : te.fullName;
+        te.name.setAttribute('x', ex.toFixed(1));
+        te.name.setAttribute('y', (ey - 4).toFixed(1));
+        te.name.setAttribute('text-anchor', anchor);
+        te.cnt.setAttribute('x', ex.toFixed(1));
+        te.cnt.setAttribute('y', (ey + 9).toFixed(1));
+        te.cnt.setAttribute('text-anchor', anchor);
+      } else {
+        // Outside mode: label pushed clear outside the circle, full text
+        const gap = 8;
+        const ox = p.x + ux * (r + gap);
+        const oy = p.y + uy * (r + gap);
+        const anchor = ux > 0.2 ? 'start' : ux < -0.2 ? 'end' : 'middle';
+        te.name.textContent = te.fullName;
+        te.name.setAttribute('x', ox.toFixed(1));
+        te.name.setAttribute('y', (oy - 4).toFixed(1));
+        te.name.setAttribute('text-anchor', anchor);
+        te.cnt.setAttribute('x', ox.toFixed(1));
+        te.cnt.setAttribute('y', (oy + 9).toFixed(1));
+        te.cnt.setAttribute('text-anchor', anchor);
+      }
+    }
+  }
+
+  function updateNodePosition(i) {
+    const p = curPos[i];
     circEls[i].setAttribute('cx', p.x.toFixed(1));
     circEls[i].setAttribute('cy', p.y.toFixed(1));
-    const labelY = p.y - r * 0.22;
-    textEls[i].name.setAttribute('x', p.x.toFixed(1));
-    textEls[i].name.setAttribute('y', labelY.toFixed(1));
-    textEls[i].cnt.setAttribute('x', p.x.toFixed(1));
-    textEls[i].cnt.setAttribute('y', (labelY + 13).toFixed(1));
+    applyLabelPos(i);
   }
 
   function updateAllLines() {
@@ -3087,20 +3170,16 @@ function renderVenn() {
     circLayer.appendChild(circle);
     circEls[i] = circle;
 
-    const labelY = pos.y - r * 0.22;
-    const maxChars = Math.max(8, Math.floor(r / 4.5));
-    const name = g.gVal.length > maxChars ? g.gVal.slice(0, maxChars) + '…' : g.gVal;
     const fontSize = n > 12 ? '9' : '10';
 
     const nameLbl = svgEl('text', {
-      x: pos.x, y: labelY, 'text-anchor': 'middle', 'dominant-baseline': 'middle',
+      x: pos.x, y: pos.y, 'text-anchor': 'middle', 'dominant-baseline': 'middle',
       'font-size': fontSize, 'font-weight': '700', fill: col, 'pointer-events': 'none'
     });
-    nameLbl.textContent = name;
     textLayer.appendChild(nameLbl);
 
     const cntLbl = svgEl('text', {
-      x: pos.x, y: labelY + 13,
+      x: pos.x, y: pos.y + 13,
       'text-anchor': 'middle', 'dominant-baseline': 'middle',
       'font-size': '8', fill: col, opacity: '0.8', 'pointer-events': 'none'
     });
@@ -3109,6 +3188,9 @@ function renderVenn() {
 
     textEls[i] = { name: nameLbl, cnt: cntLbl, fullName: g.gVal, r };
   });
+
+  // Apply initial label positions for all nodes
+  for (let i = 0; i < n; i++) applyLabelPos(i);
 
   // ── ORBIT VIEW ──
   function computeOrbitPositions(idx) {
@@ -3156,6 +3238,88 @@ function renderVenn() {
     document.getElementById('vz-orbit').classList.remove('active');
     document.getElementById('vz-all').classList.add('active');
     document.getElementById('vz-focus').classList.remove('active');
+  };
+
+  _vennRefreshLabels = () => {
+    for (let i = 0; i < n; i++) applyLabelPos(i);
+  };
+
+  // Highlight only the line between the focused circle (selectedIdx) and otherIdx.
+  // Pass null to reset to normal focus state.
+  _vennHighlightPair = (otherIdx) => {
+    if (selectedIdx === null) return;
+    for (let i = 0; i < n; i++) {
+      for (let j = i+1; j < n; j++) {
+        const key = i+'-'+j;
+        const line = lineEls[key];
+        const lbl  = lineLbls[key];
+        if (!line) continue;
+        const involvesFocus = (i === selectedIdx || j === selectedIdx);
+        const ov = overlaps[i][j];
+        if (otherIdx === null) {
+          // Reset to normal focus state
+          if (involvesFocus) {
+            const otherI = (i === selectedIdx) ? j : i;
+            const otherCol = VENN_COLORS[otherI % VENN_COLORS.length];
+            const w = Math.max(2, 8 * (ov / maxOv));
+            line.setAttribute('stroke', otherCol);
+            line.setAttribute('stroke-width', w.toFixed(1));
+            line.setAttribute('stroke-opacity', (0.55 + 0.45 * (ov / maxOv)).toFixed(2));
+            lbl.setAttribute('fill', otherCol);
+            lbl.setAttribute('opacity', '1');
+          } else {
+            line.setAttribute('stroke-opacity', '0.01');
+            lbl.setAttribute('opacity', '0');
+          }
+        } else {
+          // Only show the line between selectedIdx ↔ otherIdx
+          const isPair = involvesFocus && (i === otherIdx || j === otherIdx);
+          if (isPair) {
+            const otherCol = VENN_COLORS[otherIdx % VENN_COLORS.length];
+            const w = Math.max(2, 9 * (ov / maxOv));
+            line.setAttribute('stroke', otherCol);
+            line.setAttribute('stroke-width', w.toFixed(1));
+            line.setAttribute('stroke-opacity', '1');
+            lbl.setAttribute('fill', otherCol);
+            lbl.setAttribute('opacity', '1');
+          } else {
+            line.setAttribute('stroke-opacity', '0.015');
+            lbl.setAttribute('opacity', '0');
+          }
+        }
+      }
+    }
+    // Dim all circles except selectedIdx and otherIdx
+    for (let i = 0; i < n; i++) {
+      if (otherIdx === null) {
+        // Restore normal focus circle styling
+        if (i === selectedIdx) {
+          circEls[i].setAttribute('fill-opacity', '0.35');
+          circEls[i].setAttribute('stroke-opacity', '1');
+          textEls[i].name.setAttribute('opacity', '1');
+          textEls[i].cnt.setAttribute('opacity', '1');
+        } else {
+          const conn = overlaps[selectedIdx][i] > 0;
+          circEls[i].setAttribute('fill-opacity', conn ? '0.15' : '0.04');
+          circEls[i].setAttribute('stroke-opacity', conn ? '0.7' : '0.15');
+          textEls[i].name.setAttribute('opacity', conn ? '0.9' : '0.2');
+          textEls[i].cnt.setAttribute('opacity', conn ? '0.7' : '0.12');
+        }
+      } else {
+        if (i === selectedIdx || i === otherIdx) {
+          circEls[i].setAttribute('fill-opacity', '0.35');
+          circEls[i].setAttribute('stroke-opacity', '1');
+          circEls[i].setAttribute('stroke-width', '2.5');
+          textEls[i].name.setAttribute('opacity', '1');
+          textEls[i].cnt.setAttribute('opacity', '1');
+        } else {
+          circEls[i].setAttribute('fill-opacity', '0.03');
+          circEls[i].setAttribute('stroke-opacity', '0.08');
+          textEls[i].name.setAttribute('opacity', '0.12');
+          textEls[i].cnt.setAttribute('opacity', '0.08');
+        }
+      }
+    }
   };
   _vennOrbit = () => {
     if (selectedIdx === null) return;
@@ -3240,16 +3404,18 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
     body.appendChild(none);
   } else {
     const maxOv = ovList[0].count;
+    let activeBarJ = null; // currently highlighted other-group index
+
     ovList.forEach(({ other, j, count }) => {
       const pct = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
       const barW = (count / maxOv * 100).toFixed(1);
       const otherCol = colors[j % colors.length];
 
       const wrap = document.createElement('div');
-      wrap.style.cssText = 'margin-bottom:8px';
+      wrap.style.cssText = 'margin-bottom:8px;border-radius:4px;transition:background .1s';
 
       const header = document.createElement('div');
-      header.style.cssText = 'cursor:pointer;user-select:none';
+      header.style.cssText = 'cursor:pointer;user-select:none;padding:3px 4px;border-radius:4px';
       header.innerHTML =
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">' +
           '<span style="font-size:11px;font-weight:600;color:' + otherCol + '">' + escHtml(other.gVal) + '</span>' +
@@ -3268,6 +3434,11 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
         const arrow = header.querySelector('span:last-child');
         if (expanded) {
           arrow.textContent = arrow.textContent.replace('▸', '▾');
+          header.style.background = 'rgba(0,0,0,0.04)';
+          // Highlight only this pair in the venn diagram
+          activeBarJ = j;
+          if (_vennHighlightPair) _vennHighlightPair(j);
+
           if (!expandPanel.hasChildNodes()) {
             // Compute intersection of exam titles
             const gExamSet = new Set(g.exams.map(e => e[0]));
@@ -3278,9 +3449,13 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
             } else {
               sharedExams.forEach(([title, cnt]) => {
                 const item = document.createElement('div');
-                item.style.cssText = 'display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border);font-size:10px';
+                item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--border);font-size:10px;cursor:pointer';
+                item.title = 'Click to view all CSV rows for this exam';
                 item.innerHTML = '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px">' + escHtml(title) + '</span>' +
                   '<span style="color:var(--dim);flex-shrink:0">' + cnt.toLocaleString() + '</span>';
+                item.addEventListener('click', () => openVennExamRows(title));
+                item.addEventListener('mouseenter', () => item.style.background = 'var(--hover)');
+                item.addEventListener('mouseleave', () => item.style.background = '');
                 expandPanel.appendChild(item);
               });
             }
@@ -3288,7 +3463,13 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
           expandPanel.style.display = 'block';
         } else {
           arrow.textContent = arrow.textContent.replace('▾', '▸');
+          header.style.background = '';
           expandPanel.style.display = 'none';
+          // Reset highlight only if this was the active one
+          if (activeBarJ === j) {
+            activeBarJ = null;
+            if (_vennHighlightPair) _vennHighlightPair(null);
+          }
         }
       });
 
@@ -3299,9 +3480,73 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
   }
 
   // Collapsible unique & poly sections
-  body.appendChild(makeExamSection('Unique exam titles', g.uniqueExams, 'cv-badge-uniq'));
-  body.appendChild(makeExamSection('Polyvalent exam titles', g.polyExams, 'cv-badge-poly'));
+  body.appendChild(makeExamSection('Unique exam titles', g.uniqueExams, 'cv-badge-uniq', openVennExamRows));
+  body.appendChild(makeExamSection('Polyvalent exam titles', g.polyExams, 'cv-badge-poly', openVennExamRows));
 }
+
+// ── VENN EXAM ROWS TABLE ──
+function openVennExamRows(examTitle) {
+  if (!CSV) return;
+  const examCI = CSV.headers.findIndex(h => h.toLowerCase() === 'veranstaltungstitel');
+  if (examCI < 0) return;
+  const examVidx = (CSV.vocabs[examCI] || []).findIndex(v => v === examTitle);
+  if (examVidx < 0) return;
+
+  const sourceRows = SUBSET_ROWS ? SUBSET_ROWS.map(i => CSV.rows[i]) : CSV.rows;
+  const matchRows = sourceRows.filter(r => r[examCI] === examVidx);
+
+  const overlay = document.getElementById('venn-rows-overlay');
+  document.getElementById('venn-rows-title').textContent = examTitle;
+  document.getElementById('venn-rows-count').textContent = matchRows.length.toLocaleString() + ' rows';
+
+  const body = document.getElementById('venn-rows-body');
+  body.innerHTML = '';
+
+  const table = document.createElement('table');
+  table.className = 'venn-dt-table';
+
+  const thead = document.createElement('thead');
+  const hrow = document.createElement('tr');
+  CSV.headers.forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = h;
+    hrow.appendChild(th);
+  });
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  const limit = Math.min(matchRows.length, 3000);
+  for (let ri = 0; ri < limit; ri++) {
+    const row = matchRows[ri];
+    const tr = document.createElement('tr');
+    CSV.headers.forEach((_, ci) => {
+      const td = document.createElement('td');
+      td.textContent = CSV.vocabs[ci][row[ci]] ?? '';
+      td.title = td.textContent;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  }
+  if (matchRows.length > 3000) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = CSV.headers.length;
+    td.style.cssText = 'color:var(--dim);text-align:center;padding:12px;font-style:italic';
+    td.textContent = '… and ' + (matchRows.length - 3000).toLocaleString() + ' more rows';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  body.appendChild(table);
+
+  overlay.style.display = 'flex';
+  body.scrollTop = 0;
+}
+
+document.getElementById('venn-rows-back').addEventListener('click', () => {
+  document.getElementById('venn-rows-overlay').style.display = 'none';
+});
 
 document.getElementById('venn-back').addEventListener('click', () => {
   document.getElementById('venn-view').style.display = 'none';
@@ -3316,6 +3561,7 @@ document.getElementById('venn-back').addEventListener('click', () => {
 });
 document.getElementById('venn-detail-close').addEventListener('click', () => {
   document.getElementById('venn-detail').style.display = 'none';
+  if (_vennHighlightPair) _vennHighlightPair(null);
 });
 document.getElementById('venn-btn').addEventListener('click', () => {
   if (!_vennGroups) return;
@@ -3331,6 +3577,24 @@ document.getElementById('venn-btn').addEventListener('click', () => {
 window.addEventListener('resize', () => {
   if (document.getElementById('venn-view').style.display === 'flex') renderVenn();
 });
+
+// ── VENN PREV / NEXT NAV ──
+function vennNavigate(delta) {
+  if (!_vennGroups || _vennGroups.length === 0) return;
+  const cur = vennSelectedIdx !== null ? vennSelectedIdx : -1;
+  let next = (cur + delta + _vennGroups.length) % _vennGroups.length;
+  vennSelectedIdx = next;
+  renderVenn();
+  requestAnimationFrame(() => {
+    if (_vennGroups && _vennGroups[next] && _vennOverlaps && _vennColors) {
+      showVennDetail(_vennGroups[next], next, _vennOverlaps, _vennGroups, _vennColors);
+      document.getElementById('vz-focus').classList.add('active');
+      document.getElementById('vz-all').classList.remove('active');
+    }
+  });
+}
+document.getElementById('vz-prev').addEventListener('click', () => vennNavigate(-1));
+document.getElementById('vz-next').addEventListener('click', () => vennNavigate(1));
 
 // ── VENN SEARCH BAR ──
 (function() {
@@ -3488,6 +3752,20 @@ function changeVennRadius(factor) {
 document.getElementById('vz-circle-in').addEventListener('click', () => changeVennRadius(1.2));
 document.getElementById('vz-circle-out').addEventListener('click', () => changeVennRadius(1 / 1.2));
 
+// ── LABEL MODE CYCLE ──
+(function() {
+  const btn = document.getElementById('vz-label-mode');
+  function updateLabelBtn() {
+    btn.textContent = VENN_LABEL_ICONS[vennLabelMode];
+  }
+  updateLabelBtn();
+  btn.addEventListener('click', () => {
+    vennLabelMode = (vennLabelMode + 1) % VENN_LABEL_MODES.length;
+    updateLabelBtn();
+    if (_vennRefreshLabels) _vennRefreshLabels();
+  });
+})();
+
 // SVG background click → do nothing (All/Focus mode is only changed by buttons or circle clicks)
 
 // ── ALL / FOCUS MODE ──
@@ -3497,6 +3775,7 @@ function setVennMode(mode) {
   document.getElementById('vz-focus').classList.toggle('active', mode === 'focus');
   if (mode === 'all') {
     document.getElementById('vz-orbit').classList.remove('active');
+    if (_vennHighlightPair) _vennHighlightPair(null);
     if (_vennClickBg) _vennClickBg(); // deselect + restore ring layout
   }
 }
