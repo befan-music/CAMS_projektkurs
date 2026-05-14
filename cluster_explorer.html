@@ -63,6 +63,22 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 
 #stats-bar { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.75); white-space: nowrap; }
 #stats-bar strong { color: #fff; }
+#ce-info-btn {
+  width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7);
+  background: rgba(255,255,255,.15); color: #fff; font-size: 12px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background .1s; line-height: 1;
+}
+#ce-info-btn:hover { background: rgba(255,255,255,.35); }
+#ce-info-panel {
+  display: none; background: #f5f0d8; border-bottom: 2px solid #00883A;
+  padding: 20px 28px; font-size: 13px; line-height: 1.7; color: #2a2418;
+  position: relative; z-index: 9;
+}
+#ce-info-panel h2 { font-size: 14px; font-weight: 700; color: #1a1208; margin-bottom: 12px; }
+#ce-info-panel h3 { font-size: 12px; font-weight: 700; color: #00883A; margin: 14px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
+#ce-info-panel p { margin-bottom: 6px; color: #7a6e50; }
+#ce-info-panel strong { color: #1a1208; }
 
 /* ── LAYOUT ── */
 #layout { display: flex; height: calc(100vh - 46px); overflow: hidden; }
@@ -649,7 +665,22 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
 
   <div class="sep"></div>
   <div id="stats-bar">No file loaded</div>
-  <button id="poly-btn" style="display:none;margin-left:10px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Open Polyvalenzen analysis">⬡ Polyvalenzen</button>
+  <button id="poly-btn" style="display:none;margin-left:10px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Open Polyvalenzen analysis">⬡ Zentrale Erkenntnisse</button>
+  <button id="ce-info-btn" title="About this tool">i</button>
+</div>
+<div id="ce-info-panel">
+  <h2>Spaltenfilter — Kurzanleitung</h2>
+  <p>Der Spaltenfilter ist ein Tool, das mit dem originalen LMU-Datensatz verbunden ist und schnell intuitive Ansichten und „Schnitte" des gesamten Datensatzes ermöglicht. Hierfür stehen folgende Operatoren zur Verfügung:</p>
+  <h3>1 — Subset (Vorfilterung)</h3>
+  <p>Von allen Zeilen kann entschieden werden, welcher Spaltenwert gegeben sein muss, damit eine Zeile in der weiteren Analyse berücksichtigt wird. <strong>Beispiel:</strong> Semester = <em>20252</em> → in der weiteren Analyse werden nur Prüfungen aus dem WiSe 2025 berücksichtigt.</p>
+  <h3>2 — Active Filters (Aggregation)</h3>
+  <p>Mit diesen Werten wird entschieden, wonach die Zeilen aggregiert werden. Auf jeder Filterebene werden alle Zeilen mit demselben Spaltenwert zusammengezählt und als eigene Gruppen angezeigt. Wird ein zweiter Filter ausgewählt, kann in jede Gruppe tiefer eingestiegen werden: die Gruppe wird auf alle ihre Werte der zweiten Ebene aufgeteilt.</p>
+  <p><strong>Beispiel:</strong> 2 Filter in der Reihenfolge <em>1) Veranstaltungstitel → 2) StudiengangTxT</em> — alle Zeilen mit demselben Veranstaltungstitel werden aggregiert. Auswahl eines Titels erlaubt das Einsteigen in dessen Gruppe und zeigt, auf welche Studiengänge sich dieselbe Prüfung aufteilt.</p>
+  <h3>3 — Ansichten: Bubbles &amp; List</h3>
+  <p>Die durch die Filter bestimmte Ansicht auf den Datensatz kann entweder als <strong>Bubbles</strong> (Kreise, Größe = Anzahl Zeilen) oder als <strong>List</strong> (sortierte Hierarchie) dargestellt werden.</p>
+  <h3>4 — Tiefenanalyse einer finalen Gruppe</h3>
+  <p>Ist die letzte Aggregationsstufe erreicht, kann jede finale Gruppe angeklickt werden, um zu sehen, in welchen Eigenschaften sich die Zeilen innerhalb dieser Gruppe unterscheiden.</p>
+  <p><strong>Beispiel:</strong> Filter <em>1) Veranstaltungstitel</em> und <em>2) StudiengangTxT</em> ergibt, dass „Speaking Skills 1" in drei Studiengängen angeboten wird (Englische Philologie, WiWi, Sprache &amp; Literatur). Anklicken der Zeile „Englische Philologie" zeigt, in welchen Eigenschaften sich die 408 Einträge innerhalb dieses Studiengangs untereinander unterscheiden.</p>
 </div>
 
 <!-- MAIN LAYOUT -->
@@ -1663,7 +1694,7 @@ function renderLevel(container, clusters, total, q, depth) {
 
     const row = document.createElement('div');
     row.className = 'cl-row';
-    row.style.cssText = 'padding-left:' + indent + 'px;cursor:pointer;background:#0a0c12;border-bottom-color:#1e2130';
+    row.style.cssText = 'padding-left:' + indent + 'px;cursor:pointer;background:var(--sidebar);border-bottom-color:var(--border)';
 
     const toggleSpan = isLeaf ? '' : '<span class="hl-arrow" style="font-size:9px;color:var(--dim);width:12px;flex-shrink:0;text-align:center">▶</span>';
     row.innerHTML =
@@ -2363,14 +2394,14 @@ function openLeafBreakdown(item, accentColor) {
   // ── inLAB summary card (prepended) ──
   const inlabCI = CSV.headers.findIndex(h => h.toLowerCase() === 'inlab' || h === 'inLAB');
   if (inlabCI >= 0) {
-    let trueCount = 0, noCount = 0;
+    let takenCount = 0, notTakenCount = 0;
     for (const ri of item.allRows) {
-      const val = (CSV.vocabs[inlabCI][CSV.rows[ri][inlabCI]] || '').toUpperCase();
-      if (val === 'TRUE') trueCount++; else noCount++;
+      const val = (CSV.vocabs[inlabCI][CSV.rows[ri][inlabCI]] || '').trim();
+      if (val === '1' || val.toUpperCase() === 'TRUE') takenCount++; else notTakenCount++;
     }
     const total = item.allRows.length;
-    const pctTrue = total ? (trueCount / total * 100).toFixed(1) : '0.0';
-    const pctNo   = total ? (noCount   / total * 100).toFixed(1) : '0.0';
+    const pctTaken    = total ? (takenCount    / total * 100).toFixed(1) : '0.0';
+    const pctNotTaken = total ? (notTakenCount / total * 100).toFixed(1) : '0.0';
     const inlabCard = document.createElement('div');
     inlabCard.className = 'bk-card';
     inlabCard.style.gridColumn = '1 / -1';
@@ -2381,14 +2412,14 @@ function openLeafBreakdown(item, accentColor) {
       '<div class="bk-card-hd"><span class="bk-col-name" style="color:var(--accent)">inLAB — actually taken?</span>' +
       '<span class="bk-nuniq">' + total.toLocaleString() + ' rows</span></div>' +
       '<div class="bk-seg-bar">' +
-        '<div class="bk-seg" style="width:' + pctTrue + '%;background:#00883A" title="TRUE · ' + trueCount.toLocaleString() + '"></div>' +
-        '<div class="bk-seg" style="width:' + pctNo   + '%;background:#c0392b" title="NO · '   + noCount.toLocaleString()   + '"></div>' +
+        '<div class="bk-seg" style="width:' + pctTaken    + '%;background:#00883A" title="1 (taken) · ' + takenCount.toLocaleString() + '"></div>' +
+        '<div class="bk-seg" style="width:' + pctNotTaken + '%;background:#c0392b" title="0 (not taken) · ' + notTakenCount.toLocaleString() + '"></div>' +
       '</div>' +
       '<div class="bk-vals">' +
         '<div class="bk-val-row"><span class="bk-val-dot" style="background:#00883A"></span>' +
-        '<span class="bk-val-label">TRUE (taken)</span><span class="bk-val-pct">' + trueCount.toLocaleString() + ' · ' + pctTrue + '%</span></div>' +
+        '<span class="bk-val-label">1 (taken)</span><span class="bk-val-pct">' + takenCount.toLocaleString() + ' · ' + pctTaken + '%</span></div>' +
         '<div class="bk-val-row"><span class="bk-val-dot" style="background:#c0392b"></span>' +
-        '<span class="bk-val-label">NO (not taken)</span><span class="bk-val-pct">' + noCount.toLocaleString() + ' · ' + pctNo + '%</span></div>' +
+        '<span class="bk-val-label">0 (not taken)</span><span class="bk-val-pct">' + notTakenCount.toLocaleString() + ' · ' + pctNotTaken + '%</span></div>' +
       '</div>';
     grid.appendChild(inlabCard);
   }
@@ -3933,6 +3964,14 @@ const DEFAULT_CSV = 'allePolyvalenzen_inLabSpalte.csv';
     // running as file:// or CSV not found — user picks manually
   }
 })();
+
+document.getElementById('ce-info-btn').addEventListener('click', () => {
+  const panel = document.getElementById('ce-info-panel');
+  const btn = document.getElementById('ce-info-btn');
+  const open = panel.style.display === 'block';
+  panel.style.display = open ? 'none' : 'block';
+  btn.style.background = open ? 'rgba(255,255,255,.15)' : 'rgba(255,255,255,.4)';
+});
 </script>
 </body>
 </html>

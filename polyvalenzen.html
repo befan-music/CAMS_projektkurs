@@ -31,6 +31,21 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 #cluster-link-btn:hover { background: rgba(255,255,255,.35); border-color: #fff; }
 #col-info { font-size: 11px; color: rgba(255,255,255,.75); margin-left: auto; }
 #col-info strong { color: #fff; }
+#info-btn {
+  width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7);
+  background: rgba(255,255,255,.15); color: #fff; font-size: 12px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background .1s; line-height: 1;
+}
+#info-btn:hover { background: rgba(255,255,255,.35); }
+#info-panel {
+  display: none; background: var(--panel); border-bottom: 2px solid var(--accent);
+  padding: 20px 28px; font-size: 13px; line-height: 1.7; color: var(--text);
+}
+#info-panel h2 { font-size: 14px; font-weight: 700; color: var(--bright); margin-bottom: 12px; }
+#info-panel h3 { font-size: 12px; font-weight: 700; color: var(--accent); margin: 14px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
+#info-panel p { margin-bottom: 6px; color: var(--dim); }
+#info-panel strong { color: var(--bright); }
 
 #subset-bar {
   background: var(--panel); border-bottom: 1px solid var(--border);
@@ -54,7 +69,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 #subset-count { font-size: 11px; margin-left: 6px; color: var(--dim); }
 #subset-count strong { color: var(--green); }
 
-#main { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
+#main { margin: 20px 20px 40px; padding: 0; }
 
 .section-heading {
   font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
@@ -123,121 +138,192 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 .pv-computing { padding: 18px; text-align: center; color: var(--dim); font-size: 12px; }
 .pv-row-hint { font-size: 10px; color: var(--dim); padding: 4px 8px 8px; font-style: italic; }
 
-/* ── RADIAL CARD ── */
-#radial-card {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+/* ── POLYVALENZEN CARD (full-width, above #main) ── */
+#pv-dim-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 20px;
+  overflow: hidden;
 }
-#radial-controls {
-  display: flex; align-items: center; gap: 12px; padding: 12px 18px;
-  border-bottom: 1px solid var(--border); flex-wrap: wrap;
+#pv-dim-card-header {
+  display: flex; align-items: center; gap: 14px; padding: 12px 20px;
 }
-#radial-controls label { font-size: 11px; color: var(--dim); white-space: nowrap; }
-#outer-dim-sel {
-  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
-  padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;
+#poly-cards-open-btn {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--accent2);
+  padding: 5px 13px; border-radius: 4px; font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all .1s; white-space: nowrap;
 }
-.toggle-group {
-  display: flex; border: 1px solid var(--border2); border-radius: 4px; overflow: hidden;
-}
-.toggle-btn {
-  background: none; border: none; color: var(--dim); padding: 5px 14px;
-  font-size: 11px; font-weight: 600; cursor: pointer; transition: all .1s;
-}
-.toggle-btn.active { background: var(--accent); color: #fff; }
-.toggle-btn:not(.active):hover { background: var(--hover); color: var(--text); }
+#poly-cards-open-btn:hover { background: var(--hover); border-color: var(--accent2); }
+#poly-cards-open-btn.open { background: var(--accent2); color: #fff; border-color: var(--accent2); }
 
-#exam-search-wrap {
-  display: flex; align-items: center; gap: 6px; margin-left: auto;
-}
-#exam-search {
-  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
-  padding: 4px 10px; border-radius: 4px; font-size: 12px; width: 220px;
-}
-#exam-search::placeholder { color: var(--dim); }
-#exam-search-clear {
-  background: none; border: 1px solid var(--border2); color: var(--dim);
-  padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
-}
-#exam-search-clear:hover { color: var(--text); }
-#exam-search-results {
-  position: absolute; z-index: 200; background: #0d0f14;
-  border: 1px solid var(--border2); border-radius: 5px;
-  max-height: 220px; overflow-y: auto; min-width: 280px;
-  box-shadow: 0 6px 20px rgba(0,0,0,.5);
-}
-.exam-sr-item {
-  padding: 6px 12px; font-size: 12px; color: var(--text); cursor: pointer;
-  border-bottom: 1px solid var(--border);
-}
-.exam-sr-item:last-child { border-bottom: none; }
-.exam-sr-item:hover, .exam-sr-item.active { background: var(--hover); color: var(--bright); }
-
-#radial-stats {
-  padding: 6px 18px 8px; font-size: 11px; color: var(--dim);
-  border-bottom: 1px solid var(--border);
-}
-#radial-stats strong { color: var(--green); }
-#selected-exam-info {
-  padding: 6px 18px 8px; font-size: 11px;
-  border-bottom: 1px solid var(--border); display: none;
-  background: rgba(0,136,58,.07);
-}
-#selected-exam-info strong { color: var(--accent); }
-
-#radial-svg-wrap {
-  background: var(--bg); display: flex; justify-content: center; align-items: center;
-  min-height: 620px; position: relative;
-}
-#radial-svg-wrap svg { display: block; }
-
-#radial-tooltip {
-  position: fixed; pointer-events: none; z-index: 300;
-  background: #2a2418; border: 1px solid #1a1208; border-radius: 5px;
-  padding: 7px 11px; font-size: 11px; color: #FFF9E5; max-width: 280px;
-  display: none; line-height: 1.5;
-}
-
-/* ── DETAIL PANEL ── */
-#detail-panel {
-  position: fixed; inset: 0; background: var(--bg); z-index: 100;
+/* ── CARDS EXPANDED VIEW (inline inside the card) ── */
+#poly-cards-view {
   display: none; flex-direction: column;
+  border-top: 1px solid var(--border); position: relative;
+  height: 680px; /* fixed height so it behaves like cluster_explorer */
 }
-#detail-topbar {
-  height: 46px; background: #00883A; border-bottom: 1px solid #006d2e;
-  display: flex; align-items: center; gap: 12px; padding: 0 18px; flex-shrink: 0;
+#poly-cards-topbar {
+  padding: 8px 14px; background: var(--hover); border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
 }
-#detail-back {
-  background: none; border: 1px solid rgba(255,255,255,.5); color: #fff;
-  padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;
+#poly-group-sel {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 3px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; outline: none;
 }
-#detail-back:hover { border-color: #fff; }
-#detail-title { font-size: 13px; font-weight: 600; color: #fff; }
-#detail-subtitle { font-size: 11px; color: rgba(255,255,255,.7); margin-left: 4px; }
-#detail-body { flex: 1; overflow: auto; padding: 20px 28px; }
+#poly-cards-info { font-size: 11px; color: var(--dim); margin-left: 4px; }
+#poly-cards-grid {
+  flex: 1; overflow-y: auto; padding: 14px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px; align-content: start;
+}
 
-.dt-table { border-collapse: collapse; width: 100%; font-size: 12px; }
-.dt-table th {
-  text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 700;
-  color: var(--dim); text-transform: uppercase; letter-spacing: .07em;
-  border-bottom: 1px solid var(--border); background: var(--panel); position: sticky; top: 0;
+/* card view (shared style with cluster explorer) */
+.cv-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 12px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px;
+  transition: border-color .1s, background .1s;
 }
-.dt-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
-.dt-table tr:hover td { background: var(--hover); }
+.cv-card:hover { border-color: var(--accent); background: var(--hover); }
+.cv-card-title { font-size: 12px; font-weight: 700; color: var(--bright); line-height: 1.3; }
+.cv-card-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cv-badge {
+  font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; white-space: nowrap;
+}
+.cv-badge-uniq  { background: rgba(101,84,121,.12); color: #3d2f52; }
+.cv-badge-poly  { background: rgba(0,136,58,.12);   color: #005a27; }
+.cv-badge-total { background: rgba(184,134,11,.12); color: #7a5800; }
+.cv-bar { height: 6px; border-radius: 3px; overflow: hidden; display: flex; width: 100%; background: var(--border); }
+.cv-bar-uniq { background: #655479; }
+.cv-bar-poly { background: #00883A; }
 
-@keyframes arcPulse {
-  0%   { opacity: 1; }
-  50%  { opacity: 0.3; }
-  100% { opacity: 1; }
+/* ── VENN BUTTON in top row ── */
+#poly-venn-btn {
+  margin-left: auto;
+  background: rgba(101,84,121,.12); border: 1px solid rgba(101,84,121,.3); color: #3d2f52;
+  padding: 4px 11px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 600;
+  transition: all .1s; white-space: nowrap;
 }
-.arc-pulse { animation: arcPulse 0.7s ease-in-out 3; }
+#poly-venn-btn:hover { background: rgba(101,84,121,.22); }
+#poly-venn-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* cards-detail is inline-styled as position:absolute inside the overlay */
+
+/* collapsible exam sections */
+.cv-detail-section { margin-bottom: 10px; border: 1px solid var(--border2); border-radius: 5px; overflow: hidden; }
+.cv-detail-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px; font-size: 11px; font-weight: 700; color: var(--bright);
+  background: var(--hover); cursor: pointer; user-select: none;
+  border-bottom: 1px solid transparent; transition: background .1s;
+}
+.cv-detail-hd:hover { background: var(--border2); }
+.cv-detail-hd-arrow { font-size: 9px; color: var(--dim); transition: transform .15s; }
+.cv-detail-hd.open { border-bottom-color: var(--border2); }
+.cv-detail-hd.open .cv-detail-hd-arrow { transform: rotate(90deg); }
+.cv-detail-body { display: none; padding: 6px 8px; }
+.cv-detail-body.open { display: block; }
+.cv-exam-row {
+  display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 3px;
+  cursor: pointer; border: 1px solid transparent; margin-bottom: 2px; transition: background .1s;
+}
+.cv-exam-row:hover { background: var(--hover); border-color: var(--border2); }
+.cv-exam-name { flex: 1; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv-exam-cnt { font-size: 10px; color: var(--dim); white-space: nowrap; }
+.cv-freq-table { font-size: 11px; margin: 4px 8px 6px; padding: 8px 10px; background: var(--panel); border-radius: 4px; border: 1px solid var(--border2); }
+.cv-freq-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; border-bottom: 1px solid var(--border); }
+.cv-freq-row:last-child { border-bottom: none; }
+.cv-freq-grp { flex: 1; font-size: 10px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv-freq-n { font-size: 10px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.cv-load-more {
+  display: block; width: calc(100% - 16px); margin: 4px 8px 8px;
+  background: none; border: 1px dashed var(--border2); color: var(--dim);
+  border-radius: 3px; padding: 5px; font-size: 10px; cursor: pointer; text-align: center;
+  transition: border-color .1s, color .1s;
+}
+.cv-load-more:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── VENN VIEW (inside cards overlay) ── */
+#poly-venn-view {
+  display: none; position: absolute; inset: 0; background: var(--bg); z-index: 10;
+  flex-direction: column; overflow: hidden;
+}
+#poly-venn-header {
+  padding: 8px 12px; background: var(--hover); border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap;
+}
+#poly-venn-back {
+  background: none; border: 1px solid var(--border2); color: var(--accent);
+  border-radius: 4px; padding: 3px 10px; font-size: 11px; cursor: pointer; white-space: nowrap;
+}
+#poly-venn-title { font-size: 12px; font-weight: 700; color: var(--bright); }
+#poly-venn-hint { font-size: 10px; color: var(--dim); flex: 1; }
+#poly-venn-zoom-controls { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+.vz-group {
+  display: flex; align-items: center;
+  border: 1px solid var(--border2); border-radius: 5px; overflow: hidden; background: var(--bg);
+}
+.vz-group .vz-btn { border: none; border-radius: 0; border-right: 1px solid var(--border2); }
+.vz-group .vz-btn:last-child { border-right: none; }
+.vz-btn {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--dim);
+  border-radius: 4px; padding: 3px 9px; font-size: 11px; cursor: pointer;
+  white-space: nowrap; transition: background .1s, color .1s, border-color .1s;
+  display: flex; align-items: center; gap: 4px;
+}
+.vz-btn:hover { background: var(--hover); color: var(--text); }
+.vz-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+#poly-venn-zoom-level, #poly-venn-circle-level {
+  font-size: 10px; color: var(--dim); min-width: 34px; text-align: center;
+  padding: 0 4px; background: var(--bg);
+}
+#poly-venn-svg-wrap { flex: 1; overflow: hidden; position: relative; cursor: grab; }
+#poly-venn-svg-wrap.panning { cursor: grabbing; }
+#poly-venn-svg { width: 100%; height: 100%; display: block; }
+#poly-venn-detail {
+  display: none; position: absolute; top: 0; right: 0; bottom: 0; width: 340px;
+  background: var(--bg); border-left: 1px solid var(--border2); flex-direction: column;
+  overflow: hidden; box-shadow: -3px 0 12px rgba(0,0,0,.08);
+}
+#poly-venn-detail-hd {
+  padding: 10px 14px; background: var(--hover); border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  font-size: 11px; font-weight: 700; color: var(--bright);
+}
+#poly-venn-detail-close { background: none; border: none; color: var(--dim); font-size: 14px; cursor: pointer; padding: 0 2px; margin-left: auto; }
+#poly-venn-detail-body { flex: 1; overflow-y: auto; padding: 12px; }
+.venn-dt-table { border-collapse: collapse; width: 100%; font-size: 11px; }
+.venn-dt-table th {
+  position: sticky; top: 0; background: var(--sidebar); padding: 6px 10px;
+  text-align: left; font-size: 10px; font-weight: 700; color: var(--dim);
+  text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid var(--border2); white-space: nowrap; z-index: 1;
+}
+.venn-dt-table td { padding: 5px 10px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.venn-dt-table tr:hover td { background: var(--hover); }
+
 </style>
 </head>
 <body>
 
 <div id="topbar">
   <h1>⬡ Polyvalenzen <em>Exam Sharing Analysis</em></h1>
-  <a href="belegt_V1_FINAL_FIXED.html" target="_blank" id="cluster-link-btn">⬡ Cluster Explorer</a>
+  <a href="cluster_explorer.html" target="_blank" id="cluster-link-btn">⬡ Cluster Explorer</a>
   <div id="col-info"></div>
+  <button id="info-btn" title="About this tool">i</button>
+</div>
+<div id="info-panel">
+  <h2>About Polyvalenzen — Exam Sharing Analysis</h2>
+  <h3>What is this?</h3>
+  <p>This tool analyses how exams are shared across degree programs (Studiengänge) and degree types (Abschlüsse) at LMU. An exam is <strong>polyvalent</strong> if it appears in more than one group; it is <strong>unique</strong> if it belongs to exactly one group.</p>
+  <h3>Polyvalenzen Card — Cards View</h3>
+  <p>Press <strong>Cards</strong> to open the group-by analysis. Choose a grouping column (e.g. AbschlussTxT, StudiengangTxT, Vertiefung). Each card shows one group with a bar indicating the share of unique vs. polyvalent exam titles and the total count.</p>
+  <h3>Venn Diagram</h3>
+  <p>After loading cards, press <strong>○ Venn diagram</strong> to see a zoomable overlap diagram. Each circle represents a group; overlapping areas indicate shared exam titles. Click a circle to focus on it and see the breakdown on the right panel. Use <strong>Focus</strong> mode to centre on one group, <strong>Orbit</strong> to animate, and the search box to highlight a specific group.</p>
+  <h3>Card Detail View</h3>
+  <p>Click any group card to open its detail view, listing unique and polyvalent exam titles. From there, press <strong>○ Venn diagram</strong> to jump directly into the Venn focused on that group.</p>
+  <h3>Subset Filter</h3>
+  <p>Use the <strong>Subset</strong> bar at the top to restrict the analysis to a specific column value (e.g. only rows from semester 20252). The cards and Venn diagram update automatically.</p>
+  <h3>Q &amp; A</h3>
+  <p>The Q&amp;A section answers three fixed questions about exam sharing: which exam is shared by the most programs, which programs share the most exams with others, and which exam spans the most degree types.</p>
 </div>
 
 <div id="subset-bar">
@@ -248,50 +334,130 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
   <span id="subset-count"></span>
 </div>
 
-<div id="main">
-  <div id="error-banner"></div>
-  <div id="loading-bar">⏳ Loading and parsing CSV…</div>
+<!-- ── POLYVALENZEN CARD (full-width, outside #main) ── -->
+<div id="pv-dim-card" style="margin: 20px 20px 0;">
+    <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+      <span style="font-size:14px;font-weight:700;color:var(--bright);">Polyvalenzen</span>
+      <button id="pv-card-info-btn" title="Was wird hier gemessen?" style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--dim);background:none;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .1s;line-height:1;margin-left:2px;">i</button>
+    </div>
+    <div id="pv-card-info-panel" style="display:none;background:#f5f0d8;border-bottom:2px solid #00883A;padding:20px 28px;font-size:13px;line-height:1.7;color:#2a2418;">
+      <h2 style="font-size:14px;font-weight:700;color:#1a1208;margin-bottom:12px;">Polyvalenzen — Was wird gemessen?</h2>
 
-  <!-- ── SECTION 1: Q&A ── -->
-  <div class="section-heading">Q &amp; A</div>
-  <div id="qa-cards"></div>
+      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">1 — Was ist eine polyvalente Prüfung?</h3>
+      <p style="margin-bottom:6px;color:#4a3e28;">Diese Ansicht ist speziell für die Analyse polyvalenter Prüfungen gedacht. Eine Prüfung gilt hier als <strong style="color:#1a1208">polyvalent</strong>, wenn sie in mehr als einer Gruppe erscheint — d.&thinsp;h. wenn dieselbe Prüfung für Studierende verschiedener Gruppen (z.&thinsp;B. Abschlüsse oder Studiengänge) angeboten wird.</p>
+      <p style="margin-bottom:6px;color:#4a3e28;"><strong style="color:#1a1208">Beispiel:</strong> Über alle 3 Semester hinweg gibt es <strong style="color:#1a1208">4.089 eindeutige Prüfungen im Bachelor</strong>. Davon sind <strong style="color:#1a1208">1.535</strong> Prüfungen, die <em>nur</em> im Abschluss Bachelor angeboten werden (einzigartig). Die übrigen <strong style="color:#00883A">2.554 Prüfungen</strong> erscheinen im Bachelor <em>und</em> mindestens einem weiteren Abschluss — sie sind polyvalent.</p>
 
-  <!-- ── SECTION 2: Radial ── -->
-  <div class="section-heading" style="margin-top:40px">Radial Exam Sharing View</div>
+      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">2 — Gruppen &amp; Prüfungsansicht</h3>
+      <p style="margin-bottom:6px;color:#4a3e28;">Das Anklicken einer Gruppe öffnet die Liste ihrer Prüfungen. Ein erneutes Anklicken einer Prüfung gibt alle dazugehörigen Zeilen des gesamten Datensatzes heraus — d.&thinsp;h. alle Einträge, in denen diese Prüfung vorkommt.</p>
 
-  <div id="radial-card">
-    <div id="radial-controls">
-      <label>Outer ring:</label>
-      <select id="outer-dim-sel"><option value="-1">— select column —</option></select>
+      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">3 — Venn-Diagramm</h3>
+      <p style="margin-bottom:6px;color:#4a3e28;">Anstatt die Gruppen als Karten zu betrachten, können diese als <strong style="color:#1a1208">Kreise in einem 2D-Venn-Raum</strong> visualisiert werden. Die Überschneidung zweier Kreise zeigt Prüfungen, die in beiden Gruppen vorkommen. Klicken eines Kreises erlaubt die Analyse dieser Gruppe im Verhältnis zu allen anderen Gruppen.</p>
 
-      <div class="toggle-group">
-        <button class="toggle-btn active" id="toggle-poly">Polyvalent exams</button>
-        <button class="toggle-btn" id="toggle-unique">Unique exams</button>
+      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">4 — Navigation im Venn-Diagramm</h3>
+      <p style="margin-bottom:6px;color:#4a3e28;">Die Schaltflächen <strong style="color:#1a1208">Fit</strong>, <strong style="color:#1a1208">Orbit</strong>, Zoom-In/Out sowie die Kreis-Größenregler erlauben eine freie Anpassung der Ansicht. <strong style="color:#1a1208">Orbit</strong> animiert das Layout automatisch; <strong style="color:#1a1208">Fit</strong> passt alle Kreise auf den sichtbaren Bereich an. Mit dem Suchfeld kann gezielt eine Gruppe hervorgehoben werden.</p>
+
+      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">5 — Polyvalenzanalyse (rechtes Panel)</h3>
+      <p style="margin-bottom:6px;color:#4a3e28;">Rechtsseitig erscheint immer die <strong style="color:#1a1208">Polyvalenzanalyse der aktuell ausgewählten Gruppe</strong> im Verhältnis zu allen anderen Gruppen: wie viele Prüfungen werden geteilt, wie viele sind einzigartig. Die anderen Gruppen sind dort ebenfalls anklickbar — ein Klick gibt alle gemeinsamen Prüfungen als Zeilen des Datensatzes heraus.</p>
+    </div>
+    <div id="pv-dim-card-header">
+      <button id="poly-cards-open-btn">&#9646; Cards</button>
+    </div>
+
+    <!-- CARDS VIEW (expands inline inside the card) -->
+    <div id="poly-cards-view">
+    <div id="poly-cards-topbar">
+      <span style="font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Group by:</span>
+      <select id="poly-group-sel"><option value="-1">— select column —</option></select>
+      <span id="poly-cards-info"></span>
+      <button id="poly-venn-btn" disabled style="margin-left:auto;background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s">&#9711; Venn diagram</button>
+      <button id="poly-fullscreen-btn" title="Enter fullscreen" style="background:none;border:1px solid var(--border2);color:var(--dim);padding:3px 8px;border-radius:3px;font-size:13px;cursor:pointer;line-height:1;transition:all .1s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--dim)'">&#x26F6;</button>
+    </div>
+    <div id="poly-cards-grid"></div>
+
+    <!-- VENN VIEW (inside cards overlay) -->
+    <div id="poly-venn-view">
+      <div id="poly-venn-header">
+        <button id="poly-venn-back">← Cards</button>
+        <span id="poly-venn-title">Venn — exam overlap</span>
+        <span id="poly-venn-hint">Scroll to zoom · drag to pan · click circle to inspect</span>
+        <div id="poly-venn-search-wrap" style="position:relative;display:flex;align-items:center;gap:4px">
+          <input id="poly-venn-search" type="text" placeholder="Search group…" autocomplete="off"
+            style="width:160px;padding:4px 8px;border:1px solid var(--border2);border-radius:4px;background:var(--bg);color:var(--text);font-size:11px;outline:none">
+          <div id="poly-venn-search-dropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;width:160px;background:var(--bg);border:1px solid var(--border2);border-radius:4px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)"></div>
+          <div class="vz-group">
+            <button class="vz-btn" id="poly-vz-prev" title="Previous group">&#8249;</button>
+            <button class="vz-btn" id="poly-vz-next" title="Next group">&#8250;</button>
+          </div>
+        </div>
+        <div id="poly-venn-zoom-controls">
+          <div class="vz-group">
+            <button class="vz-btn active" id="poly-vz-all" title="Show all circles">All</button>
+            <button class="vz-btn" id="poly-vz-focus" title="Focus on selected circle">Focus</button>
+          </div>
+          <div class="vz-group">
+            <button class="vz-btn" id="poly-vz-zoom-out" title="Zoom out">－</button>
+            <span id="poly-venn-zoom-level">100%</span>
+            <button class="vz-btn" id="poly-vz-zoom-in" title="Zoom in">＋</button>
+          </div>
+          <div class="vz-group">
+            <button class="vz-btn" id="poly-vz-fit" title="Fit all circles to screen">⊡ Fit</button>
+            <button class="vz-btn" id="poly-vz-orbit" title="Orbit layout">⊙ Orbit</button>
+          </div>
+          <div class="vz-group">
+            <button class="vz-btn" id="poly-vz-circle-out" title="Shrink circles">◎－</button>
+            <span id="poly-venn-circle-level">100%</span>
+            <button class="vz-btn" id="poly-vz-circle-in" title="Grow circles">◎＋</button>
+          </div>
+          <div class="vz-group">
+            <button class="vz-btn active" id="poly-vz-label-mode" title="Cycle label position">⊜ Labels</button>
+          </div>
+        </div>
       </div>
-
-      <div id="exam-search-wrap" style="position:relative">
-        <input id="exam-search" type="text" placeholder="Search exam title…">
-        <button id="exam-search-clear">✕</button>
-        <div id="exam-search-results" style="display:none; top:32px; left:0; position:absolute"></div>
+      <div id="poly-venn-svg-wrap">
+        <svg id="poly-venn-svg"><g id="poly-venn-cam"></g></svg>
+        <div id="poly-venn-detail">
+          <div id="poly-venn-detail-hd">
+            <span id="poly-venn-detail-title">—</span>
+            <button id="poly-venn-detail-close">✕</button>
+          </div>
+          <div id="poly-venn-detail-body"></div>
+        </div>
+        <div id="poly-venn-rows-overlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:30;flex-direction:column;overflow:hidden">
+          <div style="padding:10px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;flex-shrink:0">
+            <button id="poly-venn-rows-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Back</button>
+            <span id="poly-venn-rows-title" style="font-size:12px;font-weight:700;color:var(--bright);flex:1"></span>
+            <span id="poly-venn-rows-count" style="font-size:10px;color:var(--dim)"></span>
+          </div>
+          <div id="poly-venn-rows-body" style="flex:1;overflow:auto;padding:0"></div>
+        </div>
       </div>
     </div>
 
-    <div id="radial-stats"></div>
-    <div id="selected-exam-info"></div>
-    <div id="radial-svg-wrap"><div class="pv-computing">Select an outer ring column to render the chart</div></div>
-  </div>
-</div>
+    <!-- CARD DETAIL (inside cards overlay) -->
+    <div id="poly-cards-detail" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:20;flex-direction:column;overflow:hidden">
+      <div style="padding:10px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <button id="poly-cards-detail-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Back</button>
+        <span id="poly-cards-detail-title" style="font-size:12px;font-weight:700;color:var(--bright);flex:1"></span>
+        <button id="poly-cards-detail-venn-btn" style="background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s">&#9711; Venn diagram</button>
+      </div>
+      <div id="poly-cards-detail-body" style="flex:1;overflow-y:auto;padding:14px"></div>
+    </div>
+    </div><!-- end #poly-cards-view -->
+</div><!-- end #pv-dim-card -->
 
-<div id="radial-tooltip"></div>
+<div id="error-banner" style="margin: 12px 20px 0;"></div>
+<div id="loading-bar" style="margin: 12px 20px 0;">⏳ Loading and parsing CSV…</div>
 
-<!-- Detail panel -->
-<div id="detail-panel">
-  <div id="detail-topbar">
-    <button id="detail-back">← Back</button>
-    <span id="detail-title"></span>
-    <span id="detail-subtitle"></span>
+<div id="main">
+  <!-- ── Q&A CARD ── -->
+  <div id="qa-section-card" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--border);">
+      <span style="font-size:14px;font-weight:700;color:var(--bright);">Q &amp; A</span>
+    </div>
+    <div style="padding:16px 20px 20px;">
+      <div id="qa-cards"></div>
+    </div>
   </div>
-  <div id="detail-body"></div>
 </div>
 
 <script>
@@ -364,9 +530,6 @@ const _fallbackMeta = metaRaw ? null : { filename: DEFAULT_POLYV_CSV, delimiter:
 
 let meta = null, headers, vocabs, rows, colIdx = {};
 let subsetCI = -1, subsetVal = '';
-let radialMode = 'poly';
-let outerCI = -1;
-let selectedExamEv = null; // currently selected exam vidx
 
 try { meta = metaRaw ? JSON.parse(metaRaw) : _fallbackMeta; } catch(e) { meta = _fallbackMeta; }
 
@@ -438,7 +601,7 @@ function computeQ3() {
 // ── Q&A RENDER ──
 const TOP_N = 50;
 
-function renderResults(container, results, jumpColHeader) {
+function renderResults(container, results) {
   container.innerHTML = '';
   if (!results.length) { container.innerHTML = '<div class="pv-computing">No results.</div>'; return; }
   const maxScore = results[0].score;
@@ -446,10 +609,7 @@ function renderResults(container, results, jumpColHeader) {
   const rest  = results.slice(TOP_N);
   const inner = document.createElement('div');
   inner.className = 'pv-results-inner';
-  const hint = document.createElement('div');
-  hint.className = 'pv-row-hint';
-  hint.textContent = 'Click any row to see all its data';
-  inner.appendChild(hint);
+
 
   function addRow(r, rank) {
     const el = document.createElement('div');
@@ -460,7 +620,6 @@ function renderResults(container, results, jumpColHeader) {
       '<span class="pv-label" title="' + escHtml(r.label) + '">' + escHtml(r.label) + '</span>' +
       '<span class="pv-bar-wrap"><span class="pv-bar-fill" style="width:' + pct + '%"></span></span>' +
       '<span class="pv-score">' + escHtml(r.scoreLabel) + '</span>';
-    el.addEventListener('click', () => showDetail(jumpColHeader, r.label, r.scoreLabel));
     inner.appendChild(el);
   }
 
@@ -473,49 +632,6 @@ function renderResults(container, results, jumpColHeader) {
     inner.appendChild(btn);
   }
   container.appendChild(inner);
-}
-
-// ── DETAIL PANEL ──
-document.getElementById('detail-back').addEventListener('click', () => {
-  document.getElementById('detail-panel').style.display = 'none';
-});
-
-function showDetail(colHeader, value, scoreLabel) {
-  const ci = (headers || []).findIndex(h => h === colHeader);
-  if (ci < 0 || !rows) return;
-  const vidx = (vocabs[ci] || []).findIndex(v => v === value);
-  if (vidx < 0) return;
-  const matchRows = getActiveRows().filter(row => row[ci] === vidx);
-  const displayCols = headers.map((h, i) => ({ h, i })).filter(c => c.i !== ci);
-  document.getElementById('detail-title').textContent = value;
-  document.getElementById('detail-subtitle').textContent =
-    '· ' + matchRows.length.toLocaleString() + ' rows · ' + scoreLabel;
-  const body = document.getElementById('detail-body');
-  body.innerHTML = '';
-  const table = document.createElement('table');
-  table.className = 'dt-table';
-  const thead = document.createElement('thead');
-  const hrow = document.createElement('tr');
-  displayCols.forEach(c => { const th = document.createElement('th'); th.textContent = c.h; hrow.appendChild(th); });
-  thead.appendChild(hrow); table.appendChild(thead);
-  const tbody = document.createElement('tbody');
-  const limit = Math.min(matchRows.length, 2000);
-  for (let ri = 0; ri < limit; ri++) {
-    const row = matchRows[ri];
-    const tr = document.createElement('tr');
-    displayCols.forEach(c => { const td = document.createElement('td'); td.textContent = vocabs[c.i][row[c.i]] ?? ''; tr.appendChild(td); });
-    tbody.appendChild(tr);
-  }
-  if (matchRows.length > 2000) {
-    const tr = document.createElement('tr'); const td = document.createElement('td');
-    td.colSpan = displayCols.length;
-    td.style.cssText = 'color:var(--dim);text-align:center;padding:12px';
-    td.textContent = '… and ' + (matchRows.length - 2000).toLocaleString() + ' more rows';
-    tr.appendChild(td); tbody.appendChild(tr);
-  }
-  table.appendChild(tbody); body.appendChild(table);
-  document.getElementById('detail-panel').style.display = 'flex';
-  body.scrollTop = 0;
 }
 
 // ── Q&A CARDS ──
@@ -568,7 +684,7 @@ function buildQACards() {
       resultsDiv.style.display = state.open ? '' : 'none';
       if (state.open && !state.computed) {
         resultsDiv.innerHTML = '<div class="pv-computing">Computing…</div>';
-        setTimeout(() => { state.computed = q.compute(); renderResults(resultsDiv, state.computed, q.jumpCol); }, 10);
+        setTimeout(() => { state.computed = q.compute(); renderResults(resultsDiv, state.computed); }, 10);
       }
     });
     cardsEl.appendChild(card);
@@ -592,11 +708,13 @@ function onSubsetChange() {
     state.computed = null;
     if (state.open) {
       state.resultsDiv.innerHTML = '<div class="pv-computing">Computing…</div>';
-      setTimeout(() => { state.computed = state.q.compute(); renderResults(state.resultsDiv, state.computed, state.q.jumpCol); }, 10);
+      setTimeout(() => { state.computed = state.q.compute(); renderResults(state.resultsDiv, state.computed); }, 10);
     }
   });
-  selectedExamEv = null;
-  renderRadial();
+  // Re-render cards/venn with the new subset
+  if (document.getElementById('poly-cards-view').style.display === 'flex') {
+    renderPolyCards();
+  }
 }
 
 // ── COLOUR PALETTE ──
@@ -606,516 +724,998 @@ const PALETTE = [
   '#512e5f','#1e8449','#922b21','#1a6b5c','#8b6914','#4a235a'
 ];
 
-// ── TOOLTIP ──
-const tooltip = document.getElementById('radial-tooltip');
-function showTooltip(evt, html) {
-  tooltip.innerHTML = html;
-  tooltip.style.display = 'block';
-  moveTooltip(evt);
-}
-function moveTooltip(evt) {
-  tooltip.style.left = (evt.clientX + 14) + 'px';
-  tooltip.style.top  = (evt.clientY - 10) + 'px';
-}
-function hideTooltip() { tooltip.style.display = 'none'; }
+// ── POLYVALENZEN CARD VIEW ──
+function renderPolyCards() {
+  const groupCI = parseInt(document.getElementById('poly-group-sel').value, 10);
+  const grid = document.getElementById('poly-cards-grid');
+  const info = document.getElementById('poly-cards-info');
+  const vennBtn = document.getElementById('poly-venn-btn');
+  grid.innerHTML = '';
+  _pvVennGroups = null;
+  pvVennSelectedIdx = null;
+  renderPvVenn._savedPos = null;
+  pvVennCam.x = 0; pvVennCam.y = 0; pvVennCam.scale = 1;
+  vennBtn.disabled = true;
+  if (groupCI < 0) { info.textContent = ''; return; }
 
-// ── EXAM SEARCH ──
-const examSearchInput = document.getElementById('exam-search');
-const examSearchResults = document.getElementById('exam-search-results');
-const examSearchClear = document.getElementById('exam-search-clear');
-let searchResultEvs = [];
-let searchCursor = -1;
-
-function updateExamSearch() {
-  const q = examSearchInput.value.trim().toLowerCase();
-  examSearchResults.style.display = 'none';
-  searchResultEvs = [];
-  if (!q || !vocabs || colIdx.exam < 0) return;
-
-  // Only search within exams currently in the chart
-  const activeRows = getActiveRows();
-  const examCI = colIdx.exam;
-  const seenEv = new Set();
-  for (const r of activeRows) seenEv.add(r[examCI]);
-
-  searchResultEvs = [...seenEv]
-    .filter(ev => (vocabs[examCI][ev] || '').toLowerCase().includes(q))
-    .slice(0, 30);
-
-  if (!searchResultEvs.length) return;
-  examSearchResults.innerHTML = '';
-  searchResultEvs.forEach((ev, idx) => {
-    const item = document.createElement('div');
-    item.className = 'exam-sr-item';
-    item.textContent = vocabs[examCI][ev] || '?';
-    item.addEventListener('mousedown', e => { e.preventDefault(); selectExam(ev); });
-    examSearchResults.appendChild(item);
-  });
-  searchCursor = -1;
-  examSearchResults.style.display = '';
-}
-
-examSearchInput.addEventListener('input', updateExamSearch);
-examSearchInput.addEventListener('keydown', e => {
-  const items = examSearchResults.querySelectorAll('.exam-sr-item');
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    searchCursor = Math.min(searchCursor + 1, items.length - 1);
-    items.forEach((it, i) => it.classList.toggle('active', i === searchCursor));
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    searchCursor = Math.max(searchCursor - 1, 0);
-    items.forEach((it, i) => it.classList.toggle('active', i === searchCursor));
-  } else if (e.key === 'Enter') {
-    if (searchCursor >= 0 && searchResultEvs[searchCursor] !== undefined) {
-      selectExam(searchResultEvs[searchCursor]);
-    } else if (searchResultEvs.length) {
-      selectExam(searchResultEvs[0]);
-    }
-  } else if (e.key === 'Escape') {
-    examSearchResults.style.display = 'none';
-    examSearchInput.blur();
-  }
-});
-examSearchInput.addEventListener('blur', () => {
-  setTimeout(() => { examSearchResults.style.display = 'none'; }, 150);
-});
-examSearchClear.addEventListener('click', () => {
-  examSearchInput.value = '';
-  examSearchResults.style.display = 'none';
-  selectedExamEv = null;
-  document.getElementById('selected-exam-info').style.display = 'none';
-  renderRadial();
-});
-
-function selectExam(ev) {
-  selectedExamEv = ev;
-  examSearchInput.value = (vocabs && colIdx.exam >= 0) ? (vocabs[colIdx.exam][ev] || '') : '';
-  examSearchResults.style.display = 'none';
-  renderRadial();
-  updateSelectedExamInfo();
-}
-
-function updateSelectedExamInfo() {
-  const infoEl = document.getElementById('selected-exam-info');
-  if (selectedExamEv === null || outerCI < 0 || !vocabs) { infoEl.style.display = 'none'; return; }
-  // Build examToOuter fresh
-  const examCI = colIdx.exam;
-  const activeRows = getActiveRows();
-  const outerSet = new Set();
-  for (const r of activeRows) {
-    if (r[examCI] === selectedExamEv) outerSet.add(r[outerCI]);
-  }
-  const outerLabels = [...outerSet].map(ov => vocabs[outerCI][ov] || '?').join(', ');
-  infoEl.style.display = '';
-  infoEl.innerHTML =
-    'Selected: <strong>' + escHtml(vocabs[examCI][selectedExamEv] || '?') + '</strong> &nbsp;·&nbsp; ' +
-    'appears in <strong style="color:var(--green)">' + outerSet.size + '</strong> ' +
-    escHtml(headers[outerCI] || 'groups') +
-    (outerSet.size <= 8 ? ': <span style="color:var(--dim)">' + escHtml(outerLabels) + '</span>' : '') +
-    ' &nbsp;<span style="color:var(--dim);cursor:pointer" id="clear-sel-x">✕ clear</span>';
-  document.getElementById('clear-sel-x').addEventListener('click', () => {
-    selectedExamEv = null; examSearchInput.value = '';
-    infoEl.style.display = 'none';
-    renderRadial();
-  });
-}
-
-// ── RADIAL DATA ──
-function buildRadialData() {
-  if (outerCI < 0 || colIdx.exam < 0) return null;
   const examCI = colIdx.exam;
   const activeRows = getActiveRows();
 
-  const examToOuter = new Map();
+  const groupMap  = new Map(); // groupVal -> Map<examTitle, count>
+  const examGroups = new Map(); // examTitle -> Set<groupVal>
+
   for (const row of activeRows) {
-    const ev = row[examCI], ov = row[outerCI];
-    if (!examToOuter.has(ev)) examToOuter.set(ev, new Set());
-    examToOuter.get(ev).add(ov);
+    const gVal = vocabs[groupCI] ? (vocabs[groupCI][row[groupCI]] || '(empty)') : String(row[groupCI] || '(empty)');
+    const eVal = vocabs[examCI]  ? (vocabs[examCI][row[examCI]]   || '(empty)') : String(row[examCI]  || '(empty)');
+    if (!groupMap.has(gVal)) groupMap.set(gVal, new Map());
+    const eg = groupMap.get(gVal);
+    eg.set(eVal, (eg.get(eVal) || 0) + 1);
+    if (!examGroups.has(eVal)) examGroups.set(eVal, new Set());
+    examGroups.get(eVal).add(gVal);
   }
 
-  const outerMap = new Map();
-  for (const [ev, outerSet] of examToOuter) {
-    const outerCount = outerSet.size;
-    const keep = radialMode === 'poly' ? outerCount > 1 : outerCount === 1;
-    if (!keep) continue;
-    for (const ov of outerSet) {
-      if (!outerMap.has(ov)) outerMap.set(ov, []);
-      outerMap.get(ov).push({ ev, outerCount });
-    }
-  }
+  const groups = [...groupMap.entries()].map(([gVal, examCounts]) => {
+    const exams      = [...examCounts.entries()];
+    const uniqueExams = exams.filter(([t]) => examGroups.get(t).size === 1);
+    const polyExams   = exams.filter(([t]) => examGroups.get(t).size >  1);
+    return { gVal, exams, uniqueExams, polyExams };
+  });
+  groups.sort((a, b) => b.exams.length - a.exams.length);
+  _pvVennGroups = groups;
+  vennBtn.disabled = false;
 
-  const outerGroups = [...outerMap.entries()]
-    .map(([ov, exams]) => ({
-      ov, label: vocabs[outerCI][ov] || '?',
-      exams: exams.sort((a,b) => b.outerCount - a.outerCount)
-    }))
-    .sort((a,b) => b.exams.length - a.exams.length);
+  const groupLabel = headers[groupCI] || String(groupCI);
+  info.textContent = groups.length + ' groups · ' + [...examGroups.keys()].length.toLocaleString() + ' distinct exam titles';
 
-  const allExamVidxSet = new Set();
-  for (const g of outerGroups) for (const e of g.exams) allExamVidxSet.add(e.ev);
+  groups.forEach(g => {
+    const total = g.exams.length;
+    const nUniq = g.uniqueExams.length;
+    const nPoly = g.polyExams.length;
+    const pUniq = total ? (nUniq / total * 100).toFixed(0) : 0;
+    const pPoly = total ? (nPoly / total * 100).toFixed(0) : 0;
 
-  return { outerGroups, examToOuter, allExamCount: allExamVidxSet.size };
+    const card = document.createElement('div');
+    card.className = 'cv-card';
+    card.innerHTML =
+      '<div class="cv-card-title">' + escHtml(g.gVal) + '</div>' +
+      '<div class="cv-bar"><div class="cv-bar-uniq" style="width:' + pUniq + '%"></div><div class="cv-bar-poly" style="width:' + pPoly + '%"></div></div>' +
+      '<div class="cv-card-row">' +
+        '<span class="cv-badge cv-badge-uniq">&#9670; ' + nUniq.toLocaleString() + ' unique</span>' +
+        '<span class="cv-badge cv-badge-poly">&#9632; ' + nPoly.toLocaleString() + ' polyvalent</span>' +
+        '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' total</span>' +
+      '</div>';
+    card.addEventListener('click', () => pvShowCardDetail(g, groupLabel, groupCI));
+    grid.appendChild(card);
+  });
 }
 
-// ── RADIAL RENDER ──
-function renderRadial() {
-  const wrap = document.getElementById('radial-svg-wrap');
-  const statsEl = document.getElementById('radial-stats');
+document.getElementById('poly-group-sel').addEventListener('change', renderPolyCards);
 
-  if (outerCI < 0) {
-    wrap.innerHTML = '<div class="pv-computing">Select an outer ring column to render the chart</div>';
-    statsEl.innerHTML = '';
-    return;
+// Open Venn and immediately focus the clicked group
+function pvOpenVennFocused(g) {
+  if (!_pvVennGroups) return;
+  // Hide the card-detail overlay so the venn view is visible
+  document.getElementById('poly-cards-detail').style.display = 'none';
+  const idx = _pvVennGroups.findIndex(gr => gr.gVal === g.gVal);
+  if (idx < 0) return;
+  // Reset camera and state
+  pvVennCam.x = 0; pvVennCam.y = 0; pvVennCam.scale = 1;
+  pvVennRadiusScale = 1.0;
+  pvVennSelectedIdx = idx;
+  renderPvVenn._savedPos = null;
+  document.getElementById('poly-vz-orbit').classList.remove('active');
+  document.getElementById('poly-vz-all').classList.remove('active');
+  document.getElementById('poly-vz-focus').classList.add('active');
+  document.getElementById('poly-venn-view').style.display = 'flex';
+  // Render then show the detail panel for this group
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    renderPvVenn();
+    requestAnimationFrame(() => {
+      if (_pvVennGroups && _pvVennOverlaps && _pvVennColors) {
+        pvShowVennDetail(_pvVennGroups[idx], idx, _pvVennOverlaps, _pvVennGroups, _pvVennColors);
+      }
+    });
+  }));
+}
+
+// ── POLY CARD DETAIL ──
+function pvBuildExamFreqEl(examTitle, groupCI) {
+  const examCI = colIdx.exam;
+  const activeRows = getActiveRows();
+  const freqMap = new Map();
+  for (const r of activeRows) {
+    const eVal = vocabs[examCI] ? (vocabs[examCI][r[examCI]] || '') : String(r[examCI] || '');
+    if (eVal === examTitle) {
+      const gv = vocabs[groupCI] ? (vocabs[groupCI][r[groupCI]] || '(empty)') : String(r[groupCI] || '(empty)');
+      freqMap.set(gv, (freqMap.get(gv) || 0) + 1);
+    }
   }
+  const freqEntries = [...freqMap.entries()].sort((a, b) => b[1] - a[1]);
+  const el = document.createElement('div');
+  el.className = 'cv-freq-table';
+  el.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--dim);margin-bottom:6px">Appears in ' + freqEntries.length + ' group(s):</div>' +
+    freqEntries.map(([gv, n]) =>
+      '<div class="cv-freq-row"><span class="cv-freq-grp">' + escHtml(gv) + '</span><span class="cv-freq-n">' + n + '×</span></div>'
+    ).join('');
+  return el;
+}
 
-  const data = buildRadialData();
-  if (!data) { wrap.innerHTML = '<div class="pv-computing">No data.</div>'; return; }
-
-  const { outerGroups, examToOuter } = data;
-
-  if (!outerGroups.length) {
-    wrap.innerHTML = '<div class="pv-computing">No ' + (radialMode === 'poly' ? 'polyvalent' : 'unique') + ' exams found for this dimension.</div>';
-    statsEl.innerHTML = '';
-    return;
+function pvMakeExamSection(title, examList, colorClass, onExamClick, groupCI) {
+  const PAGE = 10;
+  examList = [...examList].sort((a, b) => b[1] - a[1]);
+  const sec = document.createElement('div');
+  sec.className = 'cv-detail-section';
+  const hd = document.createElement('div');
+  hd.className = 'cv-detail-hd';
+  hd.innerHTML = '<span>' + escHtml(title) + ' <span style="color:var(--dim);font-weight:400">(' + examList.length + ')</span></span>' +
+    '<span class="cv-detail-hd-arrow">&#9654;</span>';
+  const bodyEl = document.createElement('div');
+  bodyEl.className = 'cv-detail-body';
+  sec.appendChild(hd);
+  sec.appendChild(bodyEl);
+  let shown = 0, loadMoreBtn = null;
+  function renderRows(from, to) {
+    examList.slice(from, to).forEach(([examTitle, cnt]) => {
+      const row = document.createElement('div');
+      row.className = 'cv-exam-row';
+      row.title = 'Click to view all rows for this exam';
+      row.innerHTML = '<span class="cv-exam-name">' + escHtml(examTitle) + '</span><span class="cv-exam-cnt">' + cnt.toLocaleString() + '×</span>';
+      let freqOpen = false, freqEl = null;
+      row.addEventListener('click', e => {
+        e.stopPropagation();
+        if (onExamClick) { onExamClick(examTitle); return; }
+        if (freqOpen && freqEl) { freqEl.remove(); freqOpen = false; freqEl = null; return; }
+        freqEl = pvBuildExamFreqEl(examTitle, groupCI);
+        row.after(freqEl);
+        freqOpen = true;
+      });
+      if (loadMoreBtn) bodyEl.insertBefore(row, loadMoreBtn);
+      else bodyEl.appendChild(row);
+    });
+    shown = to;
   }
+  function addLoadMore() {
+    if (loadMoreBtn) loadMoreBtn.remove();
+    if (shown >= examList.length) { loadMoreBtn = null; return; }
+    loadMoreBtn = document.createElement('button');
+    loadMoreBtn.className = 'cv-load-more';
+    loadMoreBtn.textContent = 'Load 10 more (' + (examList.length - shown) + ' remaining)';
+    loadMoreBtn.addEventListener('click', e => { e.stopPropagation(); renderRows(shown, Math.min(shown + PAGE, examList.length)); addLoadMore(); });
+    bodyEl.appendChild(loadMoreBtn);
+  }
+  hd.addEventListener('click', () => {
+    const isOpen = hd.classList.toggle('open');
+    bodyEl.classList.toggle('open', isOpen);
+    if (isOpen && shown === 0) { renderRows(0, Math.min(PAGE, examList.length)); addLoadMore(); }
+  });
+  return sec;
+}
 
-  const totalExams = data.allExamCount;
-  const totalOuter = outerGroups.length;
-  statsEl.innerHTML =
-    '<strong>' + totalExams.toLocaleString() + '</strong> distinct exam titles (' +
-    (radialMode === 'poly' ? 'appear in ≥2 outer values' : 'appear in exactly 1 outer value') +
-    ') across <strong>' + totalOuter + '</strong> ' + escHtml(headers[outerCI] || 'groups') +
-    ' &nbsp;·&nbsp; arc width = exam variety &nbsp;·&nbsp; click an exam node or arc to select';
+let _pvDetailGroup = null; // currently shown group in card detail
 
-  // Selected exam outer set
-  const selectedOuterSet = selectedExamEv !== null
-    ? (examToOuter.get(selectedExamEv) || new Set())
-    : null;
+function pvShowCardDetail(g, groupLabel, groupCI) {
+  _pvDetailGroup = g;
+  document.getElementById('poly-cards-detail').style.display = 'flex';
+  document.getElementById('poly-cards-detail-title').textContent = g.gVal + ' — ' + groupLabel;
+  const body = document.getElementById('poly-cards-detail-body');
+  body.innerHTML = '';
+  body.appendChild(pvMakeExamSection('Unique exam titles (not shared with other groups)', g.uniqueExams, 'cv-badge-uniq', null, groupCI));
+  body.appendChild(pvMakeExamSection('Polyvalent exam titles (shared across groups)', g.polyExams, 'cv-badge-poly', null, groupCI));
+}
+document.getElementById('poly-cards-detail-venn-btn').addEventListener('click', () => {
+  if (_pvDetailGroup) pvOpenVennFocused(_pvDetailGroup);
+});
+document.getElementById('poly-cards-detail-back').addEventListener('click', () => {
+  document.getElementById('poly-cards-detail').style.display = 'none';
+});
 
-  // Layout
-  const W = Math.min(wrap.clientWidth || 900, 900);
-  const H = W;
+// ── VENN STATE ──
+let _pvVennGroups = null;
+let _pvVennOverlaps = null;
+let _pvVennColors = null;
+const pvVennCam = { x: 0, y: 0, scale: 1 };
+let pvVennRadiusScale = 1.0;
+let pvVennSelectedIdx = null;
+let pvVennIsDragging = false;
+let _pvVennClickBg = null;
+let _pvVennOrbit = null;
+let _pvVennHighlightPair = null;
+let _pvVennRefreshLabels = null;
+let pvVennLabelMode = 0;
+const PV_VENN_LABEL_MODES = ['inside', 'edge', 'outside'];
+const PV_VENN_LABEL_ICONS = ['⊜ Inside', '⊙ Edge', '⤢ Outside'];
+
+function applyPvVennCam() {
+  const cam = document.getElementById('poly-venn-cam');
+  if (cam) cam.setAttribute('transform', `translate(${pvVennCam.x.toFixed(2)},${pvVennCam.y.toFixed(2)}) scale(${pvVennCam.scale.toFixed(4)})`);
+  const lvl = document.getElementById('poly-venn-zoom-level');
+  if (lvl) lvl.textContent = Math.round(pvVennCam.scale * 100) + '%';
+}
+
+function pvVennZoomAt(screenX, screenY, factor) {
+  pvVennCam.x = screenX + (pvVennCam.x - screenX) * factor;
+  pvVennCam.y = screenY + (pvVennCam.y - screenY) * factor;
+  pvVennCam.scale *= factor;
+  applyPvVennCam();
+}
+
+function pvVennFitAll(W, H, positions, radii) {
+  if (!positions || positions.length === 0) return;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  positions.forEach((p, i) => {
+    const r = radii[i];
+    minX = Math.min(minX, p.x - r); minY = Math.min(minY, p.y - r);
+    maxX = Math.max(maxX, p.x + r); maxY = Math.max(maxY, p.y + r);
+  });
+  const pad = 40;
+  const scaleX = (W - pad * 2) / (maxX - minX);
+  const scaleY = (H - pad * 2) / (maxY - minY);
+  pvVennCam.scale = Math.min(scaleX, scaleY, 2);
+  pvVennCam.x = W / 2 - ((minX + maxX) / 2) * pvVennCam.scale;
+  pvVennCam.y = H / 2 - ((minY + maxY) / 2) * pvVennCam.scale;
+  applyPvVennCam();
+}
+
+function renderPvVenn() {
+  if (!_pvVennGroups || _pvVennGroups.length === 0) return;
+  const svg = document.getElementById('poly-venn-svg');
+  const W = svg.clientWidth || svg.parentElement.clientWidth;
+  const H = svg.clientHeight || svg.parentElement.clientHeight;
+  if (!W || !H) return;
+
+  let cam = document.getElementById('poly-venn-cam');
+  if (!cam) { cam = document.createElementNS('http://www.w3.org/2000/svg','g'); cam.id = 'poly-venn-cam'; svg.appendChild(cam); }
+  cam.innerHTML = '';
+
+  const groups = _pvVennGroups;
+  const n = groups.length;
+  if (n === 0) return;
+
+  const examSets = groups.map(g => new Set(g.exams.map(([t]) => t)));
+  const overlaps = Array.from({length:n}, () => new Array(n).fill(0));
+  for (let i = 0; i < n; i++)
+    for (let j = i+1; j < n; j++) {
+      let shared = 0;
+      for (const t of examSets[i]) if (examSets[j].has(t)) shared++;
+      overlaps[i][j] = overlaps[j][i] = shared;
+    }
+  _pvVennOverlaps = overlaps;
+  const maxOv = Math.max(...groups.flatMap((_, a) => groups.map((__, b) => a < b ? overlaps[a][b] : 0)), 1);
+  const maxTotal = Math.max(...groups.map(g => g.exams.length), 1);
+  const MIN_R = 28, MAX_R = Math.min(W, H) * 0.21;
+  const radii = groups.map(g => (MIN_R + (MAX_R - MIN_R) * Math.sqrt(g.exams.length / maxTotal)) * pvVennRadiusScale);
+
   const cx = W / 2, cy = H / 2;
-  const outerRingOuter = W * 0.46;
-  const outerRingInner = W * 0.38;
-  const innerRingR     = W * 0.26;
-
-  const totalWeight = outerGroups.reduce((s, g) => s + g.exams.length, 0);
-  const GAP_RAD = outerGroups.length > 1 ? 0.012 : 0;
-  let angle = -Math.PI / 2;
-
-  outerGroups.forEach((g, gi) => {
-    const sweep = (g.exams.length / totalWeight) * (2 * Math.PI) - GAP_RAD;
-    g.startAngle = angle + GAP_RAD / 2;
-    g.endAngle   = angle + GAP_RAD / 2 + sweep;
-    g.midAngle   = (g.startAngle + g.endAngle) / 2;
-    g.color      = PALETTE[gi % PALETTE.length];
-    angle += sweep + GAP_RAD;
+  const ringR = Math.min(W, H) * 0.30;
+  const positions = groups.map((_, i) => {
+    const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    return { x: cx + ringR * Math.cos(angle), y: cy + ringR * Math.sin(angle) };
   });
 
-  // Collect unique exam vidxes
-  const shownExamVidxes = [];
-  const seenExams = new Set();
-  for (const g of outerGroups) {
-    for (const e of g.exams) {
-      if (!seenExams.has(e.ev)) { seenExams.add(e.ev); shownExamVidxes.push(e.ev); }
-    }
+  if (pvVennCam.scale === 1 && pvVennCam.x === 0 && pvVennCam.y === 0) {
+    pvVennFitAll(W, H, positions, radii);
+  } else {
+    applyPvVennCam();
   }
 
-  function examMidAngle(ev) {
-    const outerSet = examToOuter.get(ev) || new Set();
-    let sumAngle = 0, count = 0;
-    for (const g of outerGroups) {
-      if (outerSet.has(g.ov)) { sumAngle += g.midAngle; count++; }
-    }
-    return count ? sumAngle / count : 0;
-  }
-
-  shownExamVidxes.sort((a, b) => examMidAngle(a) - examMidAngle(b));
-
-  const examAngleStep = shownExamVidxes.length > 0 ? (2 * Math.PI) / shownExamVidxes.length : 0;
-  const examAngleMap = new Map();
-  shownExamVidxes.forEach((ev, i) => {
-    examAngleMap.set(ev, -Math.PI / 2 + i * examAngleStep);
-  });
-
-  const maxOuterCount = Math.max(...[...examToOuter.values()].map(s => s.size), 1);
+  const VENN_COLORS = ['#655479','#00883A','#b8860b','#c0392b','#1a7a6e','#8b4513','#2e86ab','#6d4c41','#4a7c59','#7b3f6e','#3d6b4f','#5c4033','#1a5276','#7d6608','#512e5f'];
+  _pvVennColors = VENN_COLORS;
 
   const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('width', W); svg.setAttribute('height', H);
-  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-
-  // click on background = deselect
-  const bgRect = document.createElementNS(ns, 'rect');
-  bgRect.setAttribute('width', W); bgRect.setAttribute('height', H);
-  bgRect.setAttribute('fill', 'transparent');
-  bgRect.style.cursor = 'default';
-  bgRect.addEventListener('click', () => {
-    selectedExamEv = null; examSearchInput.value = '';
-    document.getElementById('selected-exam-info').style.display = 'none';
-    renderRadial();
-  });
-  svg.appendChild(bgRect);
-
-  function arcPath(cx, cy, r1, r2, startA, endA) {
-    const x1o = cx + r2 * Math.cos(startA), y1o = cy + r2 * Math.sin(startA);
-    const x2o = cx + r2 * Math.cos(endA),   y2o = cy + r2 * Math.sin(endA);
-    const x1i = cx + r1 * Math.cos(endA),   y1i = cy + r1 * Math.sin(endA);
-    const x2i = cx + r1 * Math.cos(startA), y2i = cy + r1 * Math.sin(startA);
-    const large = (endA - startA) > Math.PI ? 1 : 0;
-    return `M ${x1o} ${y1o} A ${r2} ${r2} 0 ${large} 1 ${x2o} ${y2o} L ${x1i} ${y1i} A ${r1} ${r1} 0 ${large} 0 ${x2i} ${y2i} Z`;
+  function svgEl(tag, attrs) {
+    const el = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
   }
 
-  // ── Lines (only drawn when an exam is selected, or always in dim mode) ──
-  const lineGroup = document.createElementNS(ns, 'g');
+  const lineLayer  = svgEl('g', { id: 'pv-venn-lines' });
+  const lblLayer   = svgEl('g', { id: 'pv-venn-lbl-lines' });
+  const circLayer  = svgEl('g', { id: 'pv-venn-circles' });
+  const textLayer  = svgEl('g', { id: 'pv-venn-texts' });
+  cam.appendChild(lineLayer); cam.appendChild(lblLayer); cam.appendChild(circLayer); cam.appendChild(textLayer);
 
-  if (selectedExamEv !== null) {
-    // Only draw lines for the selected exam
-    const ea = examAngleMap.get(selectedExamEv);
-    if (ea !== undefined) {
-      const ex = cx + innerRingR * Math.cos(ea);
-      const ey = cy + innerRingR * Math.sin(ea);
-      for (const g of outerGroups) {
-        if (!selectedOuterSet.has(g.ov)) continue;
-        const outerMx = cx + (outerRingInner - 4) * Math.cos(g.midAngle);
-        const outerMy = cy + (outerRingInner - 4) * Math.sin(g.midAngle);
-        const line = document.createElementNS(ns, 'line');
-        line.setAttribute('x1', ex); line.setAttribute('y1', ey);
-        line.setAttribute('x2', outerMx); line.setAttribute('y2', outerMy);
-        line.setAttribute('stroke', g.color);
-        line.setAttribute('stroke-width', '1.5');
-        line.setAttribute('opacity', '0.9');
-        lineGroup.appendChild(line);
-      }
+  const lineEls = {}, lineLbls = {}, circEls = [], textEls = [];
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i+1; j < n; j++) {
+      const ov = overlaps[i][j];
+      if (ov === 0) continue;
+      const pi = positions[i], pj = positions[j];
+      const w = Math.max(1, 7 * (ov / maxOv));
+      const alpha = 0.04 + 0.18 * (ov / maxOv);
+      const line = svgEl('line', { x1: pi.x, y1: pi.y, x2: pj.x, y2: pj.y, stroke: '#999', 'stroke-width': w.toFixed(1), 'stroke-opacity': alpha.toFixed(3), 'stroke-linecap': 'round' });
+      lineLayer.appendChild(line);
+      lineEls[i+'-'+j] = line;
+      const mx = (pi.x + pj.x) / 2, my = (pi.y + pj.y) / 2;
+      const lbl = svgEl('text', { x: mx, y: my, 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': '10', fill: '#555', 'pointer-events': 'none', opacity: '0' });
+      lbl.textContent = ov.toLocaleString();
+      lblLayer.appendChild(lbl);
+      lineLbls[i+'-'+j] = lbl;
     }
+  }
+
+  let curPos;
+  if (renderPvVenn._savedPos && renderPvVenn._savedPos.length === n) {
+    curPos = renderPvVenn._savedPos;
   } else {
-    // Draw all lines, dimmed
-    lineGroup.setAttribute('opacity', '0.18');
-    for (const g of outerGroups) {
-      const outerMx = cx + (outerRingInner - 4) * Math.cos(g.midAngle);
-      const outerMy = cy + (outerRingInner - 4) * Math.sin(g.midAngle);
-      for (const e of g.exams) {
-        const ea = examAngleMap.get(e.ev);
-        if (ea === undefined) continue;
-        const ex = cx + innerRingR * Math.cos(ea);
-        const ey = cy + innerRingR * Math.sin(ea);
-        const line = document.createElementNS(ns, 'line');
-        line.setAttribute('x1', ex); line.setAttribute('y1', ey);
-        line.setAttribute('x2', outerMx); line.setAttribute('y2', outerMy);
-        line.setAttribute('stroke', g.color);
-        line.setAttribute('stroke-width', '0.7');
-        lineGroup.appendChild(line);
+    curPos = positions.map(p => ({ x: p.x, y: p.y }));
+    renderPvVenn._savedPos = curPos;
+  }
+  let animFrame = null;
+  let selectedIdx = pvVennSelectedIdx;
+
+  function computeSpreadPositions(idx) {
+    const detailPanelW = 360;
+    const usableW = W - detailPanelW;
+    const pad = 60;
+    const selX = pad + radii[idx] + 10, selY = H / 2;
+    const connected = [], unconnected = [];
+    for (let j = 0; j < n; j++) {
+      if (j === idx) continue;
+      if (overlaps[idx][j] > 0) connected.push(j);
+      else unconnected.push(j);
+    }
+    connected.sort((a, b) => overlaps[idx][b] - overlaps[idx][a]);
+    const result = new Array(n);
+    result[idx] = { x: selX, y: selY };
+    const nConn = connected.length;
+    if (nConn > 0) {
+      const cols = nConn > 8 ? 2 : 1;
+      const perCol = Math.ceil(nConn / cols);
+      const colW = (usableW - selX - radii[idx] * 2 - pad * 2) / cols;
+      const baseX = selX + radii[idx] + pad * 2;
+      connected.forEach((j, ki) => {
+        const col = Math.floor(ki / perCol);
+        const row = ki % perCol;
+        const rowCount = (col === cols - 1) ? nConn - col * perCol : perCol;
+        const x = baseX + col * colW + colW / 2;
+        const ySpan = H - pad * 2;
+        const y = pad + radii[j] + (rowCount > 1 ? (row / (rowCount - 1)) * (ySpan - radii[j] * 2) : ySpan / 2);
+        result[j] = { x, y };
+      });
+    }
+    unconnected.forEach((j, ki) => { result[j] = { x: -radii[j] * 0.6, y: pad + ki * (radii[j] * 1.2 + 8) }; });
+    return result;
+  }
+
+  function animateTo(targetPos, duration) {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    const startPos = curPos.map(p => ({ x: p.x, y: p.y }));
+    const start = performance.now();
+    function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const e = ease(t);
+      for (let i = 0; i < n; i++) {
+        curPos[i].x = startPos[i].x + (targetPos[i].x - startPos[i].x) * e;
+        curPos[i].y = startPos[i].y + (targetPos[i].y - startPos[i].y) * e;
+        updateNodePosition(i);
+      }
+      updateAllLines();
+      if (t < 1) animFrame = requestAnimationFrame(step);
+      else animFrame = null;
+    }
+    animFrame = requestAnimationFrame(step);
+  }
+
+  function applyLabelPos(i) {
+    const p = curPos[i], r = radii[i], mode = pvVennLabelMode, te = textEls[i];
+    if (mode === 0) {
+      const ly = p.y - r * 0.22;
+      te.name.setAttribute('x', p.x.toFixed(1)); te.name.setAttribute('y', ly.toFixed(1));
+      te.cnt.setAttribute('x', p.x.toFixed(1));  te.cnt.setAttribute('y', (ly + 13).toFixed(1));
+      te.name.setAttribute('text-anchor', 'middle'); te.cnt.setAttribute('text-anchor', 'middle');
+      const maxChars = Math.max(8, Math.floor(r / 4.5));
+      te.name.textContent = te.fullName.length > maxChars ? te.fullName.slice(0, maxChars) + '…' : te.fullName;
+    } else {
+      const dx = p.x - cx, dy = p.y - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const ux = dx / dist, uy = dy / dist;
+      if (mode === 1) {
+        const ex = p.x + ux * r, ey = p.y + uy * r;
+        const anchor = ux > 0.2 ? 'start' : ux < -0.2 ? 'end' : 'middle';
+        const maxChars = Math.max(10, Math.floor(r / 3.5));
+        te.name.textContent = te.fullName.length > maxChars ? te.fullName.slice(0, maxChars) + '…' : te.fullName;
+        te.name.setAttribute('x', ex.toFixed(1)); te.name.setAttribute('y', (ey - 4).toFixed(1)); te.name.setAttribute('text-anchor', anchor);
+        te.cnt.setAttribute('x', ex.toFixed(1));  te.cnt.setAttribute('y', (ey + 9).toFixed(1));  te.cnt.setAttribute('text-anchor', anchor);
+      } else {
+        const gap = 8, ox = p.x + ux * (r + gap), oy = p.y + uy * (r + gap);
+        const anchor = ux > 0.2 ? 'start' : ux < -0.2 ? 'end' : 'middle';
+        te.name.textContent = te.fullName;
+        te.name.setAttribute('x', ox.toFixed(1)); te.name.setAttribute('y', (oy - 4).toFixed(1)); te.name.setAttribute('text-anchor', anchor);
+        te.cnt.setAttribute('x', ox.toFixed(1));  te.cnt.setAttribute('y', (oy + 9).toFixed(1));  te.cnt.setAttribute('text-anchor', anchor);
       }
     }
   }
-  svg.appendChild(lineGroup);
 
-  // ── Outer arcs ──
-  const arcEls = new Map(); // ov -> SVG path element
-  const arcGroup = document.createElementNS(ns, 'g');
-  outerGroups.forEach(g => {
-    const isHighlighted = selectedOuterSet && selectedOuterSet.has(g.ov);
-    const isDimmed = selectedOuterSet && !selectedOuterSet.has(g.ov);
+  function updateNodePosition(i) {
+    const p = curPos[i];
+    circEls[i].setAttribute('cx', p.x.toFixed(1));
+    circEls[i].setAttribute('cy', p.y.toFixed(1));
+    applyLabelPos(i);
+  }
 
-    const path = document.createElementNS(ns, 'path');
-    path.setAttribute('d', arcPath(cx, cy, outerRingInner, outerRingOuter, g.startAngle, g.endAngle));
-    path.setAttribute('fill', g.color);
-    path.setAttribute('opacity', isDimmed ? '0.15' : '1');
-    path.style.cursor = 'pointer';
-    path.style.transition = 'opacity 0.2s';
-    arcEls.set(g.ov, path);
-
-    if (isHighlighted) {
-      // Add glow ring
-      const glow = document.createElementNS(ns, 'path');
-      glow.setAttribute('d', arcPath(cx, cy, outerRingInner - 3, outerRingOuter + 4, g.startAngle, g.endAngle));
-      glow.setAttribute('fill', 'none');
-      glow.setAttribute('stroke', g.color);
-      glow.setAttribute('stroke-width', '3');
-      glow.setAttribute('opacity', '0.6');
-      arcGroup.appendChild(glow);
-    }
-
-    path.addEventListener('mouseenter', evt => {
-      if (!isDimmed) path.setAttribute('opacity', '0.75');
-      showTooltip(evt,
-        '<strong style="color:' + g.color + '">' + escHtml(g.label) + '</strong><br>' +
-        '<strong>' + g.exams.length + '</strong> distinct exam titles<br>' +
-        (isHighlighted ? '<span style="color:var(--green)">✓ contains selected exam</span>' : '')
-      );
-    });
-    path.addEventListener('mousemove', moveTooltip);
-    path.addEventListener('mouseleave', () => {
-      path.setAttribute('opacity', isDimmed ? '0.15' : '1');
-      hideTooltip();
-    });
-    path.addEventListener('click', evt => {
-      evt.stopPropagation();
-      showDetail(headers[outerCI], g.label, g.exams.length + ' exams');
-    });
-    arcGroup.appendChild(path);
-  });
-  svg.appendChild(arcGroup);
-
-  // ── Arc labels ──
-  const labelR = outerRingOuter + 10;
-  outerGroups.forEach(g => {
-    const sweep = g.endAngle - g.startAngle;
-    if (sweep < 0.07) return;
-    const isDimmed = selectedOuterSet && !selectedOuterSet.has(g.ov);
-    const lx = cx + labelR * Math.cos(g.midAngle);
-    const ly = cy + labelR * Math.sin(g.midAngle);
-    const txt = document.createElementNS(ns, 'text');
-    txt.setAttribute('x', lx); txt.setAttribute('y', ly);
-    txt.setAttribute('fill', isDimmed ? '#d4cdb0' : g.color);
-    txt.setAttribute('font-size', '9');
-    txt.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
-    txt.setAttribute('font-weight', '600');
-    txt.setAttribute('text-anchor', Math.cos(g.midAngle) > 0 ? 'start' : 'end');
-    txt.setAttribute('dominant-baseline', 'middle');
-    txt.setAttribute('pointer-events', 'none');
-    const maxLen = Math.max(8, Math.round(sweep * 60));
-    txt.textContent = g.label.length > maxLen ? g.label.slice(0, maxLen - 1) + '…' : g.label;
-    svg.appendChild(txt);
-  });
-
-  // ── Exam nodes ──
-  const nodeGroup = document.createElementNS(ns, 'g');
-  shownExamVidxes.forEach(ev => {
-    const ea = examAngleMap.get(ev);
-    const outerCount = examToOuter.get(ev) ? examToOuter.get(ev).size : 1;
-    const nr = 2.5 + (outerCount / maxOuterCount) * 3.5;
-    const nx = cx + innerRingR * Math.cos(ea);
-    const ny = cy + innerRingR * Math.sin(ea);
-
-    const isSelected = ev === selectedExamEv;
-    const isDimmed = selectedExamEv !== null && !isSelected;
-
-    let nodeColor = '#7a6e50';
-    const outerSet = examToOuter.get(ev) || new Set();
-    if (outerSet.size === 1) {
-      const ov = [...outerSet][0];
-      const g = outerGroups.find(g => g.ov === ov);
-      if (g) nodeColor = g.color;
-    }
-
-    const circle = document.createElementNS(ns, 'circle');
-    circle.setAttribute('cx', nx); circle.setAttribute('cy', ny);
-    circle.setAttribute('r', isSelected ? nr + 3 : nr);
-    circle.setAttribute('fill', isSelected ? '#00883A' : nodeColor);
-    circle.setAttribute('opacity', isDimmed ? '0.12' : '0.85');
-    circle.style.cursor = 'pointer';
-    circle.style.transition = 'opacity 0.2s, r 0.1s';
-
-    if (isSelected) {
-      const ring = document.createElementNS(ns, 'circle');
-      ring.setAttribute('cx', nx); ring.setAttribute('cy', ny);
-      ring.setAttribute('r', nr + 6);
-      ring.setAttribute('fill', 'none');
-      ring.setAttribute('stroke', '#00883A');
-      ring.setAttribute('stroke-width', '2');
-      ring.setAttribute('opacity', '0.8');
-      ring.setAttribute('pointer-events', 'none');
-      nodeGroup.appendChild(ring);
-    }
-
-    const examLabel = vocabs[colIdx.exam][ev] || '?';
-    const outerLabels = [...outerSet].map(ov => vocabs[outerCI][ov] || '?');
-
-    circle.addEventListener('mouseenter', me => {
-      if (!isDimmed) circle.setAttribute('r', (isSelected ? nr + 3 : nr) + 2);
-      showTooltip(me,
-        '<strong>' + escHtml(examLabel) + '</strong><br>' +
-        outerLabels.slice(0, 6).map(l => '· ' + escHtml(l)).join('<br>') +
-        (outerLabels.length > 6 ? '<br>· …' + (outerLabels.length - 6) + ' more' : '') +
-        '<br><span style="color:var(--dim)">' + outerCount + ' ' + escHtml(headers[outerCI] || 'groups') + '</span>'
-      );
-    });
-    circle.addEventListener('mousemove', moveTooltip);
-    circle.addEventListener('mouseleave', () => {
-      circle.setAttribute('r', isSelected ? nr + 3 : nr);
-      hideTooltip();
-    });
-    circle.addEventListener('click', evt => {
-      evt.stopPropagation();
-      if (selectedExamEv === ev) {
-        selectedExamEv = null;
-        examSearchInput.value = '';
-        document.getElementById('selected-exam-info').style.display = 'none';
-      } else {
-        selectedExamEv = ev;
-        examSearchInput.value = examLabel;
+  function updateAllLines() {
+    for (let i = 0; i < n; i++) {
+      for (let j = i+1; j < n; j++) {
+        const key = i+'-'+j;
+        const line = lineEls[key], lbl = lineLbls[key];
+        if (!line) continue;
+        const pi = curPos[i], pj = curPos[j];
+        line.setAttribute('x1', pi.x.toFixed(1)); line.setAttribute('y1', pi.y.toFixed(1));
+        line.setAttribute('x2', pj.x.toFixed(1)); line.setAttribute('y2', pj.y.toFixed(1));
+        if (lbl) { lbl.setAttribute('x', ((pi.x + pj.x) / 2).toFixed(1)); lbl.setAttribute('y', ((pi.y + pj.y) / 2).toFixed(1)); }
       }
-      renderRadial();
-      if (selectedExamEv !== null) updateSelectedExamInfo();
-    });
+    }
+  }
 
-    nodeGroup.appendChild(circle);
-  });
-  svg.appendChild(nodeGroup);
-
-  // ── Center label ──
-  const cLabel = document.createElementNS(ns, 'text');
-  cLabel.setAttribute('x', cx); cLabel.setAttribute('y', cy - 10);
-  cLabel.setAttribute('text-anchor', 'middle'); cLabel.setAttribute('dominant-baseline', 'middle');
-  cLabel.setAttribute('fill', '#7a6e50'); cLabel.setAttribute('font-size', '11');
-  cLabel.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
-  cLabel.setAttribute('pointer-events', 'none');
-  cLabel.textContent = radialMode === 'poly' ? 'Polyvalent exams' : 'Unique exams';
-  svg.appendChild(cLabel);
-
-  const cLabel2 = document.createElementNS(ns, 'text');
-  cLabel2.setAttribute('x', cx); cLabel2.setAttribute('y', cy + 8);
-  cLabel2.setAttribute('text-anchor', 'middle'); cLabel2.setAttribute('dominant-baseline', 'middle');
-  cLabel2.setAttribute('fill', '#00883A'); cLabel2.setAttribute('font-size', '14');
-  cLabel2.setAttribute('font-weight', '700');
-  cLabel2.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
-  cLabel2.setAttribute('pointer-events', 'none');
-  cLabel2.textContent = totalExams.toLocaleString();
-  svg.appendChild(cLabel2);
-
-  wrap.innerHTML = '';
-  wrap.appendChild(svg);
-
-  // Pulse highlighted arcs after render
-  if (selectedOuterSet && selectedOuterSet.size > 0) {
-    requestAnimationFrame(() => {
-      for (const [ov, el] of arcEls) {
-        if (selectedOuterSet.has(ov)) {
-          el.classList.remove('arc-pulse');
-          void el.offsetWidth;
-          el.classList.add('arc-pulse');
+  function applySelection(idx) {
+    selectedIdx = idx;
+    pvVennSelectedIdx = idx;
+    for (let i = 0; i < n; i++) {
+      const circle = circEls[i];
+      if (idx === null) {
+        circle.setAttribute('fill-opacity', '0.18'); circle.setAttribute('stroke-opacity', '1'); circle.setAttribute('stroke-width', '2');
+        textEls[i].name.setAttribute('opacity', '1'); textEls[i].cnt.setAttribute('opacity', '0.8');
+      } else if (i === idx) {
+        circle.setAttribute('fill-opacity', '0.35'); circle.setAttribute('stroke-opacity', '1'); circle.setAttribute('stroke-width', '3');
+        textEls[i].name.setAttribute('opacity', '1'); textEls[i].cnt.setAttribute('opacity', '1');
+      } else {
+        const connected = overlaps[idx][i] > 0;
+        circle.setAttribute('fill-opacity', connected ? '0.15' : '0.04');
+        circle.setAttribute('stroke-opacity', connected ? '0.7' : '0.15');
+        circle.setAttribute('stroke-width', connected ? '1.5' : '1');
+        textEls[i].name.setAttribute('opacity', connected ? '0.9' : '0.2');
+        textEls[i].cnt.setAttribute('opacity', connected ? '0.7' : '0.12');
+      }
+    }
+    for (let i = 0; i < n; i++) {
+      for (let j = i+1; j < n; j++) {
+        const key = i+'-'+j, line = lineEls[key], lbl = lineLbls[key];
+        if (!line) continue;
+        const ov = overlaps[i][j];
+        if (idx === null) {
+          const alpha = 0.04 + 0.18 * (ov / maxOv);
+          line.setAttribute('stroke-opacity', alpha.toFixed(3)); line.setAttribute('stroke', '#999');
+          line.setAttribute('stroke-width', Math.max(1, 7 * (ov / maxOv)).toFixed(1));
+          lbl.setAttribute('opacity', '0');
+        } else if (i === idx || j === idx) {
+          const otherIdx2 = (i === idx) ? j : i;
+          const otherCol = VENN_COLORS[otherIdx2 % VENN_COLORS.length];
+          const w = Math.max(2, 8 * (ov / maxOv));
+          line.setAttribute('stroke', otherCol); line.setAttribute('stroke-width', w.toFixed(1));
+          line.setAttribute('stroke-opacity', (0.55 + 0.45 * (ov / maxOv)).toFixed(2));
+          lbl.setAttribute('fill', otherCol); lbl.setAttribute('font-weight', '700'); lbl.setAttribute('font-size', '12'); lbl.setAttribute('opacity', '1');
+        } else {
+          line.setAttribute('stroke-opacity', '0.01'); lbl.setAttribute('opacity', '0');
         }
       }
-    });
+    }
+    for (let i = 0; i < n; i++) {
+      const te = textEls[i], fullName = te.fullName;
+      let displayName;
+      if (idx === null) {
+        const maxChars = Math.max(8, Math.floor(te.r / 4.5));
+        displayName = fullName.length > maxChars ? fullName.slice(0, maxChars) + '…' : fullName;
+        te.name.setAttribute('font-size', n > 12 ? '9' : '10');
+      } else if (i === idx) {
+        displayName = fullName; te.name.setAttribute('font-size', '13');
+      } else if (overlaps[idx][i] > 0) {
+        displayName = fullName; te.name.setAttribute('font-size', '11');
+      } else {
+        displayName = fullName.slice(0, 4) + '…'; te.name.setAttribute('font-size', '9');
+      }
+      te.name.textContent = displayName;
+    }
+    const target = (idx === null) ? positions.map(p => ({ x: p.x, y: p.y })) : computeSpreadPositions(idx);
+    animateTo(target, 420);
   }
+
+  groups.forEach((g, i) => {
+    const pos = positions[i], r = radii[i], col = VENN_COLORS[i % VENN_COLORS.length];
+    const circle = svgEl('circle', { cx: pos.x, cy: pos.y, r, fill: col, 'fill-opacity': '0.18', stroke: col, 'stroke-width': '2', style: 'cursor:pointer;transition:fill-opacity .15s,stroke-opacity .15s,stroke-width .15s' });
+    circle.addEventListener('mouseenter', () => { if (selectedIdx !== i) circle.setAttribute('fill-opacity', selectedIdx === null ? '0.28' : (overlaps[selectedIdx]?.[i] > 0 ? '0.25' : '0.04')); });
+    circle.addEventListener('mouseleave', () => { if (selectedIdx !== i) circle.setAttribute('fill-opacity', selectedIdx === null ? '0.18' : (overlaps[selectedIdx]?.[i] > 0 ? '0.15' : '0.04')); });
+    circle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (pvVennIsDragging) return;
+      if (selectedIdx !== i) { applySelection(i); pvShowVennDetail(g, i, overlaps, groups, VENN_COLORS); }
+      document.getElementById('poly-vz-all').classList.remove('active');
+      document.getElementById('poly-vz-focus').classList.add('active');
+    });
+    circLayer.appendChild(circle);
+    circEls[i] = circle;
+
+    const fontSize = n > 12 ? '9' : '10';
+    const nameLbl = svgEl('text', { x: pos.x, y: pos.y, 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': fontSize, 'font-weight': '700', fill: col, 'pointer-events': 'none' });
+    textLayer.appendChild(nameLbl);
+    const cntLbl = svgEl('text', { x: pos.x, y: pos.y + 13, 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': '8', fill: col, opacity: '0.8', 'pointer-events': 'none' });
+    cntLbl.textContent = g.uniqueExams.length + 'u · ' + g.polyExams.length + 'p';
+    textLayer.appendChild(cntLbl);
+    textEls[i] = { name: nameLbl, cnt: cntLbl, fullName: g.gVal, r };
+  });
+
+  for (let i = 0; i < n; i++) applyLabelPos(i);
+
+  function computeOrbitPositions(idx) {
+    const wrap = document.getElementById('poly-venn-svg-wrap');
+    const viewW = wrap.clientWidth, viewH = wrap.clientHeight;
+    const worldCx = (viewW / 2 - pvVennCam.x) / pvVennCam.scale;
+    const worldCy = (viewH / 2 - pvVennCam.y) / pvVennCam.scale;
+    const result = new Array(n);
+    result[idx] = { x: worldCx, y: worldCy };
+    const connected = [], unconnected = [];
+    for (let j = 0; j < n; j++) {
+      if (j === idx) continue;
+      if (overlaps[idx][j] > 0) connected.push(j); else unconnected.push(j);
+    }
+    connected.sort((a, b) => overlaps[idx][b] - overlaps[idx][a]);
+    const base = Math.min(viewW, viewH) / pvVennCam.scale;
+    const innerR = base * 0.26, outerR = base * 0.46;
+    connected.forEach((j, ki) => { const angle = (2 * Math.PI * ki / Math.max(connected.length, 1)) - Math.PI / 2; result[j] = { x: worldCx + innerR * Math.cos(angle), y: worldCy + innerR * Math.sin(angle) }; });
+    unconnected.forEach((j, ki) => { const angle = (2 * Math.PI * ki / Math.max(unconnected.length, 1)) - Math.PI / 2; result[j] = { x: worldCx + outerR * Math.cos(angle), y: worldCy + outerR * Math.sin(angle) }; });
+    return result;
+  }
+
+  if (selectedIdx !== null) applySelection(selectedIdx);
+
+  _pvVennClickBg = () => {
+    applySelection(null);
+    document.getElementById('poly-venn-detail').style.display = 'none';
+    document.getElementById('poly-vz-orbit').classList.remove('active');
+    document.getElementById('poly-vz-all').classList.add('active');
+    document.getElementById('poly-vz-focus').classList.remove('active');
+  };
+
+  _pvVennRefreshLabels = () => { for (let i = 0; i < n; i++) applyLabelPos(i); };
+
+  _pvVennHighlightPair = (otherIdx) => {
+    if (selectedIdx === null) return;
+    for (let i = 0; i < n; i++) {
+      for (let j = i+1; j < n; j++) {
+        const key = i+'-'+j, line = lineEls[key], lbl = lineLbls[key];
+        if (!line) continue;
+        const involvesFocus = (i === selectedIdx || j === selectedIdx);
+        const ov = overlaps[i][j];
+        if (otherIdx === null) {
+          if (involvesFocus) {
+            const otherI = (i === selectedIdx) ? j : i;
+            const otherCol = VENN_COLORS[otherI % VENN_COLORS.length];
+            const w = Math.max(2, 8 * (ov / maxOv));
+            line.setAttribute('stroke', otherCol); line.setAttribute('stroke-width', w.toFixed(1));
+            line.setAttribute('stroke-opacity', (0.55 + 0.45 * (ov / maxOv)).toFixed(2));
+            lbl.setAttribute('fill', otherCol); lbl.setAttribute('opacity', '1');
+          } else { line.setAttribute('stroke-opacity', '0.01'); lbl.setAttribute('opacity', '0'); }
+        } else {
+          const isPair = involvesFocus && (i === otherIdx || j === otherIdx);
+          if (isPair) {
+            const otherCol = VENN_COLORS[otherIdx % VENN_COLORS.length];
+            const w = Math.max(2, 9 * (ov / maxOv));
+            line.setAttribute('stroke', otherCol); line.setAttribute('stroke-width', w.toFixed(1));
+            line.setAttribute('stroke-opacity', '1');
+            lbl.setAttribute('fill', otherCol); lbl.setAttribute('opacity', '1');
+          } else { line.setAttribute('stroke-opacity', '0.015'); lbl.setAttribute('opacity', '0'); }
+        }
+      }
+    }
+    for (let i = 0; i < n; i++) {
+      if (otherIdx === null) {
+        if (i === selectedIdx) {
+          circEls[i].setAttribute('fill-opacity', '0.35'); circEls[i].setAttribute('stroke-opacity', '1');
+          textEls[i].name.setAttribute('opacity', '1'); textEls[i].cnt.setAttribute('opacity', '1');
+        } else {
+          const conn = overlaps[selectedIdx][i] > 0;
+          circEls[i].setAttribute('fill-opacity', conn ? '0.15' : '0.04'); circEls[i].setAttribute('stroke-opacity', conn ? '0.7' : '0.15');
+          textEls[i].name.setAttribute('opacity', conn ? '0.9' : '0.2'); textEls[i].cnt.setAttribute('opacity', conn ? '0.7' : '0.12');
+        }
+      } else {
+        if (i === selectedIdx || i === otherIdx) {
+          circEls[i].setAttribute('fill-opacity', '0.35'); circEls[i].setAttribute('stroke-opacity', '1'); circEls[i].setAttribute('stroke-width', '2.5');
+          textEls[i].name.setAttribute('opacity', '1'); textEls[i].cnt.setAttribute('opacity', '1');
+        } else {
+          circEls[i].setAttribute('fill-opacity', '0.03'); circEls[i].setAttribute('stroke-opacity', '0.08');
+          textEls[i].name.setAttribute('opacity', '0.12'); textEls[i].cnt.setAttribute('opacity', '0.08');
+        }
+      }
+    }
+  };
+
+  _pvVennOrbit = () => {
+    if (selectedIdx === null) return;
+    const orbitBtn = document.getElementById('poly-vz-orbit');
+    const isActive = orbitBtn.classList.toggle('active');
+    const target = computeOrbitPositions(selectedIdx);
+    animateTo(target, 500);
+    const existingGuides = cam.querySelectorAll('.orbit-guide');
+    existingGuides.forEach(el => el.remove());
+    if (isActive) {
+      const wrap2 = document.getElementById('poly-venn-svg-wrap');
+      const vW = wrap2.clientWidth, vH = wrap2.clientHeight;
+      const gCx = (vW / 2 - pvVennCam.x) / pvVennCam.scale;
+      const gCy = (vH / 2 - pvVennCam.y) / pvVennCam.scale;
+      const base = Math.min(vW, vH) / pvVennCam.scale;
+      let hasConnected = false, hasUnconnected = false;
+      for (let j = 0; j < n; j++) {
+        if (j === selectedIdx) continue;
+        if (overlaps[selectedIdx][j] > 0) hasConnected = true; else hasUnconnected = true;
+      }
+      if (hasConnected) cam.insertBefore(svgEl('circle', { cx: gCx, cy: gCy, r: base * 0.26, fill: 'none', stroke: 'var(--accent)', 'stroke-width': '0.5', 'stroke-dasharray': '4 6', opacity: '0.35', class: 'orbit-guide' }), lineLayer);
+      if (hasUnconnected) cam.insertBefore(svgEl('circle', { cx: gCx, cy: gCy, r: base * 0.46, fill: 'none', stroke: 'var(--dim)', 'stroke-width': '0.5', 'stroke-dasharray': '4 6', opacity: '0.3', class: 'orbit-guide' }), lineLayer);
+    }
+  };
 }
 
-// ── TOGGLE TABS ──
-document.getElementById('toggle-poly').addEventListener('click', () => {
-  radialMode = 'poly';
-  document.getElementById('toggle-poly').classList.add('active');
-  document.getElementById('toggle-unique').classList.remove('active');
-  selectedExamEv = null; examSearchInput.value = '';
-  document.getElementById('selected-exam-info').style.display = 'none';
-  renderRadial();
+function pvShowVennDetail(g, idx, overlaps, groups, colors) {
+  const detail = document.getElementById('poly-venn-detail');
+  detail.style.display = 'flex';
+  document.getElementById('poly-venn-detail-title').textContent = g.gVal;
+  const body = document.getElementById('poly-venn-detail-body');
+  body.innerHTML = '';
+
+  const total = g.exams.length;
+  const sum = document.createElement('div');
+  sum.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px';
+  sum.innerHTML = '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' exam titles</span>' +
+    '<span class="cv-badge cv-badge-uniq">&#9670; ' + g.uniqueExams.length + ' unique</span>' +
+    '<span class="cv-badge cv-badge-poly">&#9632; ' + g.polyExams.length + ' polyvalent</span>';
+  body.appendChild(sum);
+
+  const ovHd = document.createElement('div');
+  ovHd.style.cssText = 'font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px';
+  ovHd.textContent = 'Shared exam titles with other groups';
+  body.appendChild(ovHd);
+
+  const ovList = groups.map((other, j) => ({ other, j, count: overlaps[idx][j] }))
+    .filter(x => x.j !== idx && x.count > 0)
+    .sort((a, b) => b.count - a.count);
+
+  if (ovList.length === 0) {
+    const none = document.createElement('div');
+    none.style.cssText = 'font-size:11px;color:var(--dim);font-style:italic';
+    none.textContent = 'No shared exams with other groups.';
+    body.appendChild(none);
+  } else {
+    const maxOv2 = ovList[0].count;
+    let activeBarJ = null;
+    ovList.forEach(({ other, j, count }) => {
+      const pct = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
+      const barW = (count / maxOv2 * 100).toFixed(1);
+      const otherCol = colors[j % colors.length];
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'margin-bottom:8px;border-radius:4px;transition:background .1s';
+      const header = document.createElement('div');
+      header.style.cssText = 'cursor:pointer;user-select:none;padding:3px 4px;border-radius:4px';
+      header.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">' +
+          '<span style="font-size:11px;font-weight:600;color:' + otherCol + '">' + escHtml(other.gVal) + '</span>' +
+          '<span style="font-size:10px;color:var(--dim)">' + count.toLocaleString() + ' shared · ' + pct + '% of ' + escHtml(g.gVal) + ' ▸</span>' +
+        '</div>' +
+        '<div style="height:6px;border-radius:3px;overflow:hidden;background:var(--border)">' +
+          '<div style="height:100%;width:' + barW + '%;background:' + otherCol + ';border-radius:3px"></div>' +
+        '</div>';
+      const expandPanel = document.createElement('div');
+      expandPanel.style.cssText = 'display:none;margin-top:5px;padding:6px 8px;background:var(--panel);border-radius:4px;border:1px solid var(--border)';
+      let expanded = false;
+      header.addEventListener('click', () => {
+        expanded = !expanded;
+        const arrow = header.querySelector('span:last-child');
+        if (expanded) {
+          arrow.textContent = arrow.textContent.replace('▸', '▾');
+          header.style.background = 'rgba(0,0,0,0.04)';
+          activeBarJ = j;
+          if (_pvVennHighlightPair) _pvVennHighlightPair(j);
+          if (!expandPanel.hasChildNodes()) {
+            const gExamSet = new Set(g.exams.map(e => e[0]));
+            const sharedExams = other.exams.filter(e => gExamSet.has(e[0]));
+            sharedExams.sort((a, b) => b[1] - a[1]);
+            if (sharedExams.length === 0) { expandPanel.textContent = 'No shared exam titles found.'; }
+            else {
+              sharedExams.forEach(([title, cnt]) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--border);font-size:10px;cursor:pointer';
+                item.title = 'Click to view all rows for this exam';
+                item.innerHTML = '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px">' + escHtml(title) + '</span><span style="color:var(--dim);flex-shrink:0">' + cnt.toLocaleString() + '</span>';
+                item.addEventListener('click', () => pvOpenVennExamRows(title));
+                item.addEventListener('mouseenter', () => item.style.background = 'var(--hover)');
+                item.addEventListener('mouseleave', () => item.style.background = '');
+                expandPanel.appendChild(item);
+              });
+            }
+          }
+          expandPanel.style.display = 'block';
+        } else {
+          arrow.textContent = arrow.textContent.replace('▾', '▸');
+          header.style.background = '';
+          expandPanel.style.display = 'none';
+          if (activeBarJ === j) { activeBarJ = null; if (_pvVennHighlightPair) _pvVennHighlightPair(null); }
+        }
+      });
+      wrap.appendChild(header); wrap.appendChild(expandPanel); body.appendChild(wrap);
+    });
+  }
+
+  const groupCI = parseInt(document.getElementById('poly-group-sel').value, 10);
+  body.appendChild(pvMakeExamSection('Unique exam titles', g.uniqueExams, 'cv-badge-uniq', pvOpenVennExamRows, groupCI));
+  body.appendChild(pvMakeExamSection('Polyvalent exam titles', g.polyExams, 'cv-badge-poly', pvOpenVennExamRows, groupCI));
+}
+
+function pvOpenVennExamRows(examTitle) {
+  const examCI = colIdx.exam;
+  const examVidx = (vocabs[examCI] || []).findIndex(v => v === examTitle);
+  if (examVidx < 0) return;
+  const activeRows = getActiveRows();
+  const matchRows = activeRows.filter(r => r[examCI] === examVidx);
+
+  document.getElementById('poly-venn-rows-title').textContent = examTitle;
+  document.getElementById('poly-venn-rows-count').textContent = matchRows.length.toLocaleString() + ' rows';
+
+  const body = document.getElementById('poly-venn-rows-body');
+  body.innerHTML = '';
+
+  const table = document.createElement('table');
+  table.className = 'venn-dt-table';
+  const thead = document.createElement('thead');
+  const hrow = document.createElement('tr');
+  headers.forEach(h => { const th = document.createElement('th'); th.textContent = h; hrow.appendChild(th); });
+  thead.appendChild(hrow); table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  const limit = Math.min(matchRows.length, 3000);
+  for (let ri = 0; ri < limit; ri++) {
+    const row = matchRows[ri];
+    const tr = document.createElement('tr');
+    headers.forEach((_, ci) => {
+      const td = document.createElement('td');
+      td.textContent = vocabs[ci] ? (vocabs[ci][row[ci]] ?? '') : String(row[ci] ?? '');
+      td.title = td.textContent;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  }
+  if (matchRows.length > 3000) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = headers.length;
+    td.style.cssText = 'color:var(--dim);text-align:center;padding:12px;font-style:italic';
+    td.textContent = '… and ' + (matchRows.length - 3000).toLocaleString() + ' more rows';
+    tr.appendChild(td); tbody.appendChild(tr);
+  }
+  table.appendChild(tbody); body.appendChild(table);
+  document.getElementById('poly-venn-rows-overlay').style.display = 'flex';
+  body.scrollTop = 0;
+}
+
+// ── VENN BUTTON HANDLERS ──
+document.getElementById('poly-venn-rows-back').addEventListener('click', () => {
+  document.getElementById('poly-venn-rows-overlay').style.display = 'none';
 });
-document.getElementById('toggle-unique').addEventListener('click', () => {
-  radialMode = 'unique';
-  document.getElementById('toggle-unique').classList.add('active');
-  document.getElementById('toggle-poly').classList.remove('active');
-  selectedExamEv = null; examSearchInput.value = '';
-  document.getElementById('selected-exam-info').style.display = 'none';
-  renderRadial();
+// ── CARDS TOGGLE (expand / collapse inline) ──
+document.getElementById('poly-cards-open-btn').addEventListener('click', () => {
+  const view = document.getElementById('poly-cards-view');
+  const btn  = document.getElementById('poly-cards-open-btn');
+  const isOpen = view.style.display === 'flex';
+  if (isOpen) {
+    view.style.display = 'none';
+    btn.classList.remove('open');
+    document.getElementById('poly-venn-view').style.display = 'none';
+    document.getElementById('poly-cards-detail').style.display = 'none';
+  } else {
+    view.style.display = 'flex';
+    btn.classList.add('open');
+    // Default to AbschlussTxT on first open (if nothing selected yet)
+    const sel = document.getElementById('poly-group-sel');
+    if (sel.value === '-1') {
+      const abschlussOpt = [...sel.options].find(o => o.textContent.toLowerCase().startsWith('abschlusstxt'));
+      if (abschlussOpt) { sel.value = abschlussOpt.value; renderPolyCards(); }
+    }
+  }
 });
-document.getElementById('outer-dim-sel').addEventListener('change', () => {
-  outerCI = parseInt(document.getElementById('outer-dim-sel').value, 10);
-  selectedExamEv = null; examSearchInput.value = '';
-  document.getElementById('selected-exam-info').style.display = 'none';
-  renderRadial();
+
+document.getElementById('poly-venn-detail-close').addEventListener('click', () => {
+  document.getElementById('poly-venn-detail').style.display = 'none';
+  if (_pvVennHighlightPair) _pvVennHighlightPair(null);
 });
+document.getElementById('poly-venn-back').addEventListener('click', () => {
+  document.getElementById('poly-venn-view').style.display = 'none';
+  pvVennCam.x = 0; pvVennCam.y = 0; pvVennCam.scale = 1;
+  pvVennRadiusScale = 1.0; pvVennSelectedIdx = null; renderPvVenn._savedPos = null;
+  document.getElementById('poly-venn-circle-level').textContent = '100%';
+  document.getElementById('poly-vz-orbit').classList.remove('active');
+  document.getElementById('poly-vz-all').classList.add('active');
+  document.getElementById('poly-vz-focus').classList.remove('active');
+});
+document.getElementById('poly-venn-btn').addEventListener('click', () => {
+  if (!_pvVennGroups) return;
+  pvVennCam.x = 0; pvVennCam.y = 0; pvVennCam.scale = 1;
+  pvVennSelectedIdx = null; renderPvVenn._savedPos = null;
+  document.getElementById('poly-vz-orbit').classList.remove('active');
+  document.getElementById('poly-vz-all').classList.add('active');
+  document.getElementById('poly-vz-focus').classList.remove('active');
+  document.getElementById('poly-venn-view').style.display = 'flex';
+  requestAnimationFrame(() => requestAnimationFrame(renderPvVenn));
+});
+window.addEventListener('resize', () => {
+  if (document.getElementById('poly-venn-view').style.display === 'flex') renderPvVenn();
+});
+
+// ── VENN PREV / NEXT ──
+function pvVennNavigate(delta) {
+  if (!_pvVennGroups || _pvVennGroups.length === 0) return;
+  const cur = pvVennSelectedIdx !== null ? pvVennSelectedIdx : -1;
+  let next = (cur + delta + _pvVennGroups.length) % _pvVennGroups.length;
+  pvVennSelectedIdx = next;
+  renderPvVenn();
+  requestAnimationFrame(() => {
+    if (_pvVennGroups && _pvVennGroups[next] && _pvVennOverlaps && _pvVennColors) {
+      pvShowVennDetail(_pvVennGroups[next], next, _pvVennOverlaps, _pvVennGroups, _pvVennColors);
+      document.getElementById('poly-vz-focus').classList.add('active');
+      document.getElementById('poly-vz-all').classList.remove('active');
+    }
+  });
+}
+document.getElementById('poly-vz-prev').addEventListener('click', () => pvVennNavigate(-1));
+document.getElementById('poly-vz-next').addEventListener('click', () => pvVennNavigate(1));
+
+// ── VENN SEARCH ──
+(function() {
+  const searchInput = document.getElementById('poly-venn-search');
+  const dropdown = document.getElementById('poly-venn-search-dropdown');
+  function closeDropdown() { dropdown.style.display = 'none'; dropdown.innerHTML = ''; }
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    closeDropdown();
+    if (!q || !_pvVennGroups) return;
+    const matches = _pvVennGroups.map((g, i) => ({ g, i })).filter(({ g }) => g.gVal.toLowerCase().includes(q));
+    if (matches.length === 0) return;
+    matches.slice(0, 20).forEach(({ g, i }) => {
+      const item = document.createElement('div');
+      item.style.cssText = 'padding:5px 10px;cursor:pointer;font-size:11px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+      item.textContent = g.gVal;
+      item.addEventListener('mouseenter', () => item.style.background = 'var(--hover)');
+      item.addEventListener('mouseleave', () => item.style.background = '');
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        searchInput.value = ''; closeDropdown();
+        pvVennSelectedIdx = i; renderPvVenn();
+        requestAnimationFrame(() => {
+          if (_pvVennGroups && _pvVennGroups[i] && _pvVennOverlaps && _pvVennColors) {
+            pvShowVennDetail(_pvVennGroups[i], i, _pvVennOverlaps, _pvVennGroups, _pvVennColors);
+            document.getElementById('poly-vz-focus').classList.add('active');
+            document.getElementById('poly-vz-all').classList.remove('active');
+          }
+        });
+      });
+      dropdown.appendChild(item);
+    });
+    dropdown.style.display = 'block';
+  });
+  searchInput.addEventListener('blur', () => { setTimeout(closeDropdown, 150); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDropdown(); });
+})();
+
+// ── FULLSCREEN TOGGLE ──
+(function() {
+  const btn = document.getElementById('poly-fullscreen-btn');
+  const container = document.getElementById('poly-cards-view');
+
+  btn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      container.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement === container) {
+      btn.textContent = '✕';
+      btn.title = 'Exit fullscreen';
+      container.style.height = '100vh';
+    } else {
+      btn.textContent = '⛶';
+      btn.title = 'Enter fullscreen';
+      container.style.height = '680px';
+    }
+  });
+})();
+
+// ── VENN PAN + ZOOM ──
+(function() {
+  const wrap = document.getElementById('poly-venn-svg-wrap');
+  const svg  = document.getElementById('poly-venn-svg');
+  const detail = document.getElementById('poly-venn-detail');
+
+  wrap.addEventListener('wheel', e => {
+    // If the scroll originates inside the right-side detail panel, let it scroll normally
+    if (detail.contains(e.target)) return;
+    e.preventDefault();
+    const rect = svg.getBoundingClientRect();
+    vennZoomAtPv(e.clientX - rect.left, e.clientY - rect.top, e.deltaY < 0 ? 1.12 : 1 / 1.12);
+  }, { passive: false });
+  function vennZoomAtPv(mx, my, factor) { pvVennZoomAt(mx, my, factor); }
+
+  let dragging = false, dragStartX = 0, dragStartY = 0, camStartX = 0, camStartY = 0, didDrag = false;
+  wrap.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    dragging = true; didDrag = false; pvVennIsDragging = false;
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    camStartX = pvVennCam.x; camStartY = pvVennCam.y;
+    wrap.classList.add('panning'); e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - dragStartX, dy = e.clientY - dragStartY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) { didDrag = true; pvVennIsDragging = true; }
+    pvVennCam.x = camStartX + dx; pvVennCam.y = camStartY + dy;
+    applyPvVennCam();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; wrap.classList.remove('panning'); setTimeout(() => { pvVennIsDragging = false; }, 50); });
+
+  let lastTouches = null;
+  wrap.addEventListener('touchstart', e => { lastTouches = e.touches; }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
+    if (!lastTouches) return;
+    if (e.touches.length === 1 && lastTouches.length === 1) {
+      pvVennCam.x += e.touches[0].clientX - lastTouches[0].clientX;
+      pvVennCam.y += e.touches[0].clientY - lastTouches[0].clientY;
+      applyPvVennCam();
+    } else if (e.touches.length === 2 && lastTouches.length === 2) {
+      const d0 = Math.hypot(lastTouches[0].clientX - lastTouches[1].clientX, lastTouches[0].clientY - lastTouches[1].clientY);
+      const d1 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      const rect = svg.getBoundingClientRect();
+      const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+      const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+      if (d0 > 0) pvVennZoomAt(mx, my, d1 / d0); e.preventDefault();
+    }
+    lastTouches = e.touches;
+  }, { passive: false });
+})();
+
+// ── ZOOM BUTTONS ──
+document.getElementById('poly-vz-zoom-in').addEventListener('click', () => {
+  const wrap = document.getElementById('poly-venn-svg-wrap');
+  pvVennZoomAt(wrap.clientWidth / 2, wrap.clientHeight / 2, 1.25);
+});
+document.getElementById('poly-vz-zoom-out').addEventListener('click', () => {
+  const wrap = document.getElementById('poly-venn-svg-wrap');
+  pvVennZoomAt(wrap.clientWidth / 2, wrap.clientHeight / 2, 1 / 1.25);
+});
+document.getElementById('poly-vz-fit').addEventListener('click', () => {
+  const circles = document.querySelectorAll('#pv-venn-circles circle');
+  if (!circles.length) return;
+  const wrap = document.getElementById('poly-venn-svg-wrap');
+  const pts = [], rs = [];
+  circles.forEach(c => { pts.push({ x: parseFloat(c.getAttribute('cx')), y: parseFloat(c.getAttribute('cy')) }); rs.push(parseFloat(c.getAttribute('r'))); });
+  pvVennFitAll(wrap.clientWidth, wrap.clientHeight, pts, rs);
+});
+document.getElementById('poly-vz-orbit').addEventListener('click', () => { if (_pvVennOrbit) _pvVennOrbit(); });
+
+function changePvVennRadius(factor) {
+  pvVennRadiusScale = Math.max(0.15, Math.min(4, pvVennRadiusScale * factor));
+  document.getElementById('poly-venn-circle-level').textContent = Math.round(pvVennRadiusScale * 100) + '%';
+  renderPvVenn();
+}
+document.getElementById('poly-vz-circle-in').addEventListener('click', () => changePvVennRadius(1.2));
+document.getElementById('poly-vz-circle-out').addEventListener('click', () => changePvVennRadius(1 / 1.2));
+
+(function() {
+  const btn = document.getElementById('poly-vz-label-mode');
+  function updateLabelBtn() { btn.textContent = PV_VENN_LABEL_ICONS[pvVennLabelMode]; }
+  updateLabelBtn();
+  btn.addEventListener('click', () => { pvVennLabelMode = (pvVennLabelMode + 1) % PV_VENN_LABEL_MODES.length; updateLabelBtn(); if (_pvVennRefreshLabels) _pvVennRefreshLabels(); });
+})();
+
+function setPvVennMode(mode) {
+  document.getElementById('poly-vz-all').classList.toggle('active', mode === 'all');
+  document.getElementById('poly-vz-focus').classList.toggle('active', mode === 'focus');
+  if (mode === 'all') {
+    document.getElementById('poly-vz-orbit').classList.remove('active');
+    if (_pvVennHighlightPair) _pvVennHighlightPair(null);
+    if (_pvVennClickBg) _pvVennClickBg();
+  }
+}
+document.getElementById('poly-vz-all').addEventListener('click', () => setPvVennMode('all'));
+document.getElementById('poly-vz-focus').addEventListener('click', () => { if (pvVennSelectedIdx !== null) setPvVennMode('focus'); });
 
 // ── INIT ──
 async function init() {
@@ -1170,15 +1770,15 @@ async function init() {
 
   buildQACards();
 
-  // Populate outer ring selector
-  const outerSel = document.getElementById('outer-dim-sel');
+  // Populate GROUP BY dropdown — only the three allowed group columns
+  const polyGroupSel = document.getElementById('poly-group-sel');
+  const POLY_GROUP_COLS = ['abschlusstxt', 'studiengangtxt', 'vertiefung'];
   headers.forEach((h, i) => {
-    if (i === colIdx.exam) return;
+    if (!POLY_GROUP_COLS.includes(h.toLowerCase())) return;
     const opt = document.createElement('option');
     opt.value = String(i);
     opt.textContent = h + ' (' + (vocabs[i] ? vocabs[i].length : 0) + ')';
-    outerSel.appendChild(opt);
-    if (i === colIdx.studiengang) { outerSel.value = String(i); outerCI = i; }
+    polyGroupSel.appendChild(opt);
   });
 
   // Populate subset selector
@@ -1203,9 +1803,24 @@ async function init() {
 
   document.getElementById('subset-bar').style.display = 'flex';
   updateSubsetCount();
-
-  if (outerCI >= 0) renderRadial();
 }
+
+document.getElementById('info-btn').addEventListener('click', () => {
+  const panel = document.getElementById('info-panel');
+  const btn = document.getElementById('info-btn');
+  const open = panel.style.display === 'block';
+  panel.style.display = open ? 'none' : 'block';
+  btn.style.background = open ? 'rgba(255,255,255,.15)' : 'rgba(255,255,255,.4)';
+});
+
+document.getElementById('pv-card-info-btn').addEventListener('click', () => {
+  const panel = document.getElementById('pv-card-info-panel');
+  const btn = document.getElementById('pv-card-info-btn');
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  btn.style.borderColor = open ? 'var(--dim)' : '#00883A';
+  btn.style.color = open ? 'var(--dim)' : '#00883A';
+});
 
 init();
 </script>
