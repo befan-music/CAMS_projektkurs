@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Polyvalenzen — Exam Sharing Analysis</title>
+<title>Polyvalenzen — Prüfungsüberschneidungsanalyse</title>
 <style>
 :root {
   --bg: #FFF9E5; --panel: #f5f0d8; --sidebar: #ede8d2;
@@ -128,6 +128,26 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 .pv-bar-wrap { width: 140px; flex-shrink: 0; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
 .pv-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); }
 .pv-score { font-size: 11px; color: var(--accent); font-weight: 600; width: 120px; flex-shrink: 0; text-align: right; }
+
+/* ── TAKEN CARD ── */
+#taken-section-card { background:var(--panel); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.tk-row {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 14px; display: flex; align-items: center; gap: 12px;
+}
+.tk-rank { font-size: 11px; font-weight: 700; color: var(--dim); width: 22px; text-align: right; flex-shrink: 0; }
+.tk-label { font-size: 12px; font-weight: 600; color: var(--bright); width: 220px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+.tk-bar-wrap { flex: 1; position: relative; height: 10px; border-radius: 5px; background: rgba(101,84,121,.3); overflow: hidden; }
+.tk-bar-taken { position: absolute; left: 0; top: 0; height: 100%; border-radius: 5px; background: var(--accent); }
+.tk-count-offered { font-size: 11px; color: var(--accent2); font-weight: 700; width: 72px; text-align: right; flex-shrink: 0; }
+.tk-count-taken   { font-size: 11px; color: var(--accent);  font-weight: 700; width: 72px; text-align: right; flex-shrink: 0; }
+.tk-pct { font-size: 10px; color: var(--dim); width: 36px; text-align: right; flex-shrink: 0; }
+.tk-filter-btn {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--dim);
+  padding: 3px 9px; border-radius: 3px; font-size: 11px; cursor: pointer; transition: all .1s;
+}
+.tk-filter-btn:hover { border-color: var(--dim); color: var(--text); }
+.tk-filter-btn.tk-filter-active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
 
 .pv-show-all {
   margin: 8px 18px 10px; padding: 5px 12px; background: none;
@@ -305,32 +325,32 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 <body>
 
 <div id="topbar">
-  <h1>⬡ Polyvalenzen <em>Exam Sharing Analysis</em></h1>
-  <a href="cluster_explorer.html" target="_blank" id="cluster-link-btn">⬡ Cluster Explorer</a>
+  <h1>⬡ Polyvalenzen <em>Prüfungsüberschneidungsanalyse</em></h1>
+  <a href="cluster_explorer.html" target="_blank" id="cluster-link-btn">⬡ Spaltenfilter</a>
   <div id="col-info"></div>
-  <button id="info-btn" title="About this tool">i</button>
+  <button id="info-btn" title="Über dieses Tool">i</button>
 </div>
 <div id="info-panel">
-  <h2>About Polyvalenzen — Exam Sharing Analysis</h2>
-  <h3>What is this?</h3>
-  <p>This tool analyses how exams are shared across degree programs (Studiengänge) and degree types (Abschlüsse) at LMU. An exam is <strong>polyvalent</strong> if it appears in more than one group; it is <strong>unique</strong> if it belongs to exactly one group.</p>
-  <h3>Polyvalenzen Card — Cards View</h3>
-  <p>Press <strong>Cards</strong> to open the group-by analysis. Choose a grouping column (e.g. AbschlussTxT, StudiengangTxT, Vertiefung). Each card shows one group with a bar indicating the share of unique vs. polyvalent exam titles and the total count.</p>
-  <h3>Venn Diagram</h3>
-  <p>After loading cards, press <strong>○ Venn diagram</strong> to see a zoomable overlap diagram. Each circle represents a group; overlapping areas indicate shared exam titles. Click a circle to focus on it and see the breakdown on the right panel. Use <strong>Focus</strong> mode to centre on one group, <strong>Orbit</strong> to animate, and the search box to highlight a specific group.</p>
-  <h3>Card Detail View</h3>
-  <p>Click any group card to open its detail view, listing unique and polyvalent exam titles. From there, press <strong>○ Venn diagram</strong> to jump directly into the Venn focused on that group.</p>
-  <h3>Subset Filter</h3>
-  <p>Use the <strong>Subset</strong> bar at the top to restrict the analysis to a specific column value (e.g. only rows from semester 20252). The cards and Venn diagram update automatically.</p>
+  <h2>Über Polyvalenzen — Prüfungsüberschneidungsanalyse</h2>
+  <h3>Was ist das?</h3>
+  <p>Dieses Tool analysiert, wie Prüfungen über Studiengänge und Abschlussarten an der LMU hinweg geteilt werden. Eine Prüfung gilt als <strong>polyvalent</strong>, wenn sie in mehr als einer Gruppe erscheint, und als <strong>einzigartig</strong>, wenn sie genau einer Gruppe angehört.</p>
+  <h3>Polyvalenzen-Karte — Kartenansicht</h3>
+  <p>Klicken Sie auf <strong>Karten</strong>, um die Gruppenanalyse zu öffnen. Wählen Sie eine Gruppierspalte (z.&thinsp;B. AbschlussTxT, StudiengangTxT, Vertiefung). Jede Karte zeigt eine Gruppe mit einem Balken, der den Anteil einzigartiger vs. polyvalenter Prüfungstitel und die Gesamtanzahl darstellt.</p>
+  <h3>Venn-Diagramm</h3>
+  <p>Nach dem Laden der Karten auf <strong>○ Venn-Diagramm</strong> klicken, um ein zoombares Überschneidungsdiagramm zu sehen. Jeder Kreis steht für eine Gruppe; überlappende Bereiche zeigen gemeinsame Prüfungstitel. Kreis anklicken, um ihn zu fokussieren und die Aufteilung im rechten Panel zu sehen. <strong>Fokus</strong> zentriert auf eine Gruppe, <strong>Orbit</strong> animiert das Layout, das Suchfeld hebt eine bestimmte Gruppe hervor.</p>
+  <h3>Karten-Detailansicht</h3>
+  <p>Eine Gruppenkarte anklicken, um deren Detailansicht mit einzigartigen und polyvalenten Prüfungstiteln zu öffnen. Von dort aus <strong>○ Venn-Diagramm</strong> drücken, um direkt in das auf diese Gruppe fokussierte Venn-Diagramm zu springen.</p>
+  <h3>Teilmenge (Subset-Filter)</h3>
+  <p>Den <strong>Subset</strong>-Balken oben verwenden, um die Analyse auf einen bestimmten Spaltenwert einzuschränken (z.&thinsp;B. nur Zeilen aus Semester 20252). Karten und Venn-Diagramm aktualisieren sich automatisch.</p>
   <h3>Q &amp; A</h3>
-  <p>The Q&amp;A section answers three fixed questions about exam sharing: which exam is shared by the most programs, which programs share the most exams with others, and which exam spans the most degree types.</p>
+  <p>Der Abschnitt Q&amp;A beantwortet drei feststehende Fragen zur Prüfungsüberschneidung: Welche Prüfung wird von den meisten Studiengängen belegt? Welche Studiengänge teilen die meisten Prüfungen mit anderen? Welche Prüfung wird von den meisten Abschlussarten besucht?</p>
 </div>
 
 <div id="subset-bar">
-  <label>Subset:</label>
+  <label>Teilmenge:</label>
   <select id="subset-col-sel"></select>
-  <input id="subset-val-inp" type="text" placeholder="filter value…">
-  <button id="subset-clear-btn">✕ Clear</button>
+  <input id="subset-val-inp" type="text" placeholder="Filterwert…">
+  <button id="subset-clear-btn">✕ Zurücksetzen</button>
   <span id="subset-count"></span>
 </div>
 
@@ -360,56 +380,56 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
       <p style="margin-bottom:6px;color:#4a3e28;">Rechtsseitig erscheint immer die <strong style="color:#1a1208">Polyvalenzanalyse der aktuell ausgewählten Gruppe</strong> im Verhältnis zu allen anderen Gruppen: wie viele Prüfungen werden geteilt, wie viele sind einzigartig. Die anderen Gruppen sind dort ebenfalls anklickbar — ein Klick gibt alle gemeinsamen Prüfungen als Zeilen des Datensatzes heraus.</p>
     </div>
     <div id="pv-dim-card-header">
-      <button id="poly-cards-open-btn">&#9646; Cards</button>
+      <button id="poly-cards-open-btn">&#9646; Karten</button>
     </div>
 
     <!-- CARDS VIEW (expands inline inside the card) -->
     <div id="poly-cards-view">
     <div id="poly-cards-topbar">
-      <span style="font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Group by:</span>
-      <select id="poly-group-sel"><option value="-1">— select column —</option></select>
+      <span style="font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Gruppieren nach:</span>
+      <select id="poly-group-sel"><option value="-1">— Spalte wählen —</option></select>
       <span id="poly-cards-info"></span>
-      <button id="poly-venn-btn" disabled style="margin-left:auto;background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s">&#9711; Venn diagram</button>
-      <button id="poly-fullscreen-btn" title="Enter fullscreen" style="background:none;border:1px solid var(--border2);color:var(--dim);padding:3px 8px;border-radius:3px;font-size:13px;cursor:pointer;line-height:1;transition:all .1s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--dim)'">&#x26F6;</button>
+      <button id="poly-venn-btn" disabled style="margin-left:auto;background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s">&#9711; Venn-Diagramm</button>
+      <button id="poly-fullscreen-btn" title="Vollbild" style="background:none;border:1px solid var(--border2);color:var(--dim);padding:3px 8px;border-radius:3px;font-size:13px;cursor:pointer;line-height:1;transition:all .1s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--dim)'">&#x26F6;</button>
     </div>
     <div id="poly-cards-grid"></div>
 
     <!-- VENN VIEW (inside cards overlay) -->
     <div id="poly-venn-view">
       <div id="poly-venn-header">
-        <button id="poly-venn-back">← Cards</button>
-        <span id="poly-venn-title">Venn — exam overlap</span>
-        <span id="poly-venn-hint">Scroll to zoom · drag to pan · click circle to inspect</span>
+        <button id="poly-venn-back">← Karten</button>
+        <span id="poly-venn-title">Venn — Prüfungsüberschneidungen</span>
+        <span id="poly-venn-hint">Scrollen zum Zoomen · Ziehen zum Verschieben · Kreis anklicken zum Analysieren</span>
         <div id="poly-venn-search-wrap" style="position:relative;display:flex;align-items:center;gap:4px">
-          <input id="poly-venn-search" type="text" placeholder="Search group…" autocomplete="off"
+          <input id="poly-venn-search" type="text" placeholder="Gruppe suchen…" autocomplete="off"
             style="width:160px;padding:4px 8px;border:1px solid var(--border2);border-radius:4px;background:var(--bg);color:var(--text);font-size:11px;outline:none">
           <div id="poly-venn-search-dropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;width:160px;background:var(--bg);border:1px solid var(--border2);border-radius:4px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)"></div>
           <div class="vz-group">
-            <button class="vz-btn" id="poly-vz-prev" title="Previous group">&#8249;</button>
-            <button class="vz-btn" id="poly-vz-next" title="Next group">&#8250;</button>
+            <button class="vz-btn" id="poly-vz-prev" title="Vorherige Gruppe">&#8249;</button>
+            <button class="vz-btn" id="poly-vz-next" title="Nächste Gruppe">&#8250;</button>
           </div>
         </div>
         <div id="poly-venn-zoom-controls">
           <div class="vz-group">
-            <button class="vz-btn active" id="poly-vz-all" title="Show all circles">All</button>
-            <button class="vz-btn" id="poly-vz-focus" title="Focus on selected circle">Focus</button>
+            <button class="vz-btn active" id="poly-vz-all" title="Alle Kreise anzeigen">Alle</button>
+            <button class="vz-btn" id="poly-vz-focus" title="Auf ausgewählten Kreis fokussieren">Fokus</button>
           </div>
           <div class="vz-group">
-            <button class="vz-btn" id="poly-vz-zoom-out" title="Zoom out">－</button>
+            <button class="vz-btn" id="poly-vz-zoom-out" title="Verkleinern">－</button>
             <span id="poly-venn-zoom-level">100%</span>
-            <button class="vz-btn" id="poly-vz-zoom-in" title="Zoom in">＋</button>
+            <button class="vz-btn" id="poly-vz-zoom-in" title="Vergrößern">＋</button>
           </div>
           <div class="vz-group">
-            <button class="vz-btn" id="poly-vz-fit" title="Fit all circles to screen">⊡ Fit</button>
-            <button class="vz-btn" id="poly-vz-orbit" title="Orbit layout">⊙ Orbit</button>
+            <button class="vz-btn" id="poly-vz-fit" title="Alle Kreise einpassen">⊡ Einpassen</button>
+            <button class="vz-btn" id="poly-vz-orbit" title="Orbit-Layout">⊙ Orbit</button>
           </div>
           <div class="vz-group">
-            <button class="vz-btn" id="poly-vz-circle-out" title="Shrink circles">◎－</button>
+            <button class="vz-btn" id="poly-vz-circle-out" title="Kreise verkleinern">◎－</button>
             <span id="poly-venn-circle-level">100%</span>
-            <button class="vz-btn" id="poly-vz-circle-in" title="Grow circles">◎＋</button>
+            <button class="vz-btn" id="poly-vz-circle-in" title="Kreise vergrößern">◎＋</button>
           </div>
           <div class="vz-group">
-            <button class="vz-btn active" id="poly-vz-label-mode" title="Cycle label position">⊜ Labels</button>
+            <button class="vz-btn active" id="poly-vz-label-mode" title="Beschriftungsposition wechseln">⊜ Beschriftung</button>
           </div>
         </div>
       </div>
@@ -424,7 +444,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
         </div>
         <div id="poly-venn-rows-overlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:30;flex-direction:column;overflow:hidden">
           <div style="padding:10px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;flex-shrink:0">
-            <button id="poly-venn-rows-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Back</button>
+            <button id="poly-venn-rows-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Zurück</button>
             <span id="poly-venn-rows-title" style="font-size:12px;font-weight:700;color:var(--bright);flex:1"></span>
             <span id="poly-venn-rows-count" style="font-size:10px;color:var(--dim)"></span>
           </div>
@@ -436,9 +456,9 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
     <!-- CARD DETAIL (inside cards overlay) -->
     <div id="poly-cards-detail" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:20;flex-direction:column;overflow:hidden">
       <div style="padding:10px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;flex-shrink:0">
-        <button id="poly-cards-detail-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Back</button>
+        <button id="poly-cards-detail-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Zurück</button>
         <span id="poly-cards-detail-title" style="font-size:12px;font-weight:700;color:var(--bright);flex:1"></span>
-        <button id="poly-cards-detail-venn-btn" style="background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s">&#9711; Venn diagram</button>
+        <button id="poly-cards-detail-venn-btn" style="background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s">&#9711; Venn-Diagramm</button>
       </div>
       <div id="poly-cards-detail-body" style="flex:1;overflow-y:auto;padding:14px"></div>
     </div>
@@ -446,7 +466,40 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 </div><!-- end #pv-dim-card -->
 
 <div id="error-banner" style="margin: 12px 20px 0;"></div>
-<div id="loading-bar" style="margin: 12px 20px 0;">⏳ Loading and parsing CSV…</div>
+<div id="loading-bar" style="margin: 12px 20px 0;">⏳ CSV wird geladen und verarbeitet…</div>
+
+<!-- ── TAKEN CARD ── -->
+<div id="taken-section-card" style="margin: 20px 20px 0; display:none;">
+  <!-- clickable title row -->
+  <div id="taken-header" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;user-select:none;">
+    <span id="taken-arrow" style="font-size:10px;color:var(--dim)">▶</span>
+    <span style="font-size:14px;font-weight:700;color:var(--bright);">Theoretisch belegbar vs. Tatsächlich belegte Prüfungen</span>
+    <span id="taken-info" style="font-size:11px;color:var(--dim);margin-left:4px"></span>
+  </div>
+  <!-- collapsible body -->
+  <div id="taken-body" style="display:none;border-top:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--hover);border-bottom:1px solid var(--border2);flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-right:2px">Gruppieren:</span>
+      <select id="taken-group-sel" style="background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:3px 8px;border-radius:3px;font-size:11px;cursor:pointer;outline:none">
+        <option value="studiengang">Studiengang</option>
+        <option value="abschluss">Abschluss</option>
+      </select>
+      <span style="width:1px;height:16px;background:var(--border2);margin:0 4px;flex-shrink:0"></span>
+      <span style="font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-right:2px">Filter:</span>
+      <button id="taken-all-btn"  class="tk-filter-btn tk-filter-active">Alle</button>
+      <button id="taken-poly-btn" class="tk-filter-btn">Nur Polyvalente</button>
+      <button id="taken-uniq-btn" class="tk-filter-btn">Nur Einzigartige</button>
+      <span style="width:1px;height:16px;background:var(--border2);margin:0 4px;flex-shrink:0"></span>
+      <span style="font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-right:2px">Sortieren:</span>
+      <button id="taken-sort-btn" class="tk-filter-btn tk-filter-active">↓ Belegt</button>
+      <span style="width:1px;height:16px;background:var(--border2);margin:0 4px;flex-shrink:0"></span>
+      <span style="font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-right:2px">Anzeige:</span>
+      <button id="taken-abs-btn" class="tk-filter-btn tk-filter-active">Absolut</button>
+      <button id="taken-pct-btn" class="tk-filter-btn">Prozent</button>
+    </div>
+    <div id="taken-grid" style="padding:14px 20px 20px;display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+</div>
 
 <div id="main">
   <!-- ── Q&A CARD ── -->
@@ -580,7 +633,7 @@ function computeQ2() {
   return [...sgToExams.entries()]
     .map(([sv, exams]) => {
       const shared = [...exams].filter(ev => examToSG.get(ev).size > 1).length;
-      return { label: vocabs[sgCI][sv], score: shared, scoreLabel: shared + ' shared exams (of ' + exams.size + ')' };
+      return { label: vocabs[sgCI][sv], score: shared, scoreLabel: shared + ' gemeinsame Prüfungen (von ' + exams.size + ')' };
     })
     .sort((a,b) => b.score - a.score);
 }
@@ -603,7 +656,7 @@ const TOP_N = 50;
 
 function renderResults(container, results) {
   container.innerHTML = '';
-  if (!results.length) { container.innerHTML = '<div class="pv-computing">No results.</div>'; return; }
+  if (!results.length) { container.innerHTML = '<div class="pv-computing">Keine Ergebnisse.</div>'; return; }
   const maxScore = results[0].score;
   const shown = results.slice(0, TOP_N);
   const rest  = results.slice(TOP_N);
@@ -627,7 +680,7 @@ function renderResults(container, results) {
   if (rest.length) {
     const btn = document.createElement('button');
     btn.className = 'pv-show-all';
-    btn.textContent = 'Show all ' + results.length.toLocaleString() + ' results';
+    btn.textContent = 'Alle ' + results.length.toLocaleString() + ' Ergebnisse anzeigen';
     btn.addEventListener('click', () => { btn.remove(); rest.forEach((r,i) => addRow(r, TOP_N+i+1)); });
     inner.appendChild(btn);
   }
@@ -637,13 +690,13 @@ function renderResults(container, results) {
 // ── Q&A CARDS ──
 const QUESTIONS = [
   { num:'Q1', title:'Welche Prüfung wird von den meisten Studiengängen belegt?',
-    sub:'Which exam is shared by the most degree programs? (least unique to any single Studiengang)',
+    sub:'Welche Prüfung kommt in den meisten Studiengängen vor? (am wenigsten einzigartig für einen einzelnen Studiengang)',
     compute:()=>computeQ1(), jumpCol:'Veranstaltungstitel', needs:['exam','studiengang'] },
   { num:'Q2', title:'Welche Studiengänge teilen sich die meisten Prüfungen mit anderen?',
-    sub:'Which degree programs share the most exams with at least one other program?',
+    sub:'Welche Studiengänge teilen die meisten Prüfungen mit mindestens einem anderen Studiengang?',
     compute:()=>computeQ2(), jumpCol:'StudiengangTxT', needs:['exam','studiengang'] },
   { num:'Q3', title:'Welche Prüfung wird von den meisten Abschlussarten besucht?',
-    sub:'Which exam spans the most degree types (Bachelor, Master, Lehramt…)?',
+    sub:'Welche Prüfung umfasst die meisten Abschlussarten (Bachelor, Master, Lehramt…)?',
     compute:()=>computeQ3(), jumpCol:'Veranstaltungstitel', needs:['exam','abschluss'] }
 ];
 
@@ -667,7 +720,7 @@ function buildQACards() {
       '</div></div>';
     const btn = document.createElement('button');
     btn.className = 'pv-show-btn';
-    btn.textContent = '▶ Show';
+    btn.textContent = '▶ Anzeigen';
     if (missingCols.length) btn.disabled = true;
     header.appendChild(btn);
     card.appendChild(header);
@@ -679,11 +732,11 @@ function buildQACards() {
     cardStates.push(state);
     btn.addEventListener('click', () => {
       state.open = !state.open;
-      btn.textContent = state.open ? '▼ Hide' : '▶ Show';
+      btn.textContent = state.open ? '▼ Ausblenden' : '▶ Anzeigen';
       btn.classList.toggle('open', state.open);
       resultsDiv.style.display = state.open ? '' : 'none';
       if (state.open && !state.computed) {
-        resultsDiv.innerHTML = '<div class="pv-computing">Computing…</div>';
+        resultsDiv.innerHTML = '<div class="pv-computing">Wird berechnet…</div>';
         setTimeout(() => { state.computed = q.compute(); renderResults(resultsDiv, state.computed); }, 10);
       }
     });
@@ -696,11 +749,157 @@ function updateSubsetCount() {
   const active = getActiveRows();
   const el = document.getElementById('subset-count');
   if (subsetCI >= 0 && subsetVal !== '') {
-    el.innerHTML = '<strong>' + active.length.toLocaleString() + '</strong> / ' + rows.length.toLocaleString() + ' rows';
+    el.innerHTML = '<strong>' + active.length.toLocaleString() + '</strong> / ' + rows.length.toLocaleString() + ' Zeilen';
   } else {
-    el.innerHTML = '<strong>' + rows.length.toLocaleString() + '</strong> rows';
+    el.innerHTML = '<strong>' + rows.length.toLocaleString() + '</strong> Zeilen';
   }
 }
+
+// ── TAKEN CARD ──
+let _takenSortAsc  = false;
+let _takenFilter   = 'all';   // 'all' | 'poly' | 'uniq'
+let _takenDisplay  = 'abs';   // 'abs' | 'pct'
+
+function renderTakenCard() {
+  const card = document.getElementById('taken-section-card');
+  const grid = document.getElementById('taken-grid');
+  const info = document.getElementById('taken-info');
+  if (!rows || colIdx.exam < 0) { card.style.display = 'none'; return; }
+
+  const inlabCI = (headers || []).findIndex(h => h.toLowerCase() === 'inlab');
+  const sgCI    = colIdx.studiengang;
+  const abCI    = colIdx.abschluss;
+  const examCI  = colIdx.exam;
+  if (inlabCI < 0 || sgCI < 0 || abCI < 0) { card.style.display = 'none'; return; }
+
+  const groupCI    = document.getElementById('taken-group-sel').value === 'studiengang' ? sgCI : abCI;
+  const activeRows = getActiveRows();
+
+  // Pass 1: exam → how many groups it appears in
+  const examGroupCount = new Map();
+  for (const row of activeRows) {
+    const gVal = vocabs[groupCI] ? (vocabs[groupCI][row[groupCI]] || '(leer)') : String(row[groupCI] || '(leer)');
+    const eVal = vocabs[examCI]  ? (vocabs[examCI][row[examCI]]   || '(leer)') : String(row[examCI]  || '(leer)');
+    if (!examGroupCount.has(eVal)) examGroupCount.set(eVal, new Set());
+    examGroupCount.get(eVal).add(gVal);
+  }
+
+  // Pass 2: build per-group stats with active filter
+  const map = new Map();
+  for (const row of activeRows) {
+    const gVal    = vocabs[groupCI] ? (vocabs[groupCI][row[groupCI]] || '(leer)') : String(row[groupCI] || '(leer)');
+    const eVal    = vocabs[examCI]  ? (vocabs[examCI][row[examCI]]   || '(leer)') : String(row[examCI]  || '(leer)');
+    const isTaken = (vocabs[inlabCI] ? (vocabs[inlabCI][row[inlabCI]] || '0') : '0').trim() === '1';
+    const gc      = (examGroupCount.get(eVal) || new Set()).size;
+    if (_takenFilter === 'poly' && gc <= 1) continue;
+    if (_takenFilter === 'uniq' && gc >  1) continue;
+    if (!map.has(gVal)) map.set(gVal, { offered: new Set(), taken: new Set() });
+    const g = map.get(gVal);
+    g.offered.add(eVal);
+    if (isTaken) g.taken.add(eVal);
+  }
+
+  const sortKey = _takenDisplay === 'pct'
+    ? (g => g.offered ? g.taken / g.offered : 0)
+    : (g => g.taken);
+
+  const groups = [...map.entries()]
+    .map(([gVal, s]) => ({ gVal, offered: s.offered.size, taken: s.taken.size }))
+    .sort((a, b) => _takenSortAsc ? sortKey(a) - sortKey(b) : sortKey(b) - sortKey(a));
+
+  const filterLabel = _takenFilter === 'poly' ? ' · nur Polyvalente' : _takenFilter === 'uniq' ? ' · nur Einzigartige' : '';
+  info.textContent = groups.length + ' Gruppen' + filterLabel;
+  grid.innerHTML = '';
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.style.cssText = 'display:flex;align-items:center;gap:16px;padding:0 0 8px;font-size:11px;color:var(--dim)';
+  legend.innerHTML =
+    '<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:12px;height:10px;border-radius:3px;background:rgba(101,84,121,.3)"></span> Belegbar</span>' +
+    '<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:12px;height:10px;border-radius:3px;background:var(--accent)"></span> Tatsächlich belegt (inLAB=1)</span>';
+  grid.appendChild(legend);
+
+  const maxTaken   = Math.max(...groups.map(g => g.taken), 1);
+  const maxOffered = Math.max(...groups.map(g => g.offered), 1);
+
+  groups.forEach((g, i) => {
+    const sharePct = g.offered ? (g.taken / g.offered * 100) : 0;
+    // bar: green always = taken/offered fraction of the purple track
+    const takenBarW = sharePct.toFixed(2);
+
+    // Labels depend on display mode, but both modes always show count + % as secondary
+    const offeredMain = _takenDisplay === 'pct'
+      ? sharePct.toFixed(1) + '%'
+      : g.taken.toLocaleString() + ' belegt';
+    const offeredSub  = _takenDisplay === 'pct'
+      ? g.taken.toLocaleString()
+      : sharePct.toFixed(0) + '%';
+
+    const row = document.createElement('div');
+    row.className = 'tk-row';
+    row.innerHTML =
+      '<span class="tk-rank">' + (i + 1) + '</span>' +
+      '<span class="tk-label" title="' + escHtml(g.gVal) + '">' + escHtml(g.gVal) + '</span>' +
+      '<div class="tk-bar-wrap" title="' + g.taken.toLocaleString() + ' belegt von ' + g.offered.toLocaleString() + ' belegbar">' +
+        '<div class="tk-bar-taken" style="width:' + takenBarW + '%"></div>' +
+      '</div>' +
+      '<span class="tk-count-offered">' + g.offered.toLocaleString() + ' belegbar</span>' +
+      '<span class="tk-count-taken">' + offeredMain + ' <span style="font-size:10px;font-weight:400;color:var(--dim)">' + offeredSub + '</span></span>';
+    grid.appendChild(row);
+  });
+
+  card.style.display = '';
+}
+
+// Toggle collapse
+document.getElementById('taken-header').addEventListener('click', () => {
+  const body  = document.getElementById('taken-body');
+  const arrow = document.getElementById('taken-arrow');
+  const open  = body.style.display === 'none';
+  body.style.display = open ? '' : 'none';
+  arrow.textContent  = open ? '▼' : '▶';
+});
+
+// Group by
+document.getElementById('taken-group-sel').addEventListener('change', renderTakenCard);
+
+// Filter buttons (Alle / Poly / Uniq) — mutually exclusive
+(function() {
+  const btns = {
+    all:  document.getElementById('taken-all-btn'),
+    poly: document.getElementById('taken-poly-btn'),
+    uniq: document.getElementById('taken-uniq-btn'),
+  };
+  function setFilter(val) {
+    _takenFilter = val;
+    Object.entries(btns).forEach(([k, b]) => b.classList.toggle('tk-filter-active', k === val));
+    renderTakenCard();
+  }
+  btns.all.addEventListener('click',  () => setFilter('all'));
+  btns.poly.addEventListener('click', () => setFilter('poly'));
+  btns.uniq.addEventListener('click', () => setFilter('uniq'));
+})();
+
+// Sort toggle
+document.getElementById('taken-sort-btn').addEventListener('click', function() {
+  _takenSortAsc = !_takenSortAsc;
+  this.textContent = _takenSortAsc ? '↑ Aufsteigend' : '↓ Absteigend';
+  renderTakenCard();
+});
+
+// Display toggle (Absolut / Prozent) — mutually exclusive
+(function() {
+  const absBtn = document.getElementById('taken-abs-btn');
+  const pctBtn = document.getElementById('taken-pct-btn');
+  function setDisplay(val) {
+    _takenDisplay = val;
+    absBtn.classList.toggle('tk-filter-active', val === 'abs');
+    pctBtn.classList.toggle('tk-filter-active', val === 'pct');
+    renderTakenCard();
+  }
+  absBtn.addEventListener('click', () => setDisplay('abs'));
+  pctBtn.addEventListener('click', () => setDisplay('pct'));
+})();
 
 function onSubsetChange() {
   updateSubsetCount();
@@ -711,6 +910,7 @@ function onSubsetChange() {
       setTimeout(() => { state.computed = state.q.compute(); renderResults(state.resultsDiv, state.computed); }, 10);
     }
   });
+  renderTakenCard();
   // Re-render cards/venn with the new subset
   if (document.getElementById('poly-cards-view').style.display === 'flex') {
     renderPolyCards();
@@ -765,7 +965,7 @@ function renderPolyCards() {
   vennBtn.disabled = false;
 
   const groupLabel = headers[groupCI] || String(groupCI);
-  info.textContent = groups.length + ' groups · ' + [...examGroups.keys()].length.toLocaleString() + ' distinct exam titles';
+  info.textContent = groups.length + ' Gruppen · ' + [...examGroups.keys()].length.toLocaleString() + ' eindeutige Prüfungstitel';
 
   groups.forEach(g => {
     const total = g.exams.length;
@@ -780,9 +980,9 @@ function renderPolyCards() {
       '<div class="cv-card-title">' + escHtml(g.gVal) + '</div>' +
       '<div class="cv-bar"><div class="cv-bar-uniq" style="width:' + pUniq + '%"></div><div class="cv-bar-poly" style="width:' + pPoly + '%"></div></div>' +
       '<div class="cv-card-row">' +
-        '<span class="cv-badge cv-badge-uniq">&#9670; ' + nUniq.toLocaleString() + ' unique</span>' +
+        '<span class="cv-badge cv-badge-uniq">&#9670; ' + nUniq.toLocaleString() + ' einzigartig</span>' +
         '<span class="cv-badge cv-badge-poly">&#9632; ' + nPoly.toLocaleString() + ' polyvalent</span>' +
-        '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' total</span>' +
+        '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' gesamt</span>' +
       '</div>';
     card.addEventListener('click', () => pvShowCardDetail(g, groupLabel, groupCI));
     grid.appendChild(card);
@@ -833,7 +1033,7 @@ function pvBuildExamFreqEl(examTitle, groupCI) {
   const freqEntries = [...freqMap.entries()].sort((a, b) => b[1] - a[1]);
   const el = document.createElement('div');
   el.className = 'cv-freq-table';
-  el.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--dim);margin-bottom:6px">Appears in ' + freqEntries.length + ' group(s):</div>' +
+  el.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--dim);margin-bottom:6px">Erscheint in ' + freqEntries.length + ' Gruppe(n):</div>' +
     freqEntries.map(([gv, n]) =>
       '<div class="cv-freq-row"><span class="cv-freq-grp">' + escHtml(gv) + '</span><span class="cv-freq-n">' + n + '×</span></div>'
     ).join('');
@@ -858,7 +1058,7 @@ function pvMakeExamSection(title, examList, colorClass, onExamClick, groupCI) {
     examList.slice(from, to).forEach(([examTitle, cnt]) => {
       const row = document.createElement('div');
       row.className = 'cv-exam-row';
-      row.title = 'Click to view all rows for this exam';
+      row.title = 'Klicken, um alle Zeilen dieser Prüfung anzuzeigen';
       row.innerHTML = '<span class="cv-exam-name">' + escHtml(examTitle) + '</span><span class="cv-exam-cnt">' + cnt.toLocaleString() + '×</span>';
       let freqOpen = false, freqEl = null;
       row.addEventListener('click', e => {
@@ -879,7 +1079,7 @@ function pvMakeExamSection(title, examList, colorClass, onExamClick, groupCI) {
     if (shown >= examList.length) { loadMoreBtn = null; return; }
     loadMoreBtn = document.createElement('button');
     loadMoreBtn.className = 'cv-load-more';
-    loadMoreBtn.textContent = 'Load 10 more (' + (examList.length - shown) + ' remaining)';
+    loadMoreBtn.textContent = '10 weitere laden (' + (examList.length - shown) + ' verbleibend)';
     loadMoreBtn.addEventListener('click', e => { e.stopPropagation(); renderRows(shown, Math.min(shown + PAGE, examList.length)); addLoadMore(); });
     bodyEl.appendChild(loadMoreBtn);
   }
@@ -899,8 +1099,8 @@ function pvShowCardDetail(g, groupLabel, groupCI) {
   document.getElementById('poly-cards-detail-title').textContent = g.gVal + ' — ' + groupLabel;
   const body = document.getElementById('poly-cards-detail-body');
   body.innerHTML = '';
-  body.appendChild(pvMakeExamSection('Unique exam titles (not shared with other groups)', g.uniqueExams, 'cv-badge-uniq', null, groupCI));
-  body.appendChild(pvMakeExamSection('Polyvalent exam titles (shared across groups)', g.polyExams, 'cv-badge-poly', null, groupCI));
+  body.appendChild(pvMakeExamSection('Einzigartige Prüfungstitel (nicht mit anderen Gruppen geteilt)', g.uniqueExams, 'cv-badge-uniq', null, groupCI));
+  body.appendChild(pvMakeExamSection('Polyvalente Prüfungstitel (gruppenübergreifend geteilt)', g.polyExams, 'cv-badge-poly', null, groupCI));
 }
 document.getElementById('poly-cards-detail-venn-btn').addEventListener('click', () => {
   if (_pvDetailGroup) pvOpenVennFocused(_pvDetailGroup);
@@ -1356,13 +1556,13 @@ function pvShowVennDetail(g, idx, overlaps, groups, colors) {
   const sum = document.createElement('div');
   sum.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px';
   sum.innerHTML = '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' exam titles</span>' +
-    '<span class="cv-badge cv-badge-uniq">&#9670; ' + g.uniqueExams.length + ' unique</span>' +
+    '<span class="cv-badge cv-badge-uniq">&#9670; ' + g.uniqueExams.length + ' einzigartig</span>' +
     '<span class="cv-badge cv-badge-poly">&#9632; ' + g.polyExams.length + ' polyvalent</span>';
   body.appendChild(sum);
 
   const ovHd = document.createElement('div');
   ovHd.style.cssText = 'font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px';
-  ovHd.textContent = 'Shared exam titles with other groups';
+  ovHd.textContent = 'Gemeinsame Prüfungstitel mit anderen Gruppen';
   body.appendChild(ovHd);
 
   const ovList = groups.map((other, j) => ({ other, j, count: overlaps[idx][j] }))
@@ -1372,7 +1572,7 @@ function pvShowVennDetail(g, idx, overlaps, groups, colors) {
   if (ovList.length === 0) {
     const none = document.createElement('div');
     none.style.cssText = 'font-size:11px;color:var(--dim);font-style:italic';
-    none.textContent = 'No shared exams with other groups.';
+    none.textContent = 'Keine gemeinsamen Prüfungen mit anderen Gruppen.';
     body.appendChild(none);
   } else {
     const maxOv2 = ovList[0].count;
@@ -1408,7 +1608,7 @@ function pvShowVennDetail(g, idx, overlaps, groups, colors) {
             const gExamSet = new Set(g.exams.map(e => e[0]));
             const sharedExams = other.exams.filter(e => gExamSet.has(e[0]));
             sharedExams.sort((a, b) => b[1] - a[1]);
-            if (sharedExams.length === 0) { expandPanel.textContent = 'No shared exam titles found.'; }
+            if (sharedExams.length === 0) { expandPanel.textContent = 'Keine gemeinsamen Prüfungstitel gefunden.'; }
             else {
               sharedExams.forEach(([title, cnt]) => {
                 const item = document.createElement('div');
@@ -1435,8 +1635,8 @@ function pvShowVennDetail(g, idx, overlaps, groups, colors) {
   }
 
   const groupCI = parseInt(document.getElementById('poly-group-sel').value, 10);
-  body.appendChild(pvMakeExamSection('Unique exam titles', g.uniqueExams, 'cv-badge-uniq', pvOpenVennExamRows, groupCI));
-  body.appendChild(pvMakeExamSection('Polyvalent exam titles', g.polyExams, 'cv-badge-poly', pvOpenVennExamRows, groupCI));
+  body.appendChild(pvMakeExamSection('Einzigartige Prüfungstitel', g.uniqueExams, 'cv-badge-uniq', pvOpenVennExamRows, groupCI));
+  body.appendChild(pvMakeExamSection('Polyvalente Prüfungstitel', g.polyExams, 'cv-badge-poly', pvOpenVennExamRows, groupCI));
 }
 
 function pvOpenVennExamRows(examTitle) {
@@ -1447,7 +1647,7 @@ function pvOpenVennExamRows(examTitle) {
   const matchRows = activeRows.filter(r => r[examCI] === examVidx);
 
   document.getElementById('poly-venn-rows-title').textContent = examTitle;
-  document.getElementById('poly-venn-rows-count').textContent = matchRows.length.toLocaleString() + ' rows';
+  document.getElementById('poly-venn-rows-count').textContent = matchRows.length.toLocaleString() + ' Zeilen';
 
   const body = document.getElementById('poly-venn-rows-body');
   body.innerHTML = '';
@@ -1477,7 +1677,7 @@ function pvOpenVennExamRows(examTitle) {
     const td = document.createElement('td');
     td.colSpan = headers.length;
     td.style.cssText = 'color:var(--dim);text-align:center;padding:12px;font-style:italic';
-    td.textContent = '… and ' + (matchRows.length - 3000).toLocaleString() + ' more rows';
+    td.textContent = '… und ' + (matchRows.length - 3000).toLocaleString() + ' weitere Zeilen';
     tr.appendChild(td); tbody.appendChild(tr);
   }
   table.appendChild(tbody); body.appendChild(table);
@@ -1721,10 +1921,10 @@ document.getElementById('poly-vz-focus').addEventListener('click', () => { if (p
 async function init() {
   if (!meta) return;
   const filename = meta.filename;
-  if (!filename) { showError('No filename in session data.'); return; }
+  if (!filename) { showError('Kein Dateiname in den Sitzungsdaten.'); return; }
 
   document.getElementById('loading-bar').style.display = '';
-  document.getElementById('loading-bar').textContent = '⏳ Loading ' + filename + '…';
+  document.getElementById('loading-bar').textContent = '⏳ Lade ' + filename + '…';
 
   let text;
   try {
@@ -1733,17 +1933,17 @@ async function init() {
     text = await res.text();
   } catch(e) {
     document.getElementById('loading-bar').style.display = 'none';
-    showError('Could not load <strong>' + escHtml(filename) + '</strong>: ' + e.message +
-      '<br>Make sure the file is served from the same HTTP server as this page.');
+    showError('<strong>' + escHtml(filename) + '</strong> konnte nicht geladen werden: ' + e.message +
+      '<br>Bitte sicherstellen, dass die Datei vom selben HTTP-Server wie diese Seite bereitgestellt wird.');
     return;
   }
 
-  document.getElementById('loading-bar').textContent = '⚙️ Parsing CSV…';
+  document.getElementById('loading-bar').textContent = '⚙️ CSV wird verarbeitet…';
   await new Promise(r => setTimeout(r, 20));
 
   const parsed = parseCSV(text, meta.delimiter || 'auto');
   document.getElementById('loading-bar').style.display = 'none';
-  if (!parsed) { showError('Could not parse CSV file.'); return; }
+  if (!parsed) { showError('CSV-Datei konnte nicht verarbeitet werden.'); return; }
 
   headers = parsed.headers;
   vocabs  = parsed.vocabs;
@@ -1758,17 +1958,18 @@ async function init() {
   if (colIdx.studiengang < 0) missing.push('StudiengangTxT');
   if (colIdx.abschluss < 0)   missing.push('AbschlussTxT');
   if (missing.length) {
-    showError('Column(s) not found: <strong>' + missing.join(', ') + '</strong><br>Available: ' + headers.join(', '));
+    showError('Spalte(n) nicht gefunden: <strong>' + missing.join(', ') + '</strong><br>Verfügbar: ' + headers.join(', '));
   }
 
   document.getElementById('col-info').innerHTML =
-    '<strong>' + rows.length.toLocaleString() + '</strong> rows &nbsp;·&nbsp; ' +
+    '<strong>' + rows.length.toLocaleString() + '</strong> Zeilen &nbsp;·&nbsp; ' +
     escHtml(filename) + ' &nbsp;·&nbsp; ' +
-    'Exam: <strong>' + escHtml(headers[colIdx.exam] || '—') + '</strong> &nbsp;·&nbsp; ' +
+    'Prüfung: <strong>' + escHtml(headers[colIdx.exam] || '—') + '</strong> &nbsp;·&nbsp; ' +
     'Studiengang: <strong>' + escHtml(headers[colIdx.studiengang] || '—') + '</strong> &nbsp;·&nbsp; ' +
     'Abschluss: <strong>' + escHtml(headers[colIdx.abschluss] || '—') + '</strong>';
 
   buildQACards();
+  renderTakenCard();
 
   // Populate GROUP BY dropdown — only the three allowed group columns
   const polyGroupSel = document.getElementById('poly-group-sel');
@@ -1786,7 +1987,7 @@ async function init() {
   const valInp = document.getElementById('subset-val-inp');
   const clearBtn = document.getElementById('subset-clear-btn');
   const blankOpt = document.createElement('option');
-  blankOpt.value = '-1'; blankOpt.textContent = '— column —';
+  blankOpt.value = '-1'; blankOpt.textContent = '— Spalte —';
   colSel.appendChild(blankOpt);
   headers.forEach((h, i) => {
     const opt = document.createElement('option');

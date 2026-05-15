@@ -631,7 +631,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
 <div id="dd-overlay"></div>
 <div id="dd-panel">
   <div id="dd-header">
-    <button id="dd-close" title="Close">✕</button>
+    <button id="dd-close" title="Schließen">✕</button>
     <div id="dd-title-wrap">
       <div id="dd-title"></div>
       <div id="dd-subtitle"></div>
@@ -646,16 +646,16 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
   <div class="sep"></div>
 
   <!-- CSV drop / pick -->
-  <div id="csv-drop-zone" title="Click to choose a CSV, or drag one here">
+  <div id="csv-drop-zone" title="Klicken um eine CSV auszuwählen, oder hierher ziehen">
     <span class="dz-icon">📂</span>
-    <span class="dz-text" id="dz-label"><strong>Choose CSV</strong> or drag &amp; drop</span>
+    <span class="dz-text" id="dz-label"><strong>CSV auswählen</strong> oder hierher ziehen</span>
   </div>
   <input type="file" id="csv-input" accept=".csv,.tsv,.txt">
 
   <div id="delim-wrap">
     <label>Delimiter:</label>
     <select id="delim-select">
-      <option value="auto">Auto-detect</option>
+      <option value="auto">Automatisch</option>
       <option value=";">Semicolon ;</option>
       <option value=",">Comma ,</option>
       <option value="&#9;">Tab</option>
@@ -664,9 +664,9 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
   </div>
 
   <div class="sep"></div>
-  <div id="stats-bar">No file loaded</div>
-  <button id="poly-btn" style="display:none;margin-left:10px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Open Polyvalenzen analysis">Polyvalenzen</button>
-  <button id="ce-info-btn" title="About this tool">i</button>
+  <div id="stats-bar">Keine Datei geladen</div>
+  <button id="poly-btn" style="display:none;margin-left:10px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Polyvalenzen-Analyse öffnen">Polyvalenzen</button>
+  <button id="ce-info-btn" title="Über dieses Tool">i</button>
 </div>
 <div id="ce-info-panel">
   <h2>Spaltenfilter — Kurzanleitung</h2>
@@ -692,7 +692,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
     <!-- SUBSET pre-filter -->
     <div id="subset-section">
       <div id="subset-title" class="open">
-        <span>&#9654; Subset <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--dim);font-size:10px">(pre-filter rows)</span></span>
+        <span>&#9654; Subset <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--dim);font-size:10px">(Zeilen vorfiltern)</span></span>
         <span class="ss-arrow">&#9654;</span>
       </div>
       <div id="subset-body">
@@ -700,29 +700,29 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
           <option value="">— choose a column —</option>
         </select>
         <div id="subset-val-row">
-          <input type="text" id="subset-val" placeholder="match value…" disabled>
-          <button id="subset-clear-btn" title="Clear subset">✕ Clear</button>
+          <input type="text" id="subset-val" placeholder="Filterwert…" disabled>
+          <button id="subset-clear-btn" title="Subset zurücksetzen">✕ Zurücksetzen</button>
         </div>
-        <div id="subset-badge">0 rows</div>
+        <div id="subset-badge">0 Zeilen</div>
       </div>
     </div>
 
     <div class="panel-title">
-      <span>Active Filters</span>
-      <button id="btn-clear">Clear all</button>
+      <span>Aktive Filter</span>
+      <button id="btn-clear">Alle löschen</button>
     </div>
     <div id="active-wrap">
-      <div class="empty-hint" id="filter-empty">Add columns below to create clusters</div>
+      <div class="empty-hint" id="filter-empty">Unten Spalten hinzufügen, um Cluster zu erstellen</div>
     </div>
     <div id="col-wrap">
-      <input type="text" id="col-search" placeholder="Search columns…">
+      <input type="text" id="col-search" placeholder="Spalten suchen…">
       <div id="col-list"></div>
     </div>
 
     <!-- QUICK FILTERS (advanced / rarely used columns) -->
     <div id="quick-filter-section" style="border-top:1px solid var(--border);flex-shrink:0">
       <div id="quick-filter-title" style="padding:7px 12px;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;background:#e0d9c0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">
-        <span>&#9654; Advanced columns</span>
+        <span>&#9654; Erweiterte Spalten</span>
         <span id="qf-arrow" style="font-size:9px;transition:transform .15s">&#9654;</span>
       </div>
       <div id="quick-filter-body" style="display:none;padding:6px 8px;flex-direction:column;gap:3px"></div>
@@ -733,29 +733,29 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
   <div id="right">
     <div id="cluster-bar">
       <div style="display:flex;gap:3px" id="view-btns">
-        <button class="vbtn on" data-v="bubble">&#9679; Bubbles</button>
-        <button class="vbtn" data-v="list">&#9776; List</button>
+        <button class="vbtn on" data-v="bubble">&#9679; Blasen</button>
+        <button class="vbtn" data-v="list">&#9776; Liste</button>
       
         <button class="vbtn" id="matrix-btn" data-v="matrix" style="display:none">&#8862; Matrix</button>
         <span style="color:var(--border2);margin:0 4px;font-size:16px;line-height:1">|</span>
         
       </div>
       <div class="sep"></div>
-      <label style="font-size:11px;color:var(--dim)">Sort:</label>
+      <label style="font-size:11px;color:var(--dim)">Sortierung:</label>
       <select id="sort-sel">
-        <option value="cnt-d">Count ↓</option>
-        <option value="cnt-a">Count ↑</option>
+        <option value="cnt-d">Anzahl ↓</option>
+        <option value="cnt-a">Anzahl ↑</option>
         <option value="alpha">A → Z</option>
       </select>
-      <input type="text" id="cluster-search" placeholder="Filter clusters…">
+      <input type="text" id="cluster-search" placeholder="Cluster filtern…">
       <span id="cluster-count"></span>
     </div>
     <div id="cluster-area">
       <div id="landing">
         <div class="land-icon">📂</div>
-        <p><strong>Drop a CSV file</strong>.<br>
-        Add columns from in left panel to group data into clusters.<br>
-        Each unique combination of selected column values becomes one cluster — sized by row count.</p>
+        <p><strong>CSV ändern</strong>.<br>
+        Im linken Panel Spalten hinzufügen, um Daten in Cluster zu gruppieren.<br>
+        Jede eindeutige Kombination ausgewählter Spaltenwerte ergibt einen Cluster — Größe entspricht der Zeilenanzahl.</p>
       </div>
       <div id="bubble-view" style="display:none">
         <div id="bubble-crumbs" style="display:none"></div>
@@ -782,50 +782,50 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
             <option value="Vertiefung">Vertiefung</option>
           </select>
           <span id="cards-info" style="font-size:11px;color:var(--dim);margin-left:4px"></span>
-          <button id="venn-btn" style="margin-left:auto;background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Open Venn diagram">&#9711; Venn diagram</button>
+          <button id="venn-btn" style="margin-left:auto;background:rgba(101,84,121,.12);border:1px solid rgba(101,84,121,.3);color:#3d2f52;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Venn-Diagramm öffnen">&#9711; Venn-Diagramm</button>
         </div>
         <div id="cards-grid" style="flex:1;overflow-y:auto;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-content:start"></div>
         <!-- VENN VIEW (inside cards-view) -->
         <div id="venn-view">
           <div id="venn-header">
             <button id="venn-back">← Cards</button>
-            <span id="venn-title">Venn — exam overlap</span>
+            <span id="venn-title">Venn — Prüfungsüberschneidung</span>
             <span id="venn-hint">Scroll to zoom · drag to pan · click circle to inspect</span>
             <div id="venn-search-wrap" style="position:relative;display:flex;align-items:center;gap:4px">
-              <input id="venn-search" type="text" placeholder="Search group…" autocomplete="off"
+              <input id="venn-search" type="text" placeholder="Gruppe suchen…" autocomplete="off"
                 style="width:160px;padding:4px 8px;border:1px solid var(--border2);border-radius:4px;background:var(--bg);color:var(--text);font-size:11px;outline:none">
               <div id="venn-search-dropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;width:160px;background:var(--bg);border:1px solid var(--border2);border-radius:4px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)"></div>
               <div class="vz-group">
-                <button class="vz-btn" id="vz-prev" title="Previous group">&#8249;</button>
-                <button class="vz-btn" id="vz-next" title="Next group">&#8250;</button>
+                <button class="vz-btn" id="vz-prev" title="Vorherige Gruppe">&#8249;</button>
+                <button class="vz-btn" id="vz-next" title="Nächste Gruppe">&#8250;</button>
               </div>
             </div>
             <div id="venn-zoom-controls">
               <!-- Group 0: All / Focus mode -->
               <div class="vz-group">
-                <button class="vz-btn active" id="vz-all" title="Show all circles (deselect)">All</button>
-                <button class="vz-btn" id="vz-focus" title="Focus on selected circle and its connections">Focus</button>
+                <button class="vz-btn active" id="vz-all" title="Alle Kreise anzeigen (Auswahl aufheben)">Alle</button>
+                <button class="vz-btn" id="vz-focus" title="Auf ausgewählten Kreis und Verbindungen fokussieren">Fokus</button>
               </div>
               <!-- Group 1: viewport zoom -->
               <div class="vz-group">
-                <button class="vz-btn" id="vz-zoom-out" title="Zoom out">－</button>
+                <button class="vz-btn" id="vz-zoom-out" title="Verkleinern">－</button>
                 <span id="venn-zoom-level">100%</span>
-                <button class="vz-btn" id="vz-zoom-in" title="Zoom in">＋</button>
+                <button class="vz-btn" id="vz-zoom-in" title="Vergrößern">＋</button>
               </div>
               <!-- Group 2: fit + orbit -->
               <div class="vz-group">
-                <button class="vz-btn" id="vz-fit" title="Fit all circles to screen">⊡ Fit</button>
-                <button class="vz-btn" id="vz-orbit" title="Orbit: center selected circle, all others orbit around it">⊙ Orbit</button>
+                <button class="vz-btn" id="vz-fit" title="Alle Kreise einpassen">⊡ Einpassen</button>
+                <button class="vz-btn" id="vz-orbit" title="Orbit: ausgewählten Kreis zentrieren, andere kreisen darum">⊙ Orbit</button>
               </div>
               <!-- Group 3: circle radius scale -->
               <div class="vz-group">
-                <button class="vz-btn" id="vz-circle-out" title="Shrink all circles">◎－</button>
+                <button class="vz-btn" id="vz-circle-out" title="Alle Kreise verkleinern">◎－</button>
                 <span id="venn-circle-level">100%</span>
-                <button class="vz-btn" id="vz-circle-in" title="Grow all circles">◎＋</button>
+                <button class="vz-btn" id="vz-circle-in" title="Alle Kreise vergrößern">◎＋</button>
               </div>
               <!-- Group 4: label position mode -->
               <div class="vz-group">
-                <button class="vz-btn active" id="vz-label-mode" title="Cycle label position: inside → edge → outside">⊜ Labels</button>
+                <button class="vz-btn active" id="vz-label-mode" title="Beschriftungsposition wechseln: innen → Rand → außen">⊜ Beschriftung</button>
               </div>
             </div>
           </div>
@@ -841,7 +841,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
             <!-- Exam rows table overlay -->
             <div id="venn-rows-overlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:30;flex-direction:column;overflow:hidden">
               <div style="padding:10px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;flex-shrink:0">
-                <button id="venn-rows-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Back</button>
+                <button id="venn-rows-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Zurück</button>
                 <span id="venn-rows-title" style="font-size:12px;font-weight:700;color:var(--bright);flex:1"></span>
                 <span id="venn-rows-count" style="font-size:10px;color:var(--dim)"></span>
               </div>
@@ -851,7 +851,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
         </div>
         <div id="cards-detail" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:20;flex-direction:column;overflow:hidden">
           <div style="padding:10px 14px;background:var(--hover);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;flex-shrink:0">
-            <button id="cards-detail-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Back</button>
+            <button id="cards-detail-back" style="background:none;border:1px solid var(--border2);color:var(--accent);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">← Zurück</button>
             <span id="cards-detail-title" style="font-size:12px;font-weight:700;color:var(--bright);flex:1"></span>
           </div>
           <div id="cards-detail-body" style="flex:1;overflow-y:auto;padding:14px"></div>
@@ -860,14 +860,14 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
 
       <div id="breakdown-view">
         <div id="breakdown-header">
-          <button id="breakdown-back">← Back</button>
+          <button id="breakdown-back">← Zurück</button>
           <span id="breakdown-title"></span>
           <span id="breakdown-subtitle"></span>
         </div>
         <div id="breakdown-body">
           <div id="breakdown-grid"></div>
           <div id="breakdown-sublist" style="display:none">
-            <div id="breakdown-sublist-hd"><span></span><button id="breakdown-sublist-close" title="Close">✕</button></div>
+            <div id="breakdown-sublist-hd"><span></span><button id="breakdown-sublist-close" title="Schließen">✕</button></div>
             <div id="breakdown-sublist-rows"></div>
           </div>
         </div>
@@ -989,7 +989,7 @@ function loadCSV(text, filename) {
     const delim = document.getElementById('delim-select').value;
     try {
       CSV = parseCSV(text, delim);
-      if (!CSV) { hideOverlay(); alert('Could not parse CSV — check delimiter.'); return; }
+      if (!CSV) { hideOverlay(); alert('CSV konnte nicht verarbeitet werden — Trennzeichen prüfen.'); return; }
       FILTERS = [];
       Q = ''; COL_Q = '';
       SUBSET_COL = -1; SUBSET_VAL = ''; SUBSET_ROWS = null;
@@ -1008,7 +1008,7 @@ function loadCSV(text, filename) {
       document.getElementById('dz-label').innerHTML = '<span class="dz-file">' + escHtml(filename) + '</span>';
       document.getElementById('poly-btn').style.display = '';
     } catch(e) {
-      alert('Parse error: ' + e.message);
+      alert('Fehler beim Einlesen: ' + e.message);
     }
     hideOverlay();
   }, 30);
@@ -1022,7 +1022,7 @@ function buildSubsetSelect() {
   CSV.headers.forEach((h, ci) => {
     const opt = document.createElement('option');
     opt.value = ci;
-    opt.textContent = h + ' (' + CSV.vocabs[ci].length + ' unique)';
+    opt.textContent = h + ' (' + CSV.vocabs[ci].length + ' eindeutig)';
     sel.appendChild(opt);
   });
   // restore previous selection if column still exists
@@ -1057,7 +1057,7 @@ function applySubset() {
   }
 
   const badge = document.getElementById('subset-badge');
-  badge.textContent = SUBSET_ROWS.length.toLocaleString() + ' rows';
+  badge.textContent = SUBSET_ROWS.length.toLocaleString() + ' Zeilen';
   badge.classList.add('active');
 
   updateStats();
@@ -1178,7 +1178,7 @@ function renderFilters() {
     const h = document.createElement('div');
     h.className = 'empty-hint';
     h.id = 'filter-empty';
-    h.textContent = CSV ? 'Add columns below to create clusters' : 'Load a CSV first';
+    h.textContent = CSV ? 'Unten Spalten hinzufügen, um Cluster zu erstellen' : 'Zuerst eine CSV-Datei laden';
     wrap.appendChild(h);
     return;
   }
@@ -1192,7 +1192,7 @@ function renderFilters() {
       '<span class="chip-num" style="background:' + color + '22;color:' + color + '">' + (pos+1) + '</span>' +
       '<span class="chip-lbl" style="color:' + color + '" title="' + escHtml(CSV.headers[ci]) + '">' + escHtml(CSV.headers[ci]) + '</span>' +
       '<span class="chip-uniq">' + CSV.vocabs[ci].length + '</span>' +
-      '<button class="chip-rm" title="Remove">×</button>';
+      '<button class="chip-rm" title="Entfernen">×</button>';
 
     chip.querySelector('.chip-rm').addEventListener('click', e => { e.stopPropagation(); removeFilter(ci); });
 
@@ -1277,7 +1277,7 @@ function renderClusters() {
   if (!CSV || FILTERS.length === 0) { showLanding(); return; }
   hideLanding();
   const clusters = applySort(applyFilters(computeClusters()));
-  document.getElementById('cluster-count').textContent = clusters.length.toLocaleString() + ' clusters';
+  document.getElementById('cluster-count').textContent = clusters.length.toLocaleString() + ' Cluster';
 
   // hide all views
   document.getElementById('bubble-view').style.display = 'none';
@@ -1342,7 +1342,7 @@ function renderBubbleCrumbs(depth) {
 
   const root = document.createElement('span');
   root.className = 'crumb';
-  root.textContent = 'All';
+  root.textContent = 'Alle';
   root.addEventListener('click', () => bubbleNavTo(0));
   bar.appendChild(root);
 
@@ -1483,11 +1483,11 @@ function renderBubblesAtDepth(clusters, depth) {
       const pct = (c.count/total*100).toFixed(1);
       const filterHeader = CSV.headers[FILTERS[depth]] || '';
       let html = '<div class="tip-row"><span class="tip-k">' + escHtml(filterHeader) + ':</span><span class="tip-v">' + escHtml(c.key) + '</span></div>';
-      if (!isLeaf) html += '<div class="tip-row"><span class="tip-k">Sub-clusters:</span><span class="tip-v">' + c.clusters.length + '</span></div>';
-      html += '<div class="tip-row" style="margin-top:4px"><span class="tip-k">Rows:</span><span class="tip-count">' + c.count.toLocaleString() + '</span></div>';
-      html += '<div class="tip-row"><span class="tip-k">Share:</span><span class="tip-v">' + pct + '% of total</span></div>';
-      if (!isLeaf) html += '<div class="tip-row" style="margin-top:4px;color:var(--accent)"><em>click to zoom in →</em></div>';
-      else html += '<div class="tip-row" style="margin-top:4px;color:var(--accent)"><em>click to see why they differ</em></div>';
+      if (!isLeaf) html += '<div class="tip-row"><span class="tip-k">Sub-Cluster:</span><span class="tip-v">' + c.clusters.length + '</span></div>';
+      html += '<div class="tip-row" style="margin-top:4px"><span class="tip-k">Zeilen:</span><span class="tip-count">' + c.count.toLocaleString() + '</span></div>';
+      html += '<div class="tip-row"><span class="tip-k">Anteil:</span><span class="tip-v">' + pct + '% gesamt</span></div>';
+      if (!isLeaf) html += '<div class="tip-row" style="margin-top:4px;color:var(--accent)"><em>klicken zum Hineinzoomen →</em></div>';
+      else html += '<div class="tip-row" style="margin-top:4px;color:var(--accent)"><em>klicken um Unterschiede zu sehen</em></div>';
       tip.innerHTML = html; tip.style.display = 'block';
     });
     g.addEventListener('mousemove', e => {
@@ -1536,7 +1536,7 @@ function renderList(clusters) {
   lv.innerHTML = '';
 
   if (clusters.length === 0) {
-    lv.innerHTML = '<div style="padding:40px;text-align:center;color:var(--dim)">No clusters match the filter</div>';
+    lv.innerHTML = '<div style="padding:40px;text-align:center;color:var(--dim)">Keine Cluster entsprechen dem Filter</div>';
     return;
   }
 
@@ -1585,7 +1585,7 @@ function renderList(clusters) {
         '<span class="cl-key" style="color:' + col + '">' + (q ? hlText(grp.key, q) : escHtml(grp.key)) + '</span>' +
         '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + pct + '%;background:' + col + '70"></span><span class="cl-pct">' + pctT + '%</span></span>' +
         '<span class="cl-n">' + grp.count.toLocaleString() + '</span>' +
-        '<button class="info-btn" title="Deep analysis">i</button>';
+        '<button class="info-btn" title="Tiefenanalyse">i</button>';
 
       // Children container
       const children = document.createElement('div');
@@ -1636,7 +1636,7 @@ function renderListFlat(container, clusters, total, q) {
       '<span class="cl-key">' + keyHtml + '</span>' +
       '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + pct + '%;background:' + col + '70"></span><span class="cl-pct">' + pctT + '%</span></span>' +
       '<span class="cl-n">' + c.count.toLocaleString() + '</span>' +
-      '<button class="info-btn" title="Deep analysis">i</button>';
+      '<button class="info-btn" title="Tiefenanalyse">i</button>';
 
     row.addEventListener('click', e => {
       if (e.target.classList.contains('info-btn')) return;
@@ -1657,7 +1657,7 @@ function renderLevel(container, clusters, total, q, depth) {
     // Leaf level — show raw row count only
     const leaf = document.createElement('div');
     leaf.style.cssText = 'padding:4px 14px 4px ' + (14 + depth*16) + 'px;font-size:11px;color:var(--dim)';
-    leaf.textContent = clusters.reduce((s,c) => s+c.count, 0).toLocaleString() + ' rows';
+    leaf.textContent = clusters.reduce((s,c) => s+c.count, 0).toLocaleString() + ' Zeilen';
     container.appendChild(leaf);
     return;
   }
@@ -1702,7 +1702,7 @@ function renderLevel(container, clusters, total, q, depth) {
       '<span class="cl-key" style="color:' + COLORS[depth % COLORS.length] + ';font-size:11px">' + (q ? hlText(grp.key, q) : escHtml(grp.key)) + '</span>' +
       '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + pct + '%;background:' + col + '60"></span><span class="cl-pct" style="font-size:10px">' + pctT + '%</span></span>' +
       '<span class="cl-n" style="font-size:11px">' + grp.count.toLocaleString() + '</span>' +
-      '<button class="info-btn" title="Deep analysis">i</button>';
+      '<button class="info-btn" title="Tiefenanalyse">i</button>';
 
     const children = document.createElement('div');
     children.className = 'cl-sub';
@@ -1740,15 +1740,15 @@ function renderLevel(container, clusters, total, q, depth) {
 // ── STATS ──
 function updateStats() {
   const el = document.getElementById('stats-bar');
-  if (!CSV) { el.textContent = 'No file loaded'; return; }
+  if (!CSV) { el.textContent = 'Keine Datei geladen'; return; }
   const activeN = SUBSET_ROWS !== null ? SUBSET_ROWS.length : CSV.rows.length;
   const subsetStr = SUBSET_ROWS !== null
-    ? ' &nbsp;·&nbsp; subset: <strong style="color:var(--green)">' + activeN.toLocaleString() + '</strong> rows'
+    ? ' &nbsp;·&nbsp; Subset: <strong style="color:var(--green)">' + activeN.toLocaleString() + '</strong> Zeilen'
     : '';
   el.innerHTML =
-    '<strong>' + CSV.rows.length.toLocaleString() + '</strong> total rows' + subsetStr +
-    ' &nbsp;·&nbsp; <strong>' + CSV.headers.length + '</strong> columns' +
-    ' &nbsp;·&nbsp; delimiter: <strong>' + escHtml(CSV.delimiter === '\t' ? 'Tab' : CSV.delimiter) + '</strong>';
+    '<strong>' + CSV.rows.length.toLocaleString() + '</strong> Zeilen gesamt' + subsetStr +
+    ' &nbsp;·&nbsp; <strong>' + CSV.headers.length + '</strong> Spalten' +
+    ' &nbsp;·&nbsp; Trennzeichen: <strong>' + escHtml(CSV.delimiter === '\t' ? 'Tab' : CSV.delimiter) + '</strong>';
 }
 
 // ── TREEMAP VIEW ──
@@ -1884,7 +1884,7 @@ function renderTreemap(clusters) {
     rects.forEach((r, ri) => {
       const col = COLORS[ri % COLORS.length];
       const lbl = r.item.parts[0] || r.item.key;
-      const tip = lbl + '\n' + r.item.count.toLocaleString() + ' rows · ' + (r.item.count/total*100).toFixed(1) + '%';
+      const tip = lbl + '\n' + r.item.count.toLocaleString() + ' Zeilen · ' + (r.item.count/total*100).toFixed(1) + '%';
       drawLeaf(r, r.item, col, tip, lbl);
     });
   } else {
@@ -2024,7 +2024,7 @@ function renderMatrix(clusters) {
     let maxCell = 0;
     for (const { inner } of rowEntries) for (const v of inner.values()) if (v > maxCell) maxCell = v;
 
-    statsEl.textContent = rowEntries.length + ' rows × ' + colVidxs.length + ' cols';
+    statsEl.textContent = rowEntries.length + ' Zeilen × ' + colVidxs.length + ' Spalten';
 
     const table = document.createElement('table');
     table.className = 'mx-table';
@@ -2039,8 +2039,8 @@ function renderMatrix(clusters) {
       const th = document.createElement('th');
       const lbl = document.createElement('div');
       lbl.className = 'mx-col-label';
-      lbl.textContent = CSV.vocabs[colCI][cvi] || '(empty)';
-      lbl.title = CSV.vocabs[colCI][cvi] || '(empty)';
+      lbl.textContent = CSV.vocabs[colCI][cvi] || '(leer)';
+      lbl.title = CSV.vocabs[colCI][cvi] || '(leer)';
       th.appendChild(lbl);
       hrow.appendChild(th);
     });
@@ -2061,7 +2061,7 @@ function renderMatrix(clusters) {
 
     rowEntries.forEach(({ rvIdx, inner, rowTotal }) => {
       const tr = document.createElement('tr');
-      const rowName = CSV.vocabs[rowCI][rvIdx] || '(empty)';
+      const rowName = CSV.vocabs[rowCI][rvIdx] || '(leer)';
       const rowAllRows = allRowsByRowVidx.get(rvIdx) || [];
       const accentColor = COLORS[0];
 
@@ -2070,7 +2070,7 @@ function renderMatrix(clusters) {
       const rlbl = document.createElement('div');
       rlbl.className = 'mx-row-label';
       rlbl.textContent = rowName;
-      rlbl.title = rowName + ' · ' + rowTotal.toLocaleString() + ' total';
+      rlbl.title = rowName + ' · ' + rowTotal.toLocaleString() + ' gesamt';
       td0.appendChild(rlbl);
       tr.appendChild(td0);
 
@@ -2082,10 +2082,10 @@ function renderMatrix(clusters) {
           colSums[ci] += cnt;
           const intensity = Math.pow(cnt / maxCell, 0.45);
           td.style.background = `rgba(79,142,247,${(0.12 + intensity * 0.88).toFixed(3)})`;
-          const colName = CSV.vocabs[colCI][cvi] || '(empty)';
+          const colName = CSV.vocabs[colCI][cvi] || '(leer)';
           td.title = rowName + ' × ' + colName + ': ' + cnt.toLocaleString();
           td.style.cursor = 'pointer';
-          td.addEventListener('mouseenter', e => showTip(e, rowName + ' × ' + colName + '\n' + cnt.toLocaleString() + ' rows'));
+          td.addEventListener('mouseenter', e => showTip(e, rowName + ' × ' + colName + '\n' + cnt.toLocaleString() + ' Zeilen'));
           td.addEventListener('mousemove', e => moveTip(e));
           td.addEventListener('mouseleave', hideTip);
           td.addEventListener('click', () => {
@@ -2246,7 +2246,7 @@ function openDrillDown(cluster, accentColor) {
   const titleStr = cluster.parts.join(' › ');
   document.getElementById('dd-title').textContent = titleStr;
   document.getElementById('dd-subtitle').textContent =
-    cluster.count.toLocaleString() + ' rows · ' + CSV.headers.length + ' columns analysed';
+    cluster.count.toLocaleString() + ' Zeilen · ' + CSV.headers.length + ' Spalten analysiert';
 
   const analysis = analyzeCluster(cluster.allRows);
 
@@ -2258,7 +2258,7 @@ function openDrillDown(cluster, accentColor) {
   if (varying.length > 0) {
     const hd = document.createElement('div');
     hd.className = 'dd-section-hd';
-    hd.innerHTML = 'Varying columns <span>' + varying.length + ' of ' + CSV.headers.length + ' columns differ</span>';
+    hd.innerHTML = 'Variable Spalten <span>' + varying.length + ' von ' + CSV.headers.length + ' Spalten unterschiedlich</span>';
     body.appendChild(hd);
 
     varying.forEach(col_info => {
@@ -2270,7 +2270,7 @@ function openDrillDown(cluster, accentColor) {
   if (filterUniform.length > 0) {
     const hd = document.createElement('div');
     hd.className = 'dd-section-hd';
-    hd.innerHTML = 'Filter columns <span>define this cluster</span>';
+    hd.innerHTML = 'Filterspalten <span>definieren diesen Cluster</span>';
     body.appendChild(hd);
     filterUniform.forEach(col_info => {
       body.appendChild(makeColBlock(col_info, cluster.count, col, false));
@@ -2281,7 +2281,7 @@ function openDrillDown(cluster, accentColor) {
   if (otherUniform.length > 0) {
     const hd = document.createElement('div');
     hd.className = 'dd-section-hd';
-    hd.innerHTML = 'Uniform columns <span>' + otherUniform.length + ' same value in all rows</span>';
+    hd.innerHTML = 'Einheitliche Spalten <span>' + otherUniform.length + ' gleicher Wert in allen Zeilen</span>';
     body.appendChild(hd);
     otherUniform.forEach(col_info => {
       body.appendChild(makeColBlock(col_info, cluster.count, col, false));
@@ -2311,7 +2311,7 @@ function makeColBlock(col_info, totalCount, accentColor, startOpen) {
   hd.innerHTML =
     '<span class="dd-col-name">' + escHtml(col_info.header) + '</span>' +
     '<div class="dd-diversity">' + dotsHtml + '</div>' +
-    '<span class="dd-col-nuniq">' + col_info.numUniq + ' value' + (col_info.numUniq !== 1 ? 's' : '') + '</span>' +
+    '<span class="dd-col-nuniq">' + col_info.numUniq + ' Wert' + (col_info.numUniq !== 1 ? 'e' : '') + '</span>' +
     '<span class="dd-col-toggle">&#9654;</span>';
   hd.addEventListener('click', () => wrapper.classList.toggle('open'));
   wrapper.appendChild(hd);
@@ -2324,7 +2324,7 @@ function makeColBlock(col_info, totalCount, accentColor, startOpen) {
     // Single value — show it plainly
     const uv = document.createElement('div');
     uv.className = 'dd-uniform-val';
-    uv.textContent = col_info.values[0].val || '(empty)';
+    uv.textContent = col_info.values[0].val || '(leer)';
     vlist.appendChild(uv);
   } else {
     const maxValCount = col_info.values[0].count;
@@ -2335,7 +2335,7 @@ function makeColBlock(col_info, totalCount, accentColor, startOpen) {
       const vrow = document.createElement('div');
       vrow.className = 'dd-val-row';
       vrow.innerHTML =
-        '<span class="dd-val-label" title="' + escHtml(v.val) + '">' + escHtml(v.val || '(empty)') + '</span>' +
+        '<span class="dd-val-label" title="' + escHtml(v.val) + '">' + escHtml(v.val || '(leer)') + '</span>' +
         '<span class="dd-val-bar-wrap">' +
           '<span class="dd-val-bar" style="width:' + barW + '%;background:' + accentColor + '70"></span>' +
         '</span>' +
@@ -2345,7 +2345,7 @@ function makeColBlock(col_info, totalCount, accentColor, startOpen) {
     if (col_info.values.length > MAX_SHOW) {
       const more = document.createElement('div');
       more.style.cssText = 'padding:3px 0;font-size:10px;color:var(--dim);font-style:italic';
-      more.textContent = '…and ' + (col_info.values.length - MAX_SHOW) + ' more values';
+      more.textContent = '…und ' + (col_info.values.length - MAX_SHOW) + ' weitere Werte';
       vlist.appendChild(more);
     }
   }
@@ -2385,7 +2385,7 @@ function openLeafBreakdown(item, accentColor) {
     : BUBBLE_STACK.map(f => f.label).concat([item.key]);
   document.getElementById('breakdown-title').textContent = pathParts.join(' › ');
   document.getElementById('breakdown-subtitle').textContent =
-    item.count.toLocaleString() + ' rows · click a card to break down by that column';
+    item.count.toLocaleString() + ' Zeilen · Karte anklicken, um nach dieser Spalte aufzuteilen';
 
   const grid = document.getElementById('breakdown-grid');
   grid.innerHTML = '';
@@ -2408,17 +2408,17 @@ function openLeafBreakdown(item, accentColor) {
     inlabCard.style.borderColor = 'var(--accent)';
     inlabCard.style.background = 'rgba(0,136,58,.05)';
     inlabCard.innerHTML =
-      '<div class="bk-card-hd"><span class="bk-col-name" style="color:var(--accent)">inLAB — actually taken?</span>' +
-      '<span class="bk-nuniq">' + total.toLocaleString() + ' rows</span></div>' +
+      '<div class="bk-card-hd"><span class="bk-col-name" style="color:var(--accent)">inLAB — tatsächlich teilgenommen?</span>' +
+      '<span class="bk-nuniq">' + total.toLocaleString() + ' Zeilen</span></div>' +
       '<div class="bk-seg-bar">' +
-        '<div class="bk-seg" style="width:' + pctTaken    + '%;background:#00883A" title="1 (taken) · ' + takenCount.toLocaleString() + '"></div>' +
-        '<div class="bk-seg" style="width:' + pctNotTaken + '%;background:#c0392b" title="0 (not taken) · ' + notTakenCount.toLocaleString() + '"></div>' +
+        '<div class="bk-seg" style="width:' + pctTaken    + '%;background:#00883A" title="1 (teilgenommen) · ' + takenCount.toLocaleString() + '"></div>' +
+        '<div class="bk-seg" style="width:' + pctNotTaken + '%;background:#c0392b" title="0 (nicht teilgenommen) · ' + notTakenCount.toLocaleString() + '"></div>' +
       '</div>' +
       '<div class="bk-vals">' +
         '<div class="bk-val-row"><span class="bk-val-dot" style="background:#00883A"></span>' +
-        '<span class="bk-val-label">1 (taken)</span><span class="bk-val-pct">' + takenCount.toLocaleString() + ' · ' + pctTaken + '%</span></div>' +
+        '<span class="bk-val-label">1 (teilgenommen)</span><span class="bk-val-pct">' + takenCount.toLocaleString() + ' · ' + pctTaken + '%</span></div>' +
         '<div class="bk-val-row"><span class="bk-val-dot" style="background:#c0392b"></span>' +
-        '<span class="bk-val-label">0 (not taken)</span><span class="bk-val-pct">' + notTakenCount.toLocaleString() + ' · ' + pctNotTaken + '%</span></div>' +
+        '<span class="bk-val-label">0 (nicht teilgenommen)</span><span class="bk-val-pct">' + notTakenCount.toLocaleString() + ' · ' + pctNotTaken + '%</span></div>' +
       '</div>';
     grid.appendChild(inlabCard);
   }
@@ -2438,20 +2438,20 @@ function openLeafBreakdown(item, accentColor) {
     const dom = col_info.values[0].count / item.count;
 
     let unityClass, unityLabel;
-    if (dom >= 0.9)      { unityClass = 'high'; unityLabel = 'Uniform'; }
-    else if (dom >= 0.5) { unityClass = 'mid';  unityLabel = 'Mixed'; }
-    else                  { unityClass = 'low';  unityLabel = 'Diverse'; }
+    if (dom >= 0.9)      { unityClass = 'high'; unityLabel = 'Einheitlich'; }
+    else if (dom >= 0.5) { unityClass = 'mid';  unityLabel = 'Gemischt'; }
+    else                  { unityClass = 'low';  unityLabel = 'Divers'; }
 
     const card = document.createElement('div');
     card.className = 'bk-card';
     card.style.cursor = 'pointer';
-    card.title = 'Click to break down by ' + col_info.header;
+    card.title = 'Klicken, um nach ' + col_info.header + ' aufzuteilen';
 
     const hd = document.createElement('div');
     hd.className = 'bk-card-hd';
     hd.innerHTML =
       '<span class="bk-col-name" title="' + escHtml(col_info.header) + '">' + escHtml(col_info.header) + '</span>' +
-      '<span class="bk-nuniq">' + col_info.numUniq + (col_info.numUniq === 1 ? ' val' : ' vals') + '</span>';
+      '<span class="bk-nuniq">' + col_info.numUniq + (col_info.numUniq === 1 ? ' Wert' : ' Werte') + '</span>';
     card.appendChild(hd);
 
     const badge = document.createElement('div');
@@ -2470,7 +2470,7 @@ function openLeafBreakdown(item, accentColor) {
       seg.className = 'bk-seg';
       seg.style.width = (v.count / item.count * 100).toFixed(2) + '%';
       seg.style.background = SEG_COLORS[si % SEG_COLORS.length];
-      seg.title = v.val + ' · ' + v.count.toLocaleString() + ' rows';
+      seg.title = v.val + ' · ' + v.count.toLocaleString() + ' Zeilen';
       bar.appendChild(seg);
     });
     if (otherCount > 0) {
@@ -2478,7 +2478,7 @@ function openLeafBreakdown(item, accentColor) {
       seg.className = 'bk-seg';
       seg.style.width = (otherCount / item.count * 100).toFixed(2) + '%';
       seg.style.background = '#444';
-      seg.title = 'Other · ' + otherCount.toLocaleString() + ' rows';
+      seg.title = 'Sonstige · ' + otherCount.toLocaleString() + ' Zeilen';
       bar.appendChild(seg);
     }
     card.appendChild(bar);
@@ -2491,7 +2491,7 @@ function openLeafBreakdown(item, accentColor) {
       vrow.className = 'bk-val-row';
       vrow.innerHTML =
         '<span class="bk-val-dot" style="background:' + SEG_COLORS[si % SEG_COLORS.length] + '"></span>' +
-        '<span class="bk-val-label" title="' + escHtml(v.val || '(empty)') + '">' + escHtml(v.val || '(empty)') + '</span>' +
+        '<span class="bk-val-label" title="' + escHtml(v.val || '(leer)') + '">' + escHtml(v.val || '(leer)') + '</span>' +
         '<span class="bk-val-pct">' + pct + '%</span>';
       vals.appendChild(vrow);
     });
@@ -2524,7 +2524,7 @@ function renderBreakdownSublist(col_info, item) {
   sl.style.display = 'flex';
 
   document.querySelector('#breakdown-sublist-hd span').textContent =
-    col_info.header + ' — ' + col_info.numUniq + ' values · ' + item.count.toLocaleString() + ' rows';
+    col_info.header + ' — ' + col_info.numUniq + ' Werte · ' + item.count.toLocaleString() + ' Zeilen';
 
   const rows = document.getElementById('breakdown-sublist-rows');
   rows.innerHTML = '';
@@ -2541,7 +2541,7 @@ function renderBreakdownSublist(col_info, item) {
     row.style.cursor = 'default';
     row.innerHTML =
       '<span class="cl-dot" style="background:' + col + '"></span>' +
-      '<span class="cl-key" style="font-size:11px">' + escHtml(v.val || '(empty)') + '</span>' +
+      '<span class="cl-key" style="font-size:11px">' + escHtml(v.val || '(leer)') + '</span>' +
       '<span class="cl-bar-wrap"><span class="cl-bar" style="width:' + barW + '%;background:' + col + '80"></span><span class="cl-pct" style="font-size:10px">' + pct + '%</span></span>' +
       '<span class="cl-n" style="font-size:11px">' + v.count.toLocaleString() + '</span>';
     rows.appendChild(row);
@@ -2595,8 +2595,8 @@ function renderCardView() {
   const examGroups = new Map(); // examTitle -> Set<groupVal>
 
   for (const row of sourceRows) {
-    const gVal  = CSV.vocabs[groupCI][row[groupCI]] || '(empty)';
-    const eVal  = CSV.vocabs[examCI][row[examCI]]   || '(empty)';
+    const gVal  = CSV.vocabs[groupCI][row[groupCI]] || '(leer)';
+    const eVal  = CSV.vocabs[examCI][row[examCI]]   || '(leer)';
     if (!groupMap.has(gVal)) groupMap.set(gVal, new Map());
     const eg = groupMap.get(gVal);
     eg.set(eVal, (eg.get(eVal) || 0) + 1);
@@ -2614,7 +2614,7 @@ function renderCardView() {
   groups.sort((a, b) => b.exams.length - a.exams.length);
   _vennGroups = groups;
 
-  info.textContent = groups.length + ' groups · ' + [...examGroups.keys()].length.toLocaleString() + ' distinct exam titles';
+  info.textContent = groups.length + ' Gruppen · ' + [...examGroups.keys()].length.toLocaleString() + ' eindeutige Prüfungstitel';
 
   groups.forEach(g => {
     const total  = g.exams.length;
@@ -2629,9 +2629,9 @@ function renderCardView() {
       '<div class="cv-card-title">' + escHtml(g.gVal) + '</div>' +
       '<div class="cv-bar"><div class="cv-bar-uniq" style="width:' + pUniq + '%"></div><div class="cv-bar-poly" style="width:' + pPoly + '%"></div></div>' +
       '<div class="cv-card-row">' +
-        '<span class="cv-badge cv-badge-uniq">&#9670; ' + nUniq.toLocaleString() + ' unique</span>' +
+        '<span class="cv-badge cv-badge-uniq">&#9670; ' + nUniq.toLocaleString() + ' einzigartig</span>' +
         '<span class="cv-badge cv-badge-poly">&#9632; ' + nPoly.toLocaleString() + ' polyvalent</span>' +
-        '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' total</span>' +
+        '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' gesamt</span>' +
       '</div>';
     card.addEventListener('click', () => showCardDetail(g, groupSel));
     grid.appendChild(card);
@@ -2646,14 +2646,14 @@ function buildExamFreqEl(examTitle) {
   const freqMap = new Map();
   for (const r of sourceRows) {
     if ((CSV.vocabs[examCI][r[examCI]] || '') === examTitle) {
-      const gv = CSV.vocabs[groupCI][r[groupCI]] || '(empty)';
+      const gv = CSV.vocabs[groupCI][r[groupCI]] || '(leer)';
       freqMap.set(gv, (freqMap.get(gv) || 0) + 1);
     }
   }
   const freqEntries = [...freqMap.entries()].sort((a, b) => b[1] - a[1]);
   const el = document.createElement('div');
   el.className = 'cv-freq-table';
-  el.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--dim);margin-bottom:6px">Appears in ' + freqEntries.length + ' group(s):</div>' +
+  el.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--dim);margin-bottom:6px">Erscheint in ' + freqEntries.length + ' Gruppe(n):</div>' +
     freqEntries.map(([gv, n]) =>
       '<div class="cv-freq-row"><span class="cv-freq-grp">' + escHtml(gv) + '</span><span class="cv-freq-n">' + n + '×</span></div>'
     ).join('');
@@ -2685,7 +2685,7 @@ function makeExamSection(title, examList, colorClass, onExamClick) {
       const row = document.createElement('div');
       row.className = 'cv-exam-row';
       row.style.cursor = 'pointer';
-      row.title = 'Click to view all CSV rows for this exam';
+      row.title = 'Klicken, um alle CSV-Zeilen für diese Prüfung anzuzeigen';
       row.innerHTML =
         '<span class="cv-exam-name">' + escHtml(examTitle) + '</span>' +
         '<span class="cv-exam-cnt">' + cnt.toLocaleString() + '×</span>';
@@ -2713,7 +2713,7 @@ function makeExamSection(title, examList, colorClass, onExamClick) {
     if (shown >= examList.length) { loadMoreBtn = null; return; }
     loadMoreBtn = document.createElement('button');
     loadMoreBtn.className = 'cv-load-more';
-    loadMoreBtn.textContent = 'Load 10 more (' + (examList.length - shown) + ' remaining)';
+    loadMoreBtn.textContent = '10 weitere laden (' + (examList.length - shown) + ' verbleibend)';
     loadMoreBtn.addEventListener('click', e => {
       e.stopPropagation();
       renderRows(shown, Math.min(shown + PAGE, examList.length));
@@ -2740,8 +2740,8 @@ function showCardDetail(g, groupLabel) {
   document.getElementById('cards-detail-title').textContent = g.gVal + ' — ' + groupLabel;
   const body = document.getElementById('cards-detail-body');
   body.innerHTML = '';
-  body.appendChild(makeExamSection('Unique exam titles (not shared with other groups)', g.uniqueExams, 'cv-badge-uniq'));
-  body.appendChild(makeExamSection('Polyvalent exam titles (shared across groups)', g.polyExams, 'cv-badge-poly'));
+  body.appendChild(makeExamSection('Einzigartige Prüfungstitel (nicht mit anderen Gruppen geteilt)', g.uniqueExams, 'cv-badge-uniq'));
+  body.appendChild(makeExamSection('Polyvalente Prüfungstitel (gruppenübergreifend geteilt)', g.polyExams, 'cv-badge-poly'));
 }
 
 document.getElementById('cards-detail-back').addEventListener('click', () => {
@@ -3410,15 +3410,15 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
   const sum = document.createElement('div');
   sum.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px';
   sum.innerHTML =
-    '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' exam titles</span>' +
-    '<span class="cv-badge cv-badge-uniq">&#9670; ' + g.uniqueExams.length + ' unique</span>' +
+    '<span class="cv-badge cv-badge-total">' + total.toLocaleString() + ' Prüfungstitel</span>' +
+    '<span class="cv-badge cv-badge-uniq">&#9670; ' + g.uniqueExams.length + ' einzigartig</span>' +
     '<span class="cv-badge cv-badge-poly">&#9632; ' + g.polyExams.length + ' polyvalent</span>';
   body.appendChild(sum);
 
   // Overlap breakdown with other groups
   const ovHd = document.createElement('div');
   ovHd.style.cssText = 'font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px';
-  ovHd.textContent = 'Shared exam titles with other groups';
+  ovHd.textContent = 'Gemeinsame Prüfungstitel mit anderen Gruppen';
   body.appendChild(ovHd);
 
   // Build sorted overlap list
@@ -3430,7 +3430,7 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
   if (ovList.length === 0) {
     const none = document.createElement('div');
     none.style.cssText = 'font-size:11px;color:var(--dim);font-style:italic';
-    none.textContent = 'No shared exams with other groups.';
+    none.textContent = 'Keine gemeinsamen Prüfungen mit anderen Gruppen.';
     body.appendChild(none);
   } else {
     const maxOv = ovList[0].count;
@@ -3449,7 +3449,7 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
       header.innerHTML =
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">' +
           '<span style="font-size:11px;font-weight:600;color:' + otherCol + '">' + escHtml(other.gVal) + '</span>' +
-          '<span style="font-size:10px;color:var(--dim)">' + count.toLocaleString() + ' shared · ' + pct + '% of ' + escHtml(g.gVal) + ' ▸</span>' +
+          '<span style="font-size:10px;color:var(--dim)">' + count.toLocaleString() + ' geteilt · ' + pct + '% von ' + escHtml(g.gVal) + ' ▸</span>' +
         '</div>' +
         '<div style="height:6px;border-radius:3px;overflow:hidden;background:var(--border)">' +
           '<div style="height:100%;width:' + barW + '%;background:' + otherCol + ';border-radius:3px"></div>' +
@@ -3475,12 +3475,12 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
             const sharedExams = other.exams.filter(e => gExamSet.has(e[0]));
             sharedExams.sort((a, b) => b[1] - a[1]);
             if (sharedExams.length === 0) {
-              expandPanel.textContent = 'No shared exam titles found.';
+              expandPanel.textContent = 'Keine gemeinsamen Prüfungstitel gefunden.';
             } else {
               sharedExams.forEach(([title, cnt]) => {
                 const item = document.createElement('div');
                 item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--border);font-size:10px;cursor:pointer';
-                item.title = 'Click to view all CSV rows for this exam';
+                item.title = 'Klicken, um alle CSV-Zeilen für diese Prüfung anzuzeigen';
                 item.innerHTML = '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px">' + escHtml(title) + '</span>' +
                   '<span style="color:var(--dim);flex-shrink:0">' + cnt.toLocaleString() + '</span>';
                 item.addEventListener('click', () => openVennExamRows(title));
@@ -3510,8 +3510,8 @@ function showVennDetail(g, idx, overlaps, groups, colors) {
   }
 
   // Collapsible unique & poly sections
-  body.appendChild(makeExamSection('Unique exam titles', g.uniqueExams, 'cv-badge-uniq', openVennExamRows));
-  body.appendChild(makeExamSection('Polyvalent exam titles', g.polyExams, 'cv-badge-poly', openVennExamRows));
+  body.appendChild(makeExamSection('Einzigartige Prüfungstitel', g.uniqueExams, 'cv-badge-uniq', openVennExamRows));
+  body.appendChild(makeExamSection('Polyvalente Prüfungstitel', g.polyExams, 'cv-badge-poly', openVennExamRows));
 }
 
 // ── VENN EXAM ROWS TABLE ──
@@ -3527,7 +3527,7 @@ function openVennExamRows(examTitle) {
 
   const overlay = document.getElementById('venn-rows-overlay');
   document.getElementById('venn-rows-title').textContent = examTitle;
-  document.getElementById('venn-rows-count').textContent = matchRows.length.toLocaleString() + ' rows';
+  document.getElementById('venn-rows-count').textContent = matchRows.length.toLocaleString() + ' Zeilen';
 
   const body = document.getElementById('venn-rows-body');
   body.innerHTML = '';
@@ -3563,7 +3563,7 @@ function openVennExamRows(examTitle) {
     const td = document.createElement('td');
     td.colSpan = CSV.headers.length;
     td.style.cssText = 'color:var(--dim);text-align:center;padding:12px;font-style:italic';
-    td.textContent = '… and ' + (matchRows.length - 3000).toLocaleString() + ' more rows';
+    td.textContent = '… und ' + (matchRows.length - 3000).toLocaleString() + ' weitere Zeilen';
     tr.appendChild(td);
     tbody.appendChild(tr);
   }
