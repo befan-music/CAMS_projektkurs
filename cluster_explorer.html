@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <title>Spaltenfilter</title>
+<script>
+// Apply saved theme before first paint (avoids light flash on load)
+try {
+  if (localStorage.getItem('lmuTheme') === 'dark')
+    document.documentElement.setAttribute('data-theme', 'dark');
+} catch(e) {}
+</script>
 <style>
 :root {
   --bg: #FFF9E5;
@@ -20,20 +27,66 @@
   --red: #c0392b;
   --hover: #ede5c4;
   --drag: #ddd5b0;
+  --card: #ffffff;
+  --topbar: #00883A;
+  --topbar-border: #006d2e;
+  --topbar-text: #ffffff;
+  --topbar-dim: rgba(255,255,255,.75);
+  --panel-hd: #e0d9c0;
+  --tip-bg: #2a2418;
+  --tip-text: #FFF9E5;
+  --shadow: rgba(0,0,0,.2);
 }
+:root[data-theme="dark"] {
+  --bg: #16140f;
+  --panel: #1e1b14;
+  --sidebar: #221e17;
+  --border: #35301f;
+  --border2: #45402c;
+  --text: #e8e2d0;
+  --dim: #9a9075;
+  --bright: #fff9e5;
+  --accent: #2fb56a;
+  --accent2: #9d87bd;
+  --green: #2fb56a;
+  --yellow: #d9a520;
+  --red: #e05c4a;
+  --hover: #2a2519;
+  --drag: #35301f;
+  --card: #241f18;
+  --topbar: #0d4a22;
+  --topbar-border: #072e14;
+  --topbar-text: #f0ead8;
+  --topbar-dim: rgba(240,234,216,.7);
+  --panel-hd: #2a2519;
+  --tip-bg: #0c0a06;
+  --tip-text: #FFF9E5;
+  --shadow: rgba(0,0,0,.6);
+}
+
+/* ── THEME TOGGLE BUTTON ── */
+#theme-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.7);
+  background: rgba(255,255,255,.15); color: #fff;
+  font-size: 11px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background .1s; line-height: 1;
+}
+#theme-btn:hover { background: rgba(255,255,255,.35); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background: var(--bg); color: var(--text); }
 ::selection { background: rgba(101,84,121,.25); }
 
 /* ── TOPBAR ── */
 #topbar {
-  height: 46px; background: #00883A;
-  border-bottom: 1px solid #006d2e;
+  height: 46px; background: var(--topbar);
+  border-bottom: 1px solid var(--topbar-border);
   display: flex; align-items: center; gap: 10px;
   padding: 0 14px; flex-shrink: 0; z-index: 10;
 }
-#topbar h1 { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; }
-#topbar h1 em { color: #FFF9E5; font-style: normal; }
+#topbar h1 { font-size: 13px; font-weight: 700; color: var(--topbar-text); white-space: nowrap; }
+#topbar h1 em { color: var(--topbar-text); font-style: normal; }
 .sep { width: 1px; height: 20px; background: rgba(255,255,255,.35); flex-shrink: 0; }
 
 /* CSV upload area */
@@ -50,7 +103,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #csv-drop-zone .dz-icon { font-size: 15px; }
 #csv-drop-zone .dz-text { font-size: 11px; color: rgba(255,255,255,.8); }
 #csv-drop-zone .dz-text strong { color: #fff; font-weight: 600; }
-#csv-drop-zone .dz-file { font-size: 11px; color: #FFF9E5; font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#csv-drop-zone .dz-file { font-size: 11px; color: var(--topbar-text); font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #csv-input { display: none; }
 
 /* delimiter selector */
@@ -61,8 +114,8 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
   padding: 3px 6px; border-radius: 3px; font-size: 11px; outline: none; cursor: pointer;
 }
 
-#stats-bar { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.75); white-space: nowrap; }
-#stats-bar strong { color: #fff; }
+#stats-bar { margin-left: auto; font-size: 11px; color: var(--topbar-dim); white-space: nowrap; }
+#stats-bar strong { color: var(--topbar-text); }
 #ce-info-btn {
   width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7);
   background: rgba(255,255,255,.15); color: #fff; font-size: 12px; font-weight: 700;
@@ -71,14 +124,14 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 }
 #ce-info-btn:hover { background: rgba(255,255,255,.35); }
 #ce-info-panel {
-  display: none; background: #f5f0d8; border-bottom: 2px solid #00883A;
-  padding: 20px 28px; font-size: 13px; line-height: 1.7; color: #2a2418;
+  display: none; background: var(--panel); border-bottom: 2px solid var(--accent);
+  padding: 20px 28px; font-size: 13px; line-height: 1.7; color: var(--text);
   position: relative; z-index: 9;
 }
-#ce-info-panel h2 { font-size: 14px; font-weight: 700; color: #1a1208; margin-bottom: 12px; }
-#ce-info-panel h3 { font-size: 12px; font-weight: 700; color: #00883A; margin: 14px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
-#ce-info-panel p { margin-bottom: 6px; color: #7a6e50; }
-#ce-info-panel strong { color: #1a1208; }
+#ce-info-panel h2 { font-size: 14px; font-weight: 700; color: var(--bright); margin-bottom: 12px; }
+#ce-info-panel h3 { font-size: 12px; font-weight: 700; color: var(--accent); margin: 14px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
+#ce-info-panel p { margin-bottom: 6px; color: var(--dim); }
+#ce-info-panel strong { color: var(--bright); }
 
 /* ── LAYOUT ── */
 #layout { display: flex; height: calc(100vh - 46px); overflow: hidden; }
@@ -92,7 +145,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 .panel-title {
   padding: 8px 12px; font-size: 10px; font-weight: 700;
   color: var(--dim); text-transform: uppercase; letter-spacing: .09em;
-  border-bottom: 1px solid var(--border); background: #e0d9c0; flex-shrink: 0;
+  border-bottom: 1px solid var(--border); background: var(--panel-hd); flex-shrink: 0;
   display: flex; align-items: center; justify-content: space-between;
 }
 .panel-title button {
@@ -110,7 +163,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 
 .chip {
   display: flex; align-items: center; gap: 6px;
-  background: #fff; border: 1px solid var(--border2);
+  background: var(--card); border: 1px solid var(--border2);
   border-radius: 4px; padding: 4px 7px;
   cursor: grab; user-select: none; transition: background .1s;
 }
@@ -165,7 +218,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #cluster-bar {
   padding: 7px 12px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-  background: #ede8d2;
+  background: var(--sidebar);
 }
 .vbtn {
   background: var(--bg); border: 1px solid var(--border2);
@@ -283,7 +336,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #breakdown-sublist-rows { overflow-y: auto; flex: 1; }
 .bk-card {
   border-radius: 6px; border: 1px solid var(--border2);
-  padding: 10px 11px; background: #fff;
+  padding: 10px 11px; background: var(--card);
   display: flex; flex-direction: column; gap: 6px;
   transition: border-color .15s, background .15s;
 }
@@ -316,7 +369,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 #cards-view { position: relative; }
 .cv-card {
   border-radius: 6px; border: 1px solid var(--border2);
-  background: #fff; padding: 12px 13px;
+  background: var(--card); padding: 12px 13px;
   display: flex; flex-direction: column; gap: 8px;
   cursor: pointer; transition: border-color .15s, background .15s;
 }
@@ -444,10 +497,10 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 /* TOOLTIP */
 #tip {
   position: fixed; pointer-events: none; display: none;
-  background: #2a2418; border: 1px solid #1a1208;
+  background: var(--tip-bg); border: 1px solid var(--border2);
   border-radius: 5px; padding: 8px 12px; font-size: 12px;
-  color: #FFF9E5; max-width: 360px; line-height: 1.7;
-  box-shadow: 0 4px 20px rgba(0,0,0,.3); z-index: 999;
+  color: var(--tip-text); max-width: 360px; line-height: 1.7;
+  box-shadow: 0 4px 20px var(--shadow); z-index: 999;
 }
 .tip-row { display: flex; gap: 8px; }
 .tip-k { color: rgba(255,249,229,.6); white-space: nowrap; }
@@ -456,7 +509,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui,
 
 /* LOADING overlay */
 #overlay {
-  position: fixed; inset: 0; background: rgba(255,249,229,.8);
+  position: fixed; inset: 0; background: color-mix(in srgb, var(--bg) 80%, transparent);
   display: none; flex-direction: column; align-items: center; justify-content: center;
   z-index: 9999; gap: 14px;
 }
@@ -482,7 +535,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
 #dd-panel {
   position: fixed; top: 0; right: 0; bottom: 0;
   width: 460px; max-width: 92vw;
-  background: #f5f0d8;
+  background: var(--panel);
   border-left: 1px solid var(--border2);
   z-index: 201;
   display: flex; flex-direction: column;
@@ -519,7 +572,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
   padding: 8px 14px 5px;
   font-size: 10px; font-weight: 700; color: var(--dim);
   text-transform: uppercase; letter-spacing: .09em;
-  background: #e0d9c0; border-bottom: 1px solid var(--border);
+  background: var(--panel-hd); border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 1;
   display: flex; align-items: center; justify-content: space-between;
 }
@@ -576,7 +629,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
 #subset-title {
   padding: 7px 12px; font-size: 10px; font-weight: 700;
   color: var(--dim); text-transform: uppercase; letter-spacing: .09em;
-  background: #e0d9c0; display: flex; align-items: center; justify-content: space-between;
+  background: var(--panel-hd); display: flex; align-items: center; justify-content: space-between;
   cursor: pointer; user-select: none;
 }
 #subset-title:hover { color: var(--text); }
@@ -611,7 +664,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
 .qf-btn {
   display: flex; align-items: center; justify-content: space-between;
   padding: 5px 8px; border-radius: 4px; font-size: 11px;
-  background: #fff; border: 1px solid var(--border2); color: var(--text);
+  background: var(--card); border: 1px solid var(--border2); color: var(--text);
   cursor: pointer; text-align: left; transition: background .1s, border-color .1s;
   width: 100%;
 }
@@ -620,6 +673,29 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
 .qf-btn .qf-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qf-btn .qf-badge { font-size: 10px; color: var(--dim); margin-left: 6px; flex-shrink: 0; }
 .qf-btn.qf-active .qf-badge { color: var(--accent); }
+
+/* ── DARK-MODE FIXES for tinted badges (dark text on light tint) ── */
+:root[data-theme="dark"] .bk-unity.high  { background: rgba(47,181,106,.18); color: #6fe0a2; }
+:root[data-theme="dark"] .bk-unity.mid   { background: rgba(217,165,32,.18); color: #e8c25c; }
+:root[data-theme="dark"] .bk-unity.low   { background: rgba(224,92,74,.18);  color: #f08a7a; }
+:root[data-theme="dark"] .cv-badge-uniq  { background: rgba(157,135,189,.18); color: #c4aee0; }
+:root[data-theme="dark"] .cv-badge-poly  { background: rgba(47,181,106,.18);  color: #6fe0a2; }
+:root[data-theme="dark"] .cv-badge-total { background: rgba(217,165,32,.18);  color: #e8c25c; }
+:root[data-theme="dark"] .col-item.used  { background: rgba(47,181,106,.16); }
+:root[data-theme="dark"] mark { background: rgba(157,135,189,.3); color: #c4aee0; }
+:root[data-theme="dark"] .mx-cell { border-color: var(--bg); }
+:root[data-theme="dark"] .vbtn.on,
+:root[data-theme="dark"] .vz-btn.active,
+:root[data-theme="dark"] .col-add,
+:root[data-theme="dark"] #subset-badge,
+:root[data-theme="dark"] .info-btn:hover { color: #0d1f14; }
+:root[data-theme="dark"] #venn-btn,
+:root[data-theme="dark"] #poly-venn-btn,
+:root[data-theme="dark"] #cards-detail-venn-btn {
+  background: rgba(157,135,189,.18) !important;
+  border-color: rgba(157,135,189,.4) !important;
+  color: #c4aee0 !important;
+}
 </style>
 </head>
 <body>
@@ -666,6 +742,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
   <div class="sep"></div>
   <div id="stats-bar">Keine Datei geladen</div>
   <button id="poly-btn" style="display:none;margin-left:10px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;cursor:pointer;font-weight:600;transition:all .1s" title="Polyvalenzen-Analyse öffnen">Polyvalenzen</button>
+  <button id="theme-btn" title="Dunkles/helles Layout umschalten">🌙</button>
   <button id="ce-info-btn" title="Über dieses Tool">i</button>
 </div>
 <div id="ce-info-panel">
@@ -721,7 +798,7 @@ mark { background: rgba(101,84,121,.18); color: var(--accent2); border-radius: 2
 
     <!-- QUICK FILTERS (advanced / rarely used columns) -->
     <div id="quick-filter-section" style="border-top:1px solid var(--border);flex-shrink:0">
-      <div id="quick-filter-title" style="padding:7px 12px;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;background:#e0d9c0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">
+      <div id="quick-filter-title" style="padding:7px 12px;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;background:var(--panel-hd);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">
         <span>&#9654; Erweiterte Spalten</span>
         <span id="qf-arrow" style="font-size:9px;transition:transform .15s">&#9654;</span>
       </div>
@@ -3971,6 +4048,30 @@ document.getElementById('ce-info-btn').addEventListener('click', () => {
   panel.style.display = open ? 'none' : 'block';
   btn.style.background = open ? 'rgba(255,255,255,.15)' : 'rgba(255,255,255,.4)';
 });
+
+// ── THEME TOGGLE (shared with polyvalenzen.html via localStorage) ──
+(function() {
+  const btn = document.getElementById('theme-btn');
+  function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+  function paint() { btn.textContent = isDark() ? '☀' : '🌙'; }
+  function apply(dark) {
+    if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
+    paint();
+    // SVG views bake colors in at render time — redraw so they pick up the new palette
+    if (typeof CSV !== 'undefined' && CSV && typeof renderClusters === 'function') renderClusters();
+  }
+  btn.addEventListener('click', () => {
+    const dark = !isDark();
+    try { localStorage.setItem('lmuTheme', dark ? 'dark' : 'light'); } catch(e) {}
+    apply(dark);
+  });
+  // Follow changes made in the other tab/page
+  window.addEventListener('storage', e => {
+    if (e.key === 'lmuTheme') apply(e.newValue === 'dark');
+  });
+  paint();
+})();
 </script>
 </body>
 </html>

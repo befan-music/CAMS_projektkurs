@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <title>Polyvalenzen — Prüfungsüberschneidungsanalyse</title>
+<script>
+// Apply saved theme before first paint (avoids light flash on load)
+try {
+  if (localStorage.getItem('lmuTheme') === 'dark')
+    document.documentElement.setAttribute('data-theme', 'dark');
+} catch(e) {}
+</script>
 <style>
 :root {
   --bg: #FFF9E5; --panel: #f5f0d8; --sidebar: #ede8d2;
@@ -10,17 +17,45 @@
   --text: #2a2418; --dim: #7a6e50; --bright: #1a1208;
   --accent: #00883A; --accent2: #655479; --green: #00883A; --yellow: #b8860b;
   --hover: #ede5c4;
+  --card: #ffffff;
+  --topbar: #00883A; --topbar-border: #006d2e;
+  --topbar-text: #ffffff; --topbar-dim: rgba(255,255,255,.75);
+  --err-bg: #fde8e8; --err-border: #e8b4b4; --err-text: #8b1a1a;
+  --shadow: rgba(0,0,0,.08);
 }
+:root[data-theme="dark"] {
+  --bg: #16140f; --panel: #1e1b14; --sidebar: #221e17;
+  --border: #35301f; --border2: #45402c;
+  --text: #e8e2d0; --dim: #9a9075; --bright: #fff9e5;
+  --accent: #2fb56a; --accent2: #9d87bd; --green: #2fb56a; --yellow: #d9a520;
+  --hover: #2a2519;
+  --card: #241f18;
+  --topbar: #0d4a22; --topbar-border: #072e14;
+  --topbar-text: #f0ead8; --topbar-dim: rgba(240,234,216,.7);
+  --err-bg: #3a1c1c; --err-border: #6b2d2d; --err-text: #f08a7a;
+  --shadow: rgba(0,0,0,.5);
+}
+
+/* ── THEME TOGGLE BUTTON ── */
+#theme-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.7);
+  background: rgba(255,255,255,.15); color: #fff;
+  font-size: 11px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background .1s; line-height: 1;
+}
+#theme-btn:hover { background: rgba(255,255,255,.35); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background: var(--bg); color: var(--text); }
 
 #topbar {
-  height: 46px; background: #00883A;
-  border-bottom: 1px solid #006d2e;
+  height: 46px; background: var(--topbar);
+  border-bottom: 1px solid var(--topbar-border);
   display: flex; align-items: center; gap: 12px; padding: 0 18px; flex-shrink: 0;
 }
-#topbar h1 { font-size: 14px; font-weight: 700; color: #fff; }
-#topbar h1 em { color: #FFF9E5; font-style: normal; }
+#topbar h1 { font-size: 14px; font-weight: 700; color: var(--topbar-text); }
+#topbar h1 em { color: var(--topbar-text); font-style: normal; }
 #cluster-link-btn {
   display: inline-flex; align-items: center; gap: 5px;
   background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.5);
@@ -29,8 +64,8 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
   transition: all .1s;
 }
 #cluster-link-btn:hover { background: rgba(255,255,255,.35); border-color: #fff; }
-#col-info { font-size: 11px; color: rgba(255,255,255,.75); margin-left: auto; }
-#col-info strong { color: #fff; }
+#col-info { font-size: 11px; color: var(--topbar-dim); margin-left: auto; }
+#col-info strong { color: var(--topbar-text); }
 #info-btn {
   width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7);
   background: rgba(255,255,255,.15); color: #fff; font-size: 12px; font-weight: 700;
@@ -79,8 +114,8 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 .section-heading:first-child { margin-top: 0; }
 
 #error-banner {
-  background: #fde8e8; border: 1px solid #e8b4b4; border-radius: 6px;
-  padding: 14px 18px; color: #8b1a1a; margin-bottom: 20px; font-size: 12px; display:none;
+  background: var(--err-bg); border: 1px solid var(--err-border); border-radius: 6px;
+  padding: 14px 18px; color: var(--err-text); margin-bottom: 20px; font-size: 12px; display:none;
 }
 #loading-bar {
   background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
@@ -302,7 +337,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 #poly-venn-detail {
   display: none; position: absolute; top: 0; right: 0; bottom: 0; width: 340px;
   background: var(--bg); border-left: 1px solid var(--border2); flex-direction: column;
-  overflow: hidden; box-shadow: -3px 0 12px rgba(0,0,0,.08);
+  overflow: hidden; box-shadow: -3px 0 12px var(--shadow);
 }
 #poly-venn-detail-hd {
   padding: 10px 14px; background: var(--hover); border-bottom: 1px solid var(--border2);
@@ -320,14 +355,33 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 .venn-dt-table td { padding: 5px 10px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
 .venn-dt-table tr:hover td { background: var(--hover); }
 
+/* ── DARK-MODE FIXES for tinted badges (dark text on light tint) ── */
+:root[data-theme="dark"] .cv-badge-uniq  { background: rgba(157,135,189,.18); color: #c4aee0; }
+:root[data-theme="dark"] .cv-badge-poly  { background: rgba(47,181,106,.18);  color: #6fe0a2; }
+:root[data-theme="dark"] .cv-badge-total { background: rgba(217,165,32,.18);  color: #e8c25c; }
+:root[data-theme="dark"] .pv-qnum        { background: rgba(47,181,106,.16); border-color: rgba(47,181,106,.4); }
+:root[data-theme="dark"] .pv-show-btn.open { color: #0d1f14; }
+:root[data-theme="dark"] .tk-filter-btn.tk-filter-active { color: #14100d; }
+:root[data-theme="dark"] .cv-bar-uniq { background: var(--accent2); }
+:root[data-theme="dark"] .cv-bar-poly { background: var(--accent); }
+:root[data-theme="dark"] #poly-venn-btn,
+:root[data-theme="dark"] #poly-cards-detail-venn-btn {
+  background: rgba(157,135,189,.18) !important;
+  border-color: rgba(157,135,189,.4) !important;
+  color: #c4aee0 !important;
+}
+:root[data-theme="dark"] #poly-cards-open-btn.open { color: #14100d; }
+:root[data-theme="dark"] .vz-btn.active { color: #0d1f14; }
+
 </style>
 </head>
 <body>
 
 <div id="topbar">
-  <h1>⬡ Polyvalenzen <em>Prüfungsüberschneidungsanalyse</em></h1>
+  <h1>Polyvalenzanalyse</h1>
   <a href="cluster_explorer.html" target="_blank" id="cluster-link-btn">⬡ Spaltenfilter</a>
   <div id="col-info"></div>
+  <button id="theme-btn" title="Dunkles/helles Layout umschalten">🌙</button>
   <button id="info-btn" title="Über dieses Tool">i</button>
 </div>
 <div id="info-panel">
@@ -360,24 +414,24 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
       <span style="font-size:14px;font-weight:700;color:var(--bright);">Polyvalenzen</span>
       <button id="pv-card-info-btn" title="Was wird hier gemessen?" style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--dim);background:none;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .1s;line-height:1;margin-left:2px;">i</button>
     </div>
-    <div id="pv-card-info-panel" style="display:none;background:#f5f0d8;border-bottom:2px solid #00883A;padding:20px 28px;font-size:13px;line-height:1.7;color:#2a2418;">
-      <h2 style="font-size:14px;font-weight:700;color:#1a1208;margin-bottom:12px;">Polyvalenzen — Was wird gemessen?</h2>
+    <div id="pv-card-info-panel" style="display:none;background:var(--panel);border-bottom:2px solid var(--accent);padding:20px 28px;font-size:13px;line-height:1.7;color:var(--text);">
+      <h2 style="font-size:14px;font-weight:700;color:var(--bright);margin-bottom:12px;">Polyvalenzen — Was wird gemessen?</h2>
 
-      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">1 — Was ist eine polyvalente Prüfung?</h3>
-      <p style="margin-bottom:6px;color:#4a3e28;">Diese Ansicht ist speziell für die Analyse polyvalenter Prüfungen gedacht. Eine Prüfung gilt hier als <strong style="color:#1a1208">polyvalent</strong>, wenn sie in mehr als einer Gruppe erscheint — d.&thinsp;h. wenn dieselbe Prüfung für Studierende verschiedener Gruppen (z.&thinsp;B. Abschlüsse oder Studiengänge) angeboten wird.</p>
-      <p style="margin-bottom:6px;color:#4a3e28;"><strong style="color:#1a1208">Beispiel:</strong> Über alle 3 Semester hinweg gibt es <strong style="color:#1a1208">4.089 eindeutige Prüfungen im Bachelor</strong>. Davon sind <strong style="color:#1a1208">1.535</strong> Prüfungen, die <em>nur</em> im Abschluss Bachelor angeboten werden (einzigartig). Die übrigen <strong style="color:#00883A">2.554 Prüfungen</strong> erscheinen im Bachelor <em>und</em> mindestens einem weiteren Abschluss — sie sind polyvalent.</p>
+      <h3 style="font-size:12px;font-weight:700;color:var(--accent);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">1 — Was ist eine polyvalente Prüfung?</h3>
+      <p style="margin-bottom:6px;color:var(--dim);">Diese Ansicht ist speziell für die Analyse polyvalenter Prüfungen gedacht. Eine Prüfung gilt hier als <strong style="color:var(--bright)">polyvalent</strong>, wenn sie in mehr als einer Gruppe erscheint — d.&thinsp;h. wenn dieselbe Prüfung für Studierende verschiedener Gruppen (z.&thinsp;B. Abschlüsse oder Studiengänge) angeboten wird.</p>
+      <p style="margin-bottom:6px;color:var(--dim);"><strong style="color:var(--bright)">Beispiel:</strong> Über alle 3 Semester hinweg gibt es <strong style="color:var(--bright)">4.089 eindeutige Prüfungen im Bachelor</strong>. Davon sind <strong style="color:var(--bright)">1.535</strong> Prüfungen, die <em>nur</em> im Abschluss Bachelor angeboten werden (einzigartig). Die übrigen <strong style="color:var(--accent)">2.554 Prüfungen</strong> erscheinen im Bachelor <em>und</em> mindestens einem weiteren Abschluss — sie sind polyvalent.</p>
 
-      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">2 — Gruppen &amp; Prüfungsansicht</h3>
-      <p style="margin-bottom:6px;color:#4a3e28;">Das Anklicken einer Gruppe öffnet die Liste ihrer Prüfungen. Ein erneutes Anklicken einer Prüfung gibt alle dazugehörigen Zeilen des gesamten Datensatzes heraus — d.&thinsp;h. alle Einträge, in denen diese Prüfung vorkommt.</p>
+      <h3 style="font-size:12px;font-weight:700;color:var(--accent);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">2 — Gruppen &amp; Prüfungsansicht</h3>
+      <p style="margin-bottom:6px;color:var(--dim);">Das Anklicken einer Gruppe öffnet die Liste ihrer Prüfungen. Ein erneutes Anklicken einer Prüfung gibt alle dazugehörigen Zeilen des gesamten Datensatzes heraus — d.&thinsp;h. alle Einträge, in denen diese Prüfung vorkommt.</p>
 
-      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">3 — Venn-Diagramm</h3>
-      <p style="margin-bottom:6px;color:#4a3e28;">Anstatt die Gruppen als Karten zu betrachten, können diese als <strong style="color:#1a1208">Kreise in einem 2D-Venn-Raum</strong> visualisiert werden. Die Überschneidung zweier Kreise zeigt Prüfungen, die in beiden Gruppen vorkommen. Klicken eines Kreises erlaubt die Analyse dieser Gruppe im Verhältnis zu allen anderen Gruppen.</p>
+      <h3 style="font-size:12px;font-weight:700;color:var(--accent);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">3 — Venn-Diagramm</h3>
+      <p style="margin-bottom:6px;color:var(--dim);">Anstatt die Gruppen als Karten zu betrachten, können diese als <strong style="color:var(--bright)">Kreise in einem 2D-Venn-Raum</strong> visualisiert werden. Die Überschneidung zweier Kreise zeigt Prüfungen, die in beiden Gruppen vorkommen. Klicken eines Kreises erlaubt die Analyse dieser Gruppe im Verhältnis zu allen anderen Gruppen.</p>
 
-      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">4 — Navigation im Venn-Diagramm</h3>
-      <p style="margin-bottom:6px;color:#4a3e28;">Die Schaltflächen <strong style="color:#1a1208">Fit</strong>, <strong style="color:#1a1208">Orbit</strong>, Zoom-In/Out sowie die Kreis-Größenregler erlauben eine freie Anpassung der Ansicht. <strong style="color:#1a1208">Orbit</strong> animiert das Layout automatisch; <strong style="color:#1a1208">Fit</strong> passt alle Kreise auf den sichtbaren Bereich an. Mit dem Suchfeld kann gezielt eine Gruppe hervorgehoben werden.</p>
+      <h3 style="font-size:12px;font-weight:700;color:var(--accent);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">4 — Navigation im Venn-Diagramm</h3>
+      <p style="margin-bottom:6px;color:var(--dim);">Die Schaltflächen <strong style="color:var(--bright)">Fit</strong>, <strong style="color:var(--bright)">Orbit</strong>, Zoom-In/Out sowie die Kreis-Größenregler erlauben eine freie Anpassung der Ansicht. <strong style="color:var(--bright)">Orbit</strong> animiert das Layout automatisch; <strong style="color:var(--bright)">Fit</strong> passt alle Kreise auf den sichtbaren Bereich an. Mit dem Suchfeld kann gezielt eine Gruppe hervorgehoben werden.</p>
 
-      <h3 style="font-size:12px;font-weight:700;color:#00883A;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">5 — Polyvalenzanalyse (rechtes Panel)</h3>
-      <p style="margin-bottom:6px;color:#4a3e28;">Rechtsseitig erscheint immer die <strong style="color:#1a1208">Polyvalenzanalyse der aktuell ausgewählten Gruppe</strong> im Verhältnis zu allen anderen Gruppen: wie viele Prüfungen werden geteilt, wie viele sind einzigartig. Die anderen Gruppen sind dort ebenfalls anklickbar — ein Klick gibt alle gemeinsamen Prüfungen als Zeilen des Datensatzes heraus.</p>
+      <h3 style="font-size:12px;font-weight:700;color:var(--accent);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.06em;">5 — Polyvalenzanalyse (rechtes Panel)</h3>
+      <p style="margin-bottom:6px;color:var(--dim);">Rechtsseitig erscheint immer die <strong style="color:var(--bright)">Polyvalenzanalyse der aktuell ausgewählten Gruppe</strong> im Verhältnis zu allen anderen Gruppen: wie viele Prüfungen werden geteilt, wie viele sind einzigartig. Die anderen Gruppen sind dort ebenfalls anklickbar — ein Klick gibt alle gemeinsamen Prüfungen als Zeilen des Datensatzes heraus.</p>
     </div>
     <div id="pv-dim-card-header">
       <button id="poly-cards-open-btn">&#9646; Karten</button>
@@ -2019,9 +2073,39 @@ document.getElementById('pv-card-info-btn').addEventListener('click', () => {
   const btn = document.getElementById('pv-card-info-btn');
   const open = panel.style.display !== 'none';
   panel.style.display = open ? 'none' : 'block';
-  btn.style.borderColor = open ? 'var(--dim)' : '#00883A';
-  btn.style.color = open ? 'var(--dim)' : '#00883A';
+  btn.style.borderColor = open ? 'var(--dim)' : 'var(--accent)';
+  btn.style.color = open ? 'var(--dim)' : 'var(--accent)';
 });
+
+// ── THEME TOGGLE (shared with cluster_explorer.html via localStorage) ──
+(function() {
+  const btn = document.getElementById('theme-btn');
+  function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+  function paint() { btn.textContent = isDark() ? '☀' : '🌙'; }
+  function apply(dark) {
+    if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
+    paint();
+    // SVG/canvas views bake colors in at render time — redraw the open view
+    try {
+      if (typeof renderPolyCards === 'function' &&
+          document.getElementById('poly-cards-view').style.display !== 'none') renderPolyCards();
+      if (typeof renderPvVenn === 'function' &&
+          document.getElementById('poly-venn-view').style.display !== 'none') renderPvVenn();
+      if (typeof renderTakenCard === 'function') renderTakenCard();
+    } catch(e) {}
+  }
+  btn.addEventListener('click', () => {
+    const dark = !isDark();
+    try { localStorage.setItem('lmuTheme', dark ? 'dark' : 'light'); } catch(e) {}
+    apply(dark);
+  });
+  // Follow changes made in the other tab/page
+  window.addEventListener('storage', e => {
+    if (e.key === 'lmuTheme') apply(e.newValue === 'dark');
+  });
+  paint();
+})();
 
 init();
 </script>

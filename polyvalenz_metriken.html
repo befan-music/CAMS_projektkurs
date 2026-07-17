@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Polyvalenz-Metriken — Vernetzungsanalyse</title>
+<style>
+:root {
+  --bg: #FFF9E5; --panel: #f5f0d8; --sidebar: #ede8d2;
+  --border: #d4cdb0; --border2: #c4bc98;
+  --text: #2a2418; --dim: #7a6e50; --bright: #1a1208;
+  --accent: #00883A; --accent2: #655479; --green: #00883A; --yellow: #b8860b;
+  --hover: #ede5c4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background: var(--bg); color: var(--text); }
+
+#topbar {
+  height: 46px; background: #00883A; border-bottom: 1px solid #006d2e;
+  display: flex; align-items: center; gap: 12px; padding: 0 18px; flex-shrink: 0;
+}
+#topbar h1 { font-size: 14px; font-weight: 700; color: #fff; }
+.tb-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.5);
+  color: #fff; padding: 4px 11px; border-radius: 4px;
+  font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: all .1s;
+}
+.tb-link:hover { background: rgba(255,255,255,.35); border-color: #fff; }
+#col-info { font-size: 11px; color: rgba(255,255,255,.75); margin-left: auto; }
+#col-info strong { color: #fff; }
+
+#loading-bar {
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  padding: 18px; color: var(--dim); font-size: 12px; text-align: center; display: none;
+}
+#error-banner {
+  background: #fde8e8; border-bottom: 1px solid #e8b4b4;
+  padding: 14px 18px; color: #8b1a1a; font-size: 12px; display: none;
+}
+
+#page { margin: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── shared card shell ── */
+.pm-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.pm-card-hd {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.pm-card-hd h2 { font-size: 14px; font-weight: 700; color: var(--bright); flex: 1; }
+.pm-card-hd .pm-arrow { font-size: 10px; color: var(--dim); }
+.pm-card-hd .pm-badge {
+  font-size: 11px; font-weight: 700; color: var(--accent2);
+  background: rgba(101,84,121,.1); border: 1px solid rgba(101,84,121,.25);
+  border-radius: 4px; padding: 2px 8px;
+}
+.pm-card-body { display: none; padding: 20px; }
+.pm-card-body.open { display: block; }
+.pm-desc { font-size: 11px; color: var(--dim); line-height: 1.6; margin-bottom: 16px; }
+.pm-desc strong { color: var(--bright); }
+
+/* ── controls row ── */
+.pm-controls {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 12px; background: var(--hover); border-radius: 6px; margin-bottom: 14px;
+}
+.pm-controls label { font-size: 11px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }
+.pm-sel {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  padding: 3px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; outline: none;
+}
+.pm-btn {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--dim);
+  padding: 3px 9px; border-radius: 3px; font-size: 11px; cursor: pointer; transition: all .1s;
+}
+.pm-btn:hover { border-color: var(--dim); color: var(--text); }
+.pm-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.pm-sep { width: 1px; height: 16px; background: var(--border2); flex-shrink: 0; }
+
+/* ── CARD 1: Global Score ── */
+#score-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
+  margin-bottom: 20px;
+}
+.score-tile {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;
+}
+.score-tile .st-val { font-size: 28px; font-weight: 700; color: var(--accent2); line-height: 1; }
+.score-tile .st-label { font-size: 11px; color: var(--dim); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.score-tile .st-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.score-tile.green .st-val { color: var(--accent); }
+.score-tile.yellow .st-val { color: var(--yellow); }
+
+/* ── CARD 2: Pairwise similarity ── */
+#pair-list { display: flex; flex-direction: column; gap: 4px; max-height: 520px; overflow-y: auto; }
+.pair-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 5px;
+  padding: 7px 12px;
+}
+.pair-rank { font-size: 10px; color: var(--dim); width: 24px; text-align: right; flex-shrink: 0; }
+.pair-labels { flex: 1; font-size: 11px; color: var(--bright); min-width: 0; }
+.pair-labels span { color: var(--dim); margin: 0 4px; }
+.pair-bar-wrap { width: 120px; height: 7px; border-radius: 4px; background: var(--border); overflow: hidden; flex-shrink: 0; }
+.pair-bar-fill { height: 100%; border-radius: 4px; background: var(--accent2); }
+.pair-score { font-size: 11px; font-weight: 700; color: var(--accent2); width: 38px; text-align: right; flex-shrink: 0; }
+.pair-shared { font-size: 10px; color: var(--dim); width: 80px; text-align: right; flex-shrink: 0; }
+
+/* ── Heatmap ── */
+#pair-heatmap-wrap {
+  overflow: auto; max-height: 600px;
+}
+#pair-heatmap-wrap table {
+  border-collapse: collapse; font-size: 10px;
+}
+#pair-heatmap-wrap th, #pair-heatmap-wrap td {
+  padding: 0; border: 1px solid var(--border);
+}
+.hm-row-label {
+  font-size: 10px; color: var(--bright); font-weight: 600;
+  white-space: nowrap; padding: 3px 7px 3px 4px !important;
+  text-align: right; background: var(--panel); position: sticky; left: 0; z-index: 1;
+}
+.hm-col-label {
+  font-size: 10px; color: var(--bright); font-weight: 600;
+  white-space: nowrap; writing-mode: vertical-rl; text-orientation: mixed;
+  transform: rotate(180deg); padding: 6px 3px !important;
+  background: var(--panel); position: sticky; top: 0; z-index: 2; max-height: 120px;
+}
+.hm-cell {
+  width: 22px; height: 22px; cursor: default; position: relative;
+}
+.hm-cell:hover::after {
+  content: attr(data-tip);
+  position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+  background: #1a1208; color: #fff; font-size: 10px; padding: 3px 7px;
+  border-radius: 4px; white-space: nowrap; z-index: 10; pointer-events: none;
+}
+.hm-diag { background: var(--border2) !important; }
+
+/* ── CARD 3: Fragmentation ── */
+#frag-list { display: flex; flex-direction: column; gap: 4px; }
+.frag-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 5px;
+  padding: 8px 12px;
+}
+.frag-rank { font-size: 10px; color: var(--dim); width: 24px; text-align: right; flex-shrink: 0; }
+.frag-col { font-size: 12px; font-weight: 600; color: var(--bright); width: 200px; flex-shrink: 0; }
+.frag-bar-wrap { flex: 1; height: 7px; border-radius: 4px; background: var(--border); overflow: hidden; }
+.frag-bar-fill { height: 100%; border-radius: 4px; background: var(--yellow); }
+.frag-score { font-size: 11px; font-weight: 700; color: var(--yellow); width: 52px; text-align: right; flex-shrink: 0; }
+.frag-detail { font-size: 10px; color: var(--dim); width: 140px; text-align: right; flex-shrink: 0; }
+
+/* ── CARD 4: Polyvalence predictor ── */
+#pred-list { display: flex; flex-direction: column; gap: 4px; max-height: 520px; overflow-y: auto; }
+.pred-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 5px;
+  padding: 7px 12px;
+}
+.pred-rank { font-size: 10px; color: var(--dim); width: 24px; text-align: right; flex-shrink: 0; }
+.pred-col  { font-size: 11px; color: var(--dim); width: 120px; flex-shrink: 0; }
+.pred-val  { font-size: 12px; font-weight: 600; color: var(--bright); flex: 1; }
+.pred-bar-wrap { width: 120px; height: 7px; border-radius: 4px; background: var(--border); overflow: hidden; flex-shrink: 0; }
+.pred-bar-fill { height: 100%; border-radius: 4px; }
+.pred-score { font-size: 11px; font-weight: 700; width: 60px; text-align: right; flex-shrink: 0; }
+.pred-n { font-size: 10px; color: var(--dim); width: 56px; text-align: right; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>⬡ Polyvalenz-Metriken</h1>
+  <a href="polyvalenzen.html" class="tb-link">⬡ Polyvalenzen</a>
+  <a href="cluster_explorer.html" class="tb-link">⬡ Cluster Explorer</a>
+  <div id="col-info"></div>
+</div>
+<div id="error-banner"></div>
+<div id="loading-bar">⏳ CSV wird geladen…</div>
+
+<div id="page">
+
+  <!-- ── CARD 1: Global Score ── -->
+  <div class="pm-card" id="card-global">
+    <div class="pm-card-hd" onclick="toggleCard('global')">
+      <span class="pm-arrow" id="arrow-global">▶</span>
+      <h2>Globale Vernetzungskennzahl</h2>
+      <span class="pm-badge" id="badge-global">–</span>
+    </div>
+    <div class="pm-card-body" id="body-global">
+      <p class="pm-desc">
+        Wie stark ist das Prüfungsangebot insgesamt vernetzt?
+        Der <strong>mittlere Sørensen-Dice-Koeffizient</strong> misst für alle Gruppenpaare den Anteil gemeinsamer Prüfungstitel
+        (normiert auf die durchschnittliche Gruppengröße). 0 = kein einziges Paar teilt Prüfungen · 1 = alle Gruppen sind identisch.
+        Die <strong>Netzwerkdichte</strong> gibt an, welcher Anteil aller möglichen Gruppenpaare überhaupt mindestens eine Prüfung teilt.
+      </p>
+      <div class="pm-controls">
+        <label>Gruppieren nach:</label>
+        <select class="pm-sel" id="global-group-sel">
+          <option value="studiengang">Studiengang</option>
+          <option value="abschluss">Abschluss</option>
+        </select>
+      </div>
+      <div id="score-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── CARD 2: Pairwise Similarity ── -->
+  <div class="pm-card" id="card-pair">
+    <div class="pm-card-hd" onclick="toggleCard('pair')">
+      <span class="pm-arrow" id="arrow-pair">▶</span>
+      <h2>Paarweise Ähnlichkeit (Sørensen-Dice)</h2>
+      <span class="pm-badge" id="badge-pair">–</span>
+    </div>
+    <div class="pm-card-body" id="body-pair">
+      <p class="pm-desc">
+        Für jedes Paar von Gruppen: <strong>Dice(A,B) = 2|A∩B| / (|A|+|B|)</strong>.
+        Zeigt, welche zwei Studiengänge oder Abschlüsse die ähnlichste Prüfungsauswahl haben.
+        Sortiert nach Ähnlichkeit absteigend.
+      </p>
+      <div class="pm-controls">
+        <label>Gruppieren:</label>
+        <select class="pm-sel" id="pair-group-sel">
+          <option value="studiengang">Studiengang</option>
+          <option value="abschluss">Abschluss</option>
+        </select>
+        <div class="pm-sep"></div>
+        <label>Ansicht:</label>
+        <button class="pm-btn active" id="pair-list-btn" onclick="setPairView('list')">Liste</button>
+        <button class="pm-btn" id="pair-heatmap-btn" onclick="setPairView('heatmap')">Heatmap</button>
+        <div class="pm-sep"></div>
+        <label>Anzeigen:</label>
+        <button class="pm-btn active" id="pair-top-btn" onclick="setPairMode('top')">Top 50</button>
+        <button class="pm-btn" id="pair-all-btn" onclick="setPairMode('all')">Alle</button>
+      </div>
+      <div id="pair-list"></div>
+      <div id="pair-heatmap-wrap" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── CARD 3: Fragmentation ── -->
+  <div class="pm-card" id="card-frag">
+    <div class="pm-card-hd" onclick="toggleCard('frag')">
+      <span class="pm-arrow" id="arrow-frag">▶</span>
+      <h2>Spalten-Fragmentierungsanalyse</h2>
+      <span class="pm-badge" id="badge-frag">–</span>
+    </div>
+    <div class="pm-card-body" id="body-frag">
+      <p class="pm-desc">
+        Ausgangspunkt: Prüfungen werden anhand von <strong>Abschluss + StudiengangTxT + Prüfungstext</strong> gruppiert.
+        Dann wird jede weitere Spalte hinzugefügt und gemessen, wie stark sie diese Gruppen weiter aufteilt.<br><br>
+        Der <strong>Fragmentierungsscore</strong> = (Anzahl Gruppen nach Hinzufügen der Spalte) / (Ausgangsgruppenanzahl) − 1.
+        0 = die Spalte ändert nichts · hoher Wert = die Spalte teilt viele Prüfungen auf, die sonst als identisch gelten würden.<br><br>
+        <strong>Interpretation:</strong> Eine Spalte mit hohem Score ist eine „versteckte Differenzierung" — wenn man sie weglässt,
+        sehen viele eigentlich verschiedene Prüfungen gleich aus.
+      </p>
+      <div class="pm-controls">
+        <label>Basis-Schlüssel:</label>
+        <span style="font-size:11px;color:var(--bright);font-weight:600">Abschluss + StudiengangTxT + Prüfungstext</span>
+      </div>
+      <div id="frag-list"></div>
+    </div>
+  </div>
+
+  <!-- ── CARD 4: Polyvalence Predictors ── -->
+  <div class="pm-card" id="card-pred">
+    <div class="pm-card-hd" onclick="toggleCard('pred')">
+      <span class="pm-arrow" id="arrow-pred">▶</span>
+      <h2>Prädiktoren für Polyvalenz</h2>
+      <span class="pm-badge" id="badge-pred">–</span>
+    </div>
+    <div class="pm-card-body" id="body-pred">
+      <p class="pm-desc">
+        Welche Spaltenwerte treten <em>überproportional häufig</em> in polyvalenten Prüfungen auf?
+        Für jede kategorische Spalte und jeden Wert wird der <strong>Polyvalenzanteil</strong> berechnet:
+        Anteil der Prüfungstitel mit diesem Wert, die in mehr als einer Gruppe erscheinen.
+        Werte mit hohem Anteil sind starke Prädiktoren für Polyvalenz.
+      </p>
+      <div class="pm-controls">
+        <label>Gruppieren nach:</label>
+        <select class="pm-sel" id="pred-group-sel">
+          <option value="studiengang">Studiengang</option>
+          <option value="abschluss">Abschluss</option>
+        </select>
+        <div class="pm-sep"></div>
+        <label>Mind. Prüfungen:</label>
+        <select class="pm-sel" id="pred-min-sel">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+        <div class="pm-sep"></div>
+        <label>Spalten:</label>
+        <select class="pm-sel" id="pred-col-sel"><option value="all">Alle</option></select>
+      </div>
+      <div id="pred-list"></div>
+    </div>
+  </div>
+
+</div><!-- end #page -->
+
+<script>
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── CSV loader (same logic as polyvalenzen.html) ──
+const DEFAULT_CSV = 'allePolyvalenzen_inLabSpalte.csv';
+
+function detectDelimiter(sample) {
+  const firstLine = sample.slice(0, 2000).split('\n')[0];
+  const delims = [';', ',', '\t', '|'];
+  let best = ',', bestN = 0;
+  for (const d of delims) {
+    const n = (firstLine.match(new RegExp(d === '\t' ? '\t' : ('\\' + d), 'g')) || []).length;
+    if (n > bestN) { bestN = n; best = d; }
+  }
+  return best;
+}
+
+function parseCSV(text) {
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const delim = detectDelimiter(text);
+  const allRows = []; let row = [], cell = '', inQuote = false, i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (inQuote) {
+      if (ch === '"') { if (text[i+1] === '"') { cell += '"'; i += 2; } else { inQuote = false; i++; } }
+      else { cell += ch; i++; }
+    } else {
+      if (ch === '"') { inQuote = true; i++; }
+      else if (ch === delim) { row.push(cell.trim()); cell = ''; i++; }
+      else if (ch === '\n') {
+        row.push(cell.trim()); cell = '';
+        if (row.some(c => c !== '')) allRows.push(row);
+        row = []; i++;
+      } else { cell += ch; i++; }
+    }
+  }
+  row.push(cell.trim());
+  if (row.some(c => c !== '')) allRows.push(row);
+  if (allRows.length < 2) return null;
+  const headers = allRows[0];
+  const numCols = headers.length;
+  const vocabMaps = headers.map(() => new Map());
+  const rawRows = [];
+  for (let li = 1; li < allRows.length; li++) {
+    const cells = allRows[li];
+    while (cells.length < numCols) cells.push('');
+    rawRows.push(cells.slice(0, numCols));
+    for (let ci = 0; ci < numCols; ci++) {
+      const v = cells[ci] || '';
+      if (!vocabMaps[ci].has(v)) vocabMaps[ci].set(v, vocabMaps[ci].size);
+    }
+  }
+  const vocabs = vocabMaps.map(m => { const a = []; m.forEach((i, v) => { a[i] = v; }); return a; });
+  const rows = rawRows.map(r => r.map((v, ci) => vocabMaps[ci].get(v) ?? 0));
+  return { headers, vocabs, rows };
+}
+
+// ── Global state ──
+let headers, vocabs, rows;
+let colIdx = {};
+let _pairMode = 'top';
+
+function findCol(names) {
+  for (const n of names) {
+    const i = (headers || []).findIndex(h => h.toLowerCase() === n.toLowerCase());
+    if (i >= 0) return i;
+  }
+  return -1;
+}
+
+function getGroupCI(selId) {
+  const v = document.getElementById(selId).value;
+  return v === 'studiengang' ? colIdx.studiengang : colIdx.abschluss;
+}
+
+function gVal(row, ci) {
+  return vocabs[ci] ? (vocabs[ci][row[ci]] || '(leer)') : String(row[ci] || '(leer)');
+}
+function eVal(row) {
+  return vocabs[colIdx.exam] ? (vocabs[colIdx.exam][row[colIdx.exam]] || '(leer)') : String(row[colIdx.exam] || '(leer)');
+}
+
+// ── Card collapse ──
+const cardOpen = { global: false, pair: false, frag: false, pred: false };
+function toggleCard(id) {
+  cardOpen[id] = !cardOpen[id];
+  document.getElementById('body-' + id).classList.toggle('open', cardOpen[id]);
+  document.getElementById('arrow-' + id).textContent = cardOpen[id] ? '▼' : '▶';
+}
+
+// ── ANALYSIS 1: Global score ──
+function buildGlobalScore() {
+  const groupCI = getGroupCI('global-group-sel');
+  const map = new Map();
+  for (const row of rows) {
+    const g = gVal(row, groupCI), e = eVal(row);
+    if (!map.has(g)) map.set(g, new Set());
+    map.get(g).add(e);
+  }
+  const groups = [...map.entries()].map(([g, s]) => ({ g, exams: s }));
+  const n = groups.length;
+  if (n < 2) return;
+
+  let totalDice = 0, pairCount = 0, connectedPairs = 0;
+  let totalShared = 0;
+  const pairs = n * (n - 1) / 2;
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const a = groups[i].exams, b = groups[j].exams;
+      let shared = 0;
+      for (const e of a) if (b.has(e)) shared++;
+      const dice = 2 * shared / (a.size + b.size);
+      totalDice += dice;
+      pairCount++;
+      if (shared > 0) connectedPairs++;
+      totalShared += shared;
+    }
+  }
+
+  const meanDice = pairCount ? totalDice / pairCount : 0;
+  const density  = pairs ? connectedPairs / pairs : 0;
+  const allExams = new Set(rows.map(r => eVal(r)));
+  const polyExams = new Set();
+  const examGroups = new Map();
+  for (const row of rows) {
+    const g = gVal(row, groupCI), e = eVal(row);
+    if (!examGroups.has(e)) examGroups.set(e, new Set());
+    examGroups.get(e).add(g);
+  }
+  for (const [e, gs] of examGroups) if (gs.size > 1) polyExams.add(e);
+
+  document.getElementById('badge-global').textContent = 'Dice̅ = ' + (meanDice * 100).toFixed(1) + '%';
+
+  const grid = document.getElementById('score-grid');
+  grid.innerHTML = '';
+  const tiles = [
+    { cls: 'yellow', val: (meanDice * 100).toFixed(2) + '%', label: 'Mittlerer Dice-Koeffizient', sub: 'Ø Ähnlichkeit aller Gruppenpaare' },
+    { cls: '', val: (density * 100).toFixed(1) + '%', label: 'Netzwerkdichte', sub: connectedPairs.toLocaleString() + ' von ' + pairs.toLocaleString() + ' Paaren verbunden' },
+    { cls: 'green', val: polyExams.size.toLocaleString(), label: 'Polyvalente Prüfungstitel', sub: (polyExams.size / allExams.size * 100).toFixed(1) + '% aller ' + allExams.size.toLocaleString() + ' Titel' },
+    { cls: '', val: n.toLocaleString(), label: 'Gruppen', sub: 'nach ' + (document.getElementById('global-group-sel').value === 'studiengang' ? 'Studiengang' : 'Abschluss') },
+  ];
+  tiles.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'score-tile ' + t.cls;
+    div.innerHTML = '<div class="st-val">' + t.val + '</div><div class="st-label">' + t.label + '</div><div class="st-sub">' + t.sub + '</div>';
+    grid.appendChild(div);
+  });
+}
+
+// ── ANALYSIS 2: Pairwise similarity ──
+let _pairData = [];
+let _pairGroupsCache = null; // [{g, exams: Set}] sorted by size desc
+
+function buildPairwise() {
+  const groupCI = getGroupCI('pair-group-sel');
+  const map = new Map();
+  for (const row of rows) {
+    const g = gVal(row, groupCI), e = eVal(row);
+    if (!map.has(g)) map.set(g, new Set());
+    map.get(g).add(e);
+  }
+  const groups = [...map.entries()].map(([g, exams]) => ({ g, exams }));
+  groups.sort((a, b) => b.exams.size - a.exams.size); // largest first for heatmap
+  _pairGroupsCache = groups;
+  const n = groups.length;
+
+  _pairData = [];
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const a = groups[i].exams, b = groups[j].exams;
+      let shared = 0;
+      for (const e of a) if (b.has(e)) shared++;
+      if (shared === 0) continue;
+      const dice = 2 * shared / (a.size + b.size);
+      _pairData.push({ ga: groups[i].g, gb: groups[j].g, dice, shared });
+    }
+  }
+  _pairData.sort((a, b) => b.dice - a.dice);
+
+  document.getElementById('badge-pair').textContent = _pairData.length.toLocaleString() + ' verbundene Paare';
+  if (_pairView === 'heatmap') renderPairHeatmap(); else renderPairList();
+}
+
+let _pairView = 'list'; // 'list' | 'heatmap'
+
+function setPairView(view) {
+  _pairView = view;
+  document.getElementById('pair-list-btn').classList.toggle('active', view === 'list');
+  document.getElementById('pair-heatmap-btn').classList.toggle('active', view === 'heatmap');
+  document.getElementById('pair-list').style.display = view === 'list' ? 'flex' : 'none';
+  document.getElementById('pair-heatmap-wrap').style.display = view === 'heatmap' ? 'block' : 'none';
+  // Top/All buttons only affect list view
+  document.getElementById('pair-top-btn').style.opacity = view === 'list' ? '1' : '0.35';
+  document.getElementById('pair-all-btn').style.opacity = view === 'list' ? '1' : '0.35';
+  if (view === 'heatmap') renderPairHeatmap();
+}
+
+function setPairMode(mode) {
+  _pairMode = mode;
+  document.getElementById('pair-top-btn').classList.toggle('active', mode === 'top');
+  document.getElementById('pair-all-btn').classList.toggle('active', mode === 'all');
+  renderPairList();
+}
+
+function renderPairList() {
+  const list = document.getElementById('pair-list');
+  list.innerHTML = '';
+  const data = _pairMode === 'top' ? _pairData.slice(0, 50) : _pairData;
+  const maxDice = data.length ? data[0].dice : 1;
+  data.forEach((p, i) => {
+    const barW = (p.dice / maxDice * 100).toFixed(1);
+    const row = document.createElement('div');
+    row.className = 'pair-row';
+    row.innerHTML =
+      '<span class="pair-rank">' + (i + 1) + '</span>' +
+      '<div class="pair-labels">' + escHtml(p.ga) + '<span>↔</span>' + escHtml(p.gb) + '</div>' +
+      '<div class="pair-bar-wrap"><div class="pair-bar-fill" style="width:' + barW + '%"></div></div>' +
+      '<span class="pair-score">' + (p.dice * 100).toFixed(1) + '%</span>' +
+      '<span class="pair-shared">' + p.shared.toLocaleString() + ' gemeinsam</span>';
+    list.appendChild(row);
+  });
+}
+
+function renderPairHeatmap() {
+  const wrap = document.getElementById('pair-heatmap-wrap');
+  wrap.innerHTML = '';
+  if (!_pairGroupsCache) return;
+
+  const groups = _pairGroupsCache; // [{g, exams}] sorted by total exams desc
+  const n = groups.length;
+  const labels = groups.map(g => g.g);
+
+  // Build n×n dice matrix
+  const dice = Array.from({length: n}, () => new Float32Array(n));
+  const shared = Array.from({length: n}, () => new Int32Array(n));
+  for (let i = 0; i < n; i++) {
+    dice[i][i] = 1;
+    for (let j = i + 1; j < n; j++) {
+      let sh = 0;
+      for (const e of groups[i].exams) if (groups[j].exams.has(e)) sh++;
+      const d = 2 * sh / (groups[i].exams.size + groups[j].exams.size);
+      dice[i][j] = dice[j][i] = d;
+      shared[i][j] = shared[j][i] = sh;
+    }
+  }
+
+  // Color: 0 = white/cream, 1 = deep purple (accent2 #655479)
+  function hmColor(v) {
+    if (v <= 0) return 'var(--bg)';
+    // interpolate cream → purple
+    const r0 = 0xFFF9E5, r = 0x65, g = 0x54, b = 0x79;
+    const bg_r = (r0 >> 16) & 0xff, bg_g = (r0 >> 8) & 0xff, bg_b = r0 & 0xff;
+    const rr = Math.round(bg_r + (r - bg_r) * v);
+    const rg = Math.round(bg_g + (g - bg_g) * v);
+    const rb = Math.round(bg_b + (b - bg_b) * v);
+    return 'rgb(' + rr + ',' + rg + ',' + rb + ')';
+  }
+
+  // Sort groups by total exams descending (already sorted from buildPairwise → _pairGroupsCache)
+  const table = document.createElement('table');
+
+  // Header row: corner + col labels
+  const thead = document.createElement('thead');
+  const hrow = document.createElement('tr');
+  const corner = document.createElement('th');
+  corner.style.cssText = 'position:sticky;top:0;left:0;z-index:3;background:var(--panel);min-width:120px;';
+  hrow.appendChild(corner);
+  for (let j = 0; j < n; j++) {
+    const th = document.createElement('th');
+    th.className = 'hm-col-label';
+    th.textContent = labels[j];
+    th.title = labels[j];
+    hrow.appendChild(th);
+  }
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  // Data rows
+  const tbody = document.createElement('tbody');
+  for (let i = 0; i < n; i++) {
+    const tr = document.createElement('tr');
+    const lbl = document.createElement('td');
+    lbl.className = 'hm-row-label';
+    lbl.textContent = labels[i];
+    lbl.title = labels[i];
+    tr.appendChild(lbl);
+
+    for (let j = 0; j < n; j++) {
+      const td = document.createElement('td');
+      td.className = 'hm-cell' + (i === j ? ' hm-diag' : '');
+      if (i !== j) {
+        const d = dice[i][j];
+        td.style.background = hmColor(d);
+        const pct = (d * 100).toFixed(1);
+        td.title = labels[i] + ' ↔ ' + labels[j] + ': ' + pct + '% Dice (' + shared[i][j] + ' gemeinsam)';
+        td.setAttribute('data-tip', pct + '% · ' + shared[i][j] + ' gem.');
+        if (d >= 0.1) {
+          td.style.fontSize = '8px';
+          td.style.textAlign = 'center';
+          td.style.lineHeight = '22px';
+          td.style.color = d > 0.5 ? '#fff' : '#3d2f52';
+          td.style.fontWeight = '700';
+          td.textContent = pct + '%';
+        }
+      }
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+
+  // Legend strip
+  const legend = document.createElement('div');
+  legend.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:10px;font-size:10px;color:var(--dim)';
+  const lbl0 = document.createElement('span'); lbl0.textContent = '0% (kein overlap)';
+  const grad = document.createElement('div');
+  grad.style.cssText = 'width:140px;height:10px;border-radius:4px;background:linear-gradient(to right,var(--bg),#655479);border:1px solid var(--border)';
+  const lbl1 = document.createElement('span');
+  lbl1.style.cssText = 'color:var(--accent2);font-weight:700';
+  lbl1.textContent = '100% (identisch)';
+  legend.appendChild(lbl0); legend.appendChild(grad); legend.appendChild(lbl1);
+  wrap.appendChild(legend);
+}
+
+// ── ANALYSIS 3: Fragmentation ──
+function buildFragmentation() {
+  // Base key: Abschluss + StudiengangTxT + Prüfungstext
+  const abCI   = findCol(['AbschlussTxT', 'Abschluss']);
+  const sgCI   = findCol(['StudiengangTxT', 'Studiengang']);
+  const ptCI   = findCol(['Prüfungstext', 'Pruefungstext']);
+  const baseKey = row => [abCI, sgCI, ptCI].map(ci => ci >= 0 ? row[ci] : -1).join('|');
+
+  const baseGroups = new Set(rows.map(baseKey));
+  const baseN = baseGroups.size;
+
+  const skipCols = new Set([abCI, sgCI, ptCI, colIdx.exam]);
+  const results = [];
+
+  headers.forEach((h, ci) => {
+    if (skipCols.has(ci)) return;
+    const extKey = row => baseKey(row) + '|' + row[ci];
+    const extGroups = new Set(rows.map(extKey));
+    const extN = extGroups.size;
+    const fragScore = (extN - baseN) / baseN;
+    const newGroups = extN - baseN;
+    results.push({ col: h, ci, baseN, extN, newGroups, fragScore });
+  });
+
+  results.sort((a, b) => b.fragScore - a.fragScore);
+  const maxScore = results.length ? results[0].fragScore : 1;
+
+  document.getElementById('badge-frag').textContent = 'Basis: ' + baseN.toLocaleString() + ' Gruppen';
+
+  const list = document.getElementById('frag-list');
+  list.innerHTML = '';
+  results.forEach((r, i) => {
+    const barW = maxScore > 0 ? (r.fragScore / maxScore * 100).toFixed(1) : 0;
+    const row = document.createElement('div');
+    row.className = 'frag-row';
+    row.innerHTML =
+      '<span class="frag-rank">' + (i + 1) + '</span>' +
+      '<span class="frag-col" title="' + escHtml(r.col) + '">' + escHtml(r.col) + '</span>' +
+      '<div class="frag-bar-wrap"><div class="frag-bar-fill" style="width:' + barW + '%"></div></div>' +
+      '<span class="frag-score">+' + (r.fragScore * 100).toFixed(0) + '%</span>' +
+      '<span class="frag-detail">' + r.extN.toLocaleString() + ' Gruppen (+' + r.newGroups.toLocaleString() + ')</span>';
+    list.appendChild(row);
+  });
+}
+
+// ── ANALYSIS 4: Polyvalence predictors ──
+function buildPredictors() {
+  const groupCI = getGroupCI('pred-group-sel');
+  const minN = parseInt(document.getElementById('pred-min-sel').value, 10);
+  const filterCol = document.getElementById('pred-col-sel').value;
+
+  // exam -> set of groups it appears in
+  const examGroups = new Map();
+  for (const row of rows) {
+    const g = gVal(row, groupCI), e = eVal(row);
+    if (!examGroups.has(e)) examGroups.set(e, new Set());
+    examGroups.get(e).add(g);
+  }
+
+  // exam -> is polyvalent?
+  const examIsPoly = new Map();
+  for (const [e, gs] of examGroups) examIsPoly.set(e, gs.size > 1);
+
+  // For each col×value: count exams with that value, count how many are polyvalent
+  const SKIP = new Set([colIdx.exam, colIdx.studiengang, colIdx.abschluss]);
+  const results = [];
+
+  headers.forEach((h, ci) => {
+    if (SKIP.has(ci)) return;
+    if (filterCol !== 'all' && String(ci) !== filterCol) return;
+
+    // exam -> dominant value for this column (mode across rows)
+    const examVal = new Map(); // examTitle -> Map<valIdx, count>
+    for (const row of rows) {
+      const e = eVal(row), v = row[ci];
+      if (!examVal.has(e)) examVal.set(e, new Map());
+      const m = examVal.get(e);
+      m.set(v, (m.get(v) || 0) + 1);
+    }
+
+    // group by column value (dominant)
+    const valStats = new Map(); // valLabel -> {total, poly}
+    for (const [e, valMap] of examVal) {
+      // pick mode
+      let bestV = 0, bestC = 0;
+      for (const [v, c] of valMap) if (c > bestC) { bestC = c; bestV = v; }
+      const vLabel = vocabs[ci] ? (vocabs[ci][bestV] || '(leer)') : String(bestV);
+      if (!valStats.has(vLabel)) valStats.set(vLabel, { total: 0, poly: 0 });
+      const s = valStats.get(vLabel);
+      s.total++;
+      if (examIsPoly.get(e)) s.poly++;
+    }
+
+    for (const [vLabel, s] of valStats) {
+      if (s.total < minN) continue;
+      const polyRate = s.poly / s.total;
+      results.push({ col: h, ci, val: vLabel, total: s.total, poly: s.poly, polyRate });
+    }
+  });
+
+  results.sort((a, b) => b.polyRate - a.polyRate);
+  document.getElementById('badge-pred').textContent = results.length + ' Werte analysiert';
+
+  const list = document.getElementById('pred-list');
+  list.innerHTML = '';
+
+  // color scale: green = high poly rate, yellow = medium, red = low
+  function rateColor(r) {
+    if (r >= 0.7) return '#00883A';
+    if (r >= 0.4) return '#b8860b';
+    return '#c0392b';
+  }
+
+  results.slice(0, 120).forEach((r, i) => {
+    const barW = (r.polyRate * 100).toFixed(1);
+    const row = document.createElement('div');
+    row.className = 'pred-row';
+    row.innerHTML =
+      '<span class="pred-rank">' + (i + 1) + '</span>' +
+      '<span class="pred-col" title="' + escHtml(r.col) + '">' + escHtml(r.col) + '</span>' +
+      '<span class="pred-val">' + escHtml(r.val) + '</span>' +
+      '<div class="pred-bar-wrap"><div class="pred-bar-fill" style="width:' + barW + '%;background:' + rateColor(r.polyRate) + '"></div></div>' +
+      '<span class="pred-score" style="color:' + rateColor(r.polyRate) + '">' + (r.polyRate * 100).toFixed(0) + '%</span>' +
+      '<span class="pred-n">' + r.poly.toLocaleString() + ' / ' + r.total.toLocaleString() + '</span>';
+    list.appendChild(row);
+  });
+}
+
+// ── Populate predictor column filter ──
+function populatePredColSel() {
+  const sel = document.getElementById('pred-col-sel');
+  const SKIP = new Set([colIdx.exam, colIdx.studiengang, colIdx.abschluss]);
+  headers.forEach((h, ci) => {
+    if (SKIP.has(ci)) return;
+    const opt = document.createElement('option');
+    opt.value = String(ci);
+    opt.textContent = h;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Wire controls ──
+document.getElementById('global-group-sel').addEventListener('change', buildGlobalScore);
+document.getElementById('pair-group-sel').addEventListener('change', buildPairwise);
+document.getElementById('pred-group-sel').addEventListener('change', buildPredictors);
+document.getElementById('pred-min-sel').addEventListener('change', buildPredictors);
+document.getElementById('pred-col-sel').addEventListener('change', buildPredictors);
+
+// ── Init ──
+(async function() {
+  const loadEl = document.getElementById('loading-bar');
+  const errEl  = document.getElementById('error-banner');
+  loadEl.style.display = 'block';
+  try {
+    const resp = await fetch(DEFAULT_CSV);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    loadEl.style.display = 'none';
+    const parsed = parseCSV(text);
+    if (!parsed) throw new Error('CSV konnte nicht gelesen werden.');
+    headers = parsed.headers;
+    vocabs  = parsed.vocabs;
+    rows    = parsed.rows;
+
+    colIdx.exam        = findCol(['Veranstaltungstitel']);
+    colIdx.studiengang = findCol(['StudiengangTxT', 'Studiengang']);
+    colIdx.abschluss   = findCol(['AbschlussTxT', 'Abschluss']);
+
+    document.getElementById('col-info').innerHTML =
+      '<strong>' + rows.length.toLocaleString() + '</strong> Zeilen &nbsp;·&nbsp; ' + headers.length + ' Spalten';
+
+    populatePredColSel();
+    buildGlobalScore();
+    buildPairwise();
+    buildFragmentation();
+    buildPredictors();
+
+  } catch(e) {
+    loadEl.style.display = 'none';
+    errEl.style.display = 'block';
+    errEl.textContent = 'Fehler: ' + e.message;
+  }
+})();
+</script>
+</body>
+</html>
