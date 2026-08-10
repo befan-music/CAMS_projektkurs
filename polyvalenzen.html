@@ -56,14 +56,14 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 }
 #topbar h1 { font-size: 14px; font-weight: 700; color: var(--topbar-text); }
 #topbar h1 em { color: var(--topbar-text); font-style: normal; }
-#cluster-link-btn, .topbar-link-btn {
+#cluster-link-btn {
   display: inline-flex; align-items: center; gap: 5px;
   background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.5);
   color: #fff; padding: 4px 11px; border-radius: 4px;
   font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap;
   transition: all .1s;
 }
-#cluster-link-btn:hover, .topbar-link-btn:hover { background: rgba(255,255,255,.35); border-color: #fff; }
+#cluster-link-btn:hover { background: rgba(255,255,255,.35); border-color: #fff; }
 #col-info { font-size: 11px; color: var(--topbar-dim); margin-left: auto; }
 #col-info strong { color: var(--topbar-text); }
 #info-btn {
@@ -380,7 +380,6 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; font-
 <div id="topbar">
   <h1>Polyvalenzanalyse</h1>
   <a href="cluster_explorer.html" target="_blank" id="cluster-link-btn">⬡ Spaltenfilter</a>
-  <a href="polyvalenz_metriken.html" class="topbar-link-btn" target="_blank" title="Polyvalenz-Metriken öffnen">⬡ Metriken</a>
   <div id="col-info"></div>
   <button id="theme-btn" title="Dunkles/helles Layout umschalten">🌙</button>
   <button id="info-btn" title="Über dieses Tool">i</button>
