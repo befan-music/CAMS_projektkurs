@@ -1,0 +1,19 @@
+Über Polyvalenzen — Prüfungsüberschneidungsanalyse
+
+Was ist das?
+Dieses Tool analysiert, wie Prüfungen über Studiengänge und Abschlussarten an der LMU hinweg geteilt werden. Eine Prüfung gilt als polyvalent, wenn sie in mehr als einer Gruppe erscheint, und als einzigartig, wenn sie genau einer Gruppe angehört.
+
+Polyvalenzen-Karte — Kartenansicht
+Klicken Sie auf Karten, um die Gruppenanalyse zu öffnen. Wählen Sie eine Gruppierspalte (z. B. AbschlussTxT, StudiengangTxT, Vertiefung). Jede Karte zeigt eine Gruppe mit einem Balken, der den Anteil einzigartiger vs. polyvalenter Prüfungstitel und die Gesamtanzahl darstellt.
+
+Venn-Diagramm
+Nach dem Laden der Karten auf ○ Venn-Diagramm klicken, um ein zoombares Überschneidungsdiagramm zu sehen. Jeder Kreis steht für eine Gruppe; überlappende Bereiche zeigen gemeinsame Prüfungstitel. Kreis anklicken, um ihn zu fokussieren und die Aufteilung im rechten Panel zu sehen. Fokus zentriert auf eine Gruppe, Orbit animiert das Layout, das Suchfeld hebt eine bestimmte Gruppe hervor.
+
+Karten-Detailansicht
+Eine Gruppenkarte anklicken, um deren Detailansicht mit einzigartigen und polyvalenten Prüfungstiteln zu öffnen. Von dort aus ○ Venn-Diagramm drücken, um direkt in das auf diese Gruppe fokussierte Venn-Diagramm zu springen.
+
+Teilmenge (Subset-Filter)
+Den Subset-Balken oben verwenden, um die Analyse auf einen bestimmten Spaltenwert einzuschränken (z. B. nur Zeilen aus Semester 20252). Karten und Venn-Diagramm aktualisieren sich automatisch.
+
+Q & A
+Der Abschnitt Q&A beantwortet drei feststehende Fragen zur Prüfungsüberschneidung: Welche Prüfung wird von den meisten Studiengängen belegt? Welche Studiengänge teilen die meisten Prüfungen mit anderen? Welche Prüfung wird von den meisten Abschlussarten besucht?

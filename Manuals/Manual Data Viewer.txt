@@ -1,0 +1,19 @@
+Spaltenfilter — Kurzanleitung
+
+Der Spaltenfilter ist ein Tool, das mit dem originalen LMU-Datensatz verbunden ist und schnell intuitive Ansichten und „Schnitte" des gesamten Datensatzes ermöglicht. Hierfür stehen folgende Operatoren zur Verfügung:
+
+1 — Subset (Vorfilterung)
+Von allen Zeilen kann entschieden werden, welcher Spaltenwert gegeben sein muss, damit eine Zeile in der weiteren Analyse berücksichtigt wird. Beispiel: Semester = 20252 → in der weiteren Analyse werden nur Prüfungen aus dem WiSe 2025 berücksichtigt.
+
+2 — Active Filters (Aggregation)
+Mit diesen Werten wird entschieden, wonach die Zeilen aggregiert werden. Auf jeder Filterebene werden alle Zeilen mit demselben Spaltenwert zusammengezählt und als eigene Gruppen angezeigt. Wird ein zweiter Filter ausgewählt, kann in jede Gruppe tiefer eingestiegen werden: die Gruppe wird auf alle ihre Werte der zweiten Ebene aufgeteilt.
+
+Beispiel: 2 Filter in der Reihenfolge 1) Veranstaltungstitel → 2) StudiengangTxT — alle Zeilen mit demselben Veranstaltungstitel werden aggregiert. Auswahl eines Titels erlaubt das Einsteigen in dessen Gruppe und zeigt, auf welche Studiengänge sich dieselbe Prüfung aufteilt.
+
+3 — Ansichten: Bubbles & List
+Die durch die Filter bestimmte Ansicht auf den Datensatz kann entweder als Bubbles (Kreise, Größe = Anzahl Zeilen) oder als List (sortierte Hierarchie) dargestellt werden.
+
+4 — Tiefenanalyse einer finalen Gruppe
+Ist die letzte Aggregationsstufe erreicht, kann jede finale Gruppe angeklickt werden, um zu sehen, in welchen Eigenschaften sich die Zeilen innerhalb dieser Gruppe unterscheiden.
+
+Beispiel: Filter 1) Veranstaltungstitel und 2) StudiengangTxT ergibt, dass „Speaking Skills 1" in drei Studiengängen angeboten wird (Englische Philologie, WiWi, Sprache & Literatur). Anklicken der Zeile „Englische Philologie" zeigt, in welchen Eigenschaften sich die 408 Einträge innerhalb dieses Studiengangs untereinander unterscheiden.
